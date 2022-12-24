@@ -2,7 +2,7 @@ from telegram.ext import Application, CommandHandler, MessageHandler
 from telegram.ext.filters import Regex
 
 from core.settings import settings
-from .handlers.const import (
+from bot.const import (
     REPORT_SOCIAL_PROBLEM_CMD,
     REPORT_ECO_PROBLEM_CMD,
     BECOME_VOLUNTEER_CMD,
