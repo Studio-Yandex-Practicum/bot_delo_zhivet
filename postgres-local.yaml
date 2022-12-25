@@ -5,6 +5,7 @@ volumes:
 
 services:
   postgres-local:
+    container_name: db-local
     image: postgres:14.5-alpine
     restart: always
     volumes:
@@ -12,7 +13,7 @@ services:
     env_file:
       - ./.env.example
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:?err} -d ${POSTGRES_DB:?err}"]
       timeout: 10s
       interval: 1s
       retries: 10
