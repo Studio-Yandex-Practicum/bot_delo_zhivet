@@ -1,0 +1,4 @@
+.github
+.gitignore
+.pre-commit-config.yaml
+infrastructure/*
