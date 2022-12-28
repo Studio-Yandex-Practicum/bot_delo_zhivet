@@ -1,6 +1,6 @@
 import enum
 
-from sqlalchemy import Column, Date, DateTime, Enum, ForeignKey, Integer, String, Text, func
+from sqlalchemy import Column, Date, DateTime, Enum, ForeignKey, Integer, String, Text
 from sqlalchemy.dialects.postgresql import JSON
 
 from src.core.db.db import Base
@@ -35,6 +35,7 @@ class StatusShift(enum.Enum):
     preparing = 1
     started = 2
     finished = 3
+    cancelled = 4
 
 
 class StatusReport(enum.Enum):
@@ -46,6 +47,16 @@ class StatusReport(enum.Enum):
     declined = 4
 
 
+class StatusUserTask(enum.Enum):
+    """Status chinces for model Report."""
+
+    new = 1
+    wait_report = 2
+    under_review = 3
+    approved = 4
+    declined = 5
+
+
 class User(Base):
     """Model User."""
 
@@ -55,14 +66,10 @@ class User(Base):
     city = Column(String(100), index=True, nullable=False)
     phone_number = Column(String(13), unique=True, index=True, nullable=False)
     telegram_id = Column(String(64), unique=True, index=True, nullable=False)
-    status = Column(Enum(StatusUser), nullable=False, default=StatusUser.pending)
-    created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
-    updated_at = Column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now(),
-        onupdate=func.now(),
-    )
+    volunteer_id = Column(Integer, ForeignKey("volunteer.id"))
+    status = Column(Enum(StatusUser), nullable=False)
+    created_at = Column(DateTime(timezone=True), nullable=False)
+    updated_at = Column(DateTime(timezone=True), nullable=False)
 
 
 class Member(Base):
@@ -71,14 +78,9 @@ class Member(Base):
     user_id = Column(Integer, ForeignKey("user.id"))
     shift_id = Column(Integer, ForeignKey("shift.id"))
     numbers_lombaryers = Column(Integer, default=0)
-    status = Column(Enum(StatusMember), nullable=False, default=StatusMember.active)
-    created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
-    updated_at = Column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now(),
-        onupdate=func.now(),
-    )
+    status = Column(Enum(StatusMember), nullable=False)
+    created_at = Column(DateTime(timezone=True), nullable=False)
+    updated_at = Column(DateTime(timezone=True), nullable=False)
 
 
 class Request(Base):
@@ -87,14 +89,9 @@ class Request(Base):
     user_id = Column(Integer, ForeignKey("user.id"))
     shift_id = Column(Integer, ForeignKey("shift.id"))
     attempt_number = Column(Integer, default=0)
-    status = Column(Enum(StatusMember), nullable=False, default=StatusMember.active)
-    created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
-    updated_at = Column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now(),
-        onupdate=func.now(),
-    )
+    status = Column(Enum(StatusMember), nullable=False)
+    created_at = Column(DateTime(timezone=True), nullable=False)
+    updated_at = Column(DateTime(timezone=True), nullable=False)
 
 
 class Shift(Base):
@@ -106,14 +103,9 @@ class Shift(Base):
     finished_at = Column(DateTime(timezone=True), nullable=True)
     final_message = Column(String(255), index=True, nullable=False)
     tasks = Column(JSON)
-    status = Column(Enum(StatusShift), nullable=False, default=StatusShift.preparing)
-    created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
-    updated_at = Column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now(),
-        onupdate=func.now(),
-    )
+    status = Column(Enum(StatusShift), nullable=False)
+    created_at = Column(DateTime(timezone=True), nullable=False)
+    updated_at = Column(DateTime(timezone=True), nullable=False)
 
 
 class Report(Base):
@@ -126,14 +118,9 @@ class Report(Base):
     report_url = Column(String(255), nullable=True)
     uploaded_at = Column(DateTime(timezone=True), nullable=True)
     attempt_number = Column(Integer, default=0)
-    status = Column(Enum(StatusReport), nullable=False, default=StatusReport.reviewing)
-    created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
-    updated_at = Column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now(),
-        onupdate=func.now(),
-    )
+    status = Column(Enum(StatusReport), nullable=False)
+    created_at = Column(DateTime(timezone=True), nullable=False)
+    updated_at = Column(DateTime(timezone=True), nullable=False)
 
 
 class Task(Base):
@@ -141,10 +128,15 @@ class Task(Base):
 
     description = Column(Text, nullable=False)
     ulr = Column(String(255), nullable=False)
-    created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
-    updated_at = Column(
-        DateTime(timezone=True),
-        nullable=False,
-        server_default=func.now(),
-        onupdate=func.now(),
-    )
+    status = Column(Enum(StatusUserTask), nullable=False)
+    created_at = Column(DateTime(timezone=True), nullable=False)
+    updated_at = Column(DateTime(timezone=True), nullable=False)
+
+
+class Volunteer(Base):
+    city = Column(String(100), nullable=False)
+    radius = Column(Text, nullable=False)
+    car = Column(Text, nullable=False)
+    created_at = Column(DateTime(timezone=True), nullable=False)
+    updated_at = Column(DateTime(timezone=True))
+    deleted_at = Column(DateTime(timezone=True))

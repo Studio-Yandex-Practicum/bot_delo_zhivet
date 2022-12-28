@@ -1,8 +1,8 @@
 """First migration
 
-Revision ID: 2fd072beeb15
+Revision ID: 1099b94962a7
 Revises:
-Create Date: 2022-12-23 21:32:55.759241
+Create Date: 2022-12-28 21:14:12.250338
 
 """
 import sqlalchemy as sa
@@ -11,7 +11,7 @@ from sqlalchemy.dialects import postgresql
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "2fd072beeb15"
+revision = "1099b94962a7"
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -29,22 +29,10 @@ def upgrade() -> None:
         sa.Column("final_message", sa.String(length=255), nullable=False),
         sa.Column("tasks", postgresql.JSON(astext_type=sa.Text()), nullable=True),
         sa.Column(
-            "status",
-            sa.Enum("preparing", "started", "finished", name="statusshift"),
-            nullable=False,
+            "status", sa.Enum("preparing", "started", "finished", "cancelled", name="statusshift"), nullable=False
         ),
-        sa.Column(
-            "created_at",
-            sa.DateTime(timezone=True),
-            server_default=sa.text("now()"),
-            nullable=False,
-        ),
-        sa.Column(
-            "updated_at",
-            sa.DateTime(timezone=True),
-            server_default=sa.text("now()"),
-            nullable=False,
-        ),
+        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
+        sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False),
         sa.PrimaryKeyConstraint("id"),
     )
     with op.batch_alter_table("shift", schema=None) as batch_op:
@@ -56,17 +44,23 @@ def upgrade() -> None:
         sa.Column("description", sa.Text(), nullable=False),
         sa.Column("ulr", sa.String(length=255), nullable=False),
         sa.Column(
-            "created_at",
-            sa.DateTime(timezone=True),
-            server_default=sa.text("now()"),
+            "status",
+            sa.Enum("new", "wait_report", "under_review", "approved", "declined", name="statususertask"),
             nullable=False,
         ),
-        sa.Column(
-            "updated_at",
-            sa.DateTime(timezone=True),
-            server_default=sa.text("now()"),
-            nullable=False,
-        ),
+        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
+        sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False),
+        sa.PrimaryKeyConstraint("id"),
+    )
+    op.create_table(
+        "volunteer",
+        sa.Column("id", sa.Integer(), nullable=False),
+        sa.Column("city", sa.String(length=100), nullable=False),
+        sa.Column("radius", sa.Text(), nullable=False),
+        sa.Column("car", sa.Text(), nullable=False),
+        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
+        sa.Column("updated_at", sa.DateTime(timezone=True), nullable=True),
+        sa.Column("deleted_at", sa.DateTime(timezone=True), nullable=True),
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_table(
@@ -78,22 +72,13 @@ def upgrade() -> None:
         sa.Column("city", sa.String(length=100), nullable=False),
         sa.Column("phone_number", sa.String(length=13), nullable=False),
         sa.Column("telegram_id", sa.String(length=64), nullable=False),
-        sa.Column(
-            "status",
-            sa.Enum("pending", "verified", "declined", name="statususer"),
-            nullable=False,
-        ),
-        sa.Column(
-            "created_at",
-            sa.DateTime(timezone=True),
-            server_default=sa.text("now()"),
-            nullable=False,
-        ),
-        sa.Column(
-            "updated_at",
-            sa.DateTime(timezone=True),
-            server_default=sa.text("now()"),
-            nullable=False,
+        sa.Column("volunteer_id", sa.Integer(), nullable=True),
+        sa.Column("status", sa.Enum("pending", "verified", "declined", name="statususer"), nullable=False),
+        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
+        sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False),
+        sa.ForeignKeyConstraint(
+            ["volunteer_id"],
+            ["volunteer.id"],
         ),
         sa.PrimaryKeyConstraint("id"),
     )
@@ -111,18 +96,8 @@ def upgrade() -> None:
         sa.Column("shift_id", sa.Integer(), nullable=True),
         sa.Column("numbers_lombaryers", sa.Integer(), nullable=True),
         sa.Column("status", sa.Enum("active", "excluded", name="statusmember"), nullable=False),
-        sa.Column(
-            "created_at",
-            sa.DateTime(timezone=True),
-            server_default=sa.text("now()"),
-            nullable=False,
-        ),
-        sa.Column(
-            "updated_at",
-            sa.DateTime(timezone=True),
-            server_default=sa.text("now()"),
-            nullable=False,
-        ),
+        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
+        sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False),
         sa.ForeignKeyConstraint(
             ["shift_id"],
             ["shift.id"],
@@ -140,18 +115,8 @@ def upgrade() -> None:
         sa.Column("shift_id", sa.Integer(), nullable=True),
         sa.Column("attempt_number", sa.Integer(), nullable=True),
         sa.Column("status", sa.Enum("active", "excluded", name="statusmember"), nullable=False),
-        sa.Column(
-            "created_at",
-            sa.DateTime(timezone=True),
-            server_default=sa.text("now()"),
-            nullable=False,
-        ),
-        sa.Column(
-            "updated_at",
-            sa.DateTime(timezone=True),
-            server_default=sa.text("now()"),
-            nullable=False,
-        ),
+        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
+        sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False),
         sa.ForeignKeyConstraint(
             ["shift_id"],
             ["shift.id"],
@@ -173,22 +138,10 @@ def upgrade() -> None:
         sa.Column("uploaded_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("attempt_number", sa.Integer(), nullable=True),
         sa.Column(
-            "status",
-            sa.Enum("waiting", "reviewing", "approved", "declined", name="statusreport"),
-            nullable=False,
+            "status", sa.Enum("waiting", "reviewing", "approved", "declined", name="statusreport"), nullable=False
         ),
-        sa.Column(
-            "created_at",
-            sa.DateTime(timezone=True),
-            server_default=sa.text("now()"),
-            nullable=False,
-        ),
-        sa.Column(
-            "updated_at",
-            sa.DateTime(timezone=True),
-            server_default=sa.text("now()"),
-            nullable=False,
-        ),
+        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
+        sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False),
         sa.ForeignKeyConstraint(
             ["member_id"],
             ["member.id"],
@@ -219,6 +172,7 @@ def downgrade() -> None:
         batch_op.drop_index(batch_op.f("ix_user_city"))
 
     op.drop_table("user")
+    op.drop_table("volunteer")
     op.drop_table("task")
     with op.batch_alter_table("shift", schema=None) as batch_op:
         batch_op.drop_index(batch_op.f("ix_shift_final_message"))
