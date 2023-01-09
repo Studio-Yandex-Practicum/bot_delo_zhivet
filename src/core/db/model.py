@@ -95,7 +95,7 @@ class Request(Base):
 
 
 class Shift(Base):
-    """Model Shift."""
+    """Model Shift. Смена."""
 
     sequence_number = Column(Integer, default=0)
     title = Column(String(50), nullable=False)
@@ -134,9 +134,38 @@ class Task(Base):
 
 
 class Volunteer(Base):
+    """Model Volunteer."""
+
     city = Column(String(100), nullable=False)
     radius = Column(Text, nullable=False)
     car = Column(Text, nullable=False)
+    created_at = Column(DateTime(timezone=True), nullable=False)
+    updated_at = Column(DateTime(timezone=True))
+    deleted_at = Column(DateTime(timezone=True))
+
+
+class Pollution(Base):
+    """Model Pollution. Инфо о загрязнении."""
+
+    latitude = Column(Text, nullable=False)
+    longitude = Column(Text, nullable=False)
+    comment = Column(Text, nullable=True)
+    volunteer_id = Column(Integer, ForeignKey("volunteer.id"))
+    users_id = Column(Integer, ForeignKey("user.id"))
+    created_at = Column(DateTime(timezone=True), nullable=False)
+    updated_at = Column(DateTime(timezone=True))
+    deleted_at = Column(DateTime(timezone=True))
+
+
+class Assistance_disabled(Base):
+    """Model Assistance_disabled. Инфо о помощи инвалиду."""
+
+    city = Column(Text, nullable=False)
+    street = Column(Text, nullable=False)
+    house = Column(Text, nullable=False)
+    comment = Column(Text, nullable=True)
+    volunteer_id = Column(Integer, ForeignKey("volunteer.id"))
+    users_id = Column(Integer, ForeignKey("user.id"))
     created_at = Column(DateTime(timezone=True), nullable=False)
     updated_at = Column(DateTime(timezone=True))
     deleted_at = Column(DateTime(timezone=True))
