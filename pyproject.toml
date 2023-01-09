@@ -1,8 +1,12 @@
 [tool.poetry]
 name = "bot-delo-zhivet"
 version = "0.1.0"
-description = ""
-authors = ["personage-hub <76659786+personage-hub@users.noreply.github.com>"]
+description = "Телеграм-бот для организации эко-субботников."
+authors = ["Александр Ниязов <76659786+personage-hub@users.noreply.github.com>",
+           "Александр Тихонов <aleksandrtikhonov@users.noreply.github.com>",
+           "Андрей Изотов <andreyizotov@users.noreply.github.com>",
+           "Денис Швецов <denshvetsov@users.noreply.github.com>",
+           "Владислав Василенко <vasilekx@users.noreply.github.com>"]
 readme = "README.md"
 packages = [{include = "bot_delo_zhivet"}]
 
