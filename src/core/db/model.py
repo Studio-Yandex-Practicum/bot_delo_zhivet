@@ -66,7 +66,7 @@ class User(Base):
     city = Column(String(100), index=True, nullable=False)
     phone_number = Column(String(13), unique=True, index=True, nullable=False)
     telegram_id = Column(String(64), unique=True, index=True, nullable=False)
-    volunteer_id = Column(Integer, ForeignKey("volunteer.id"))
+    volunteer_id = Column(Integer, ForeignKey("volunteer.id"), nullable=True)
     status = Column(Enum(StatusUser), nullable=False)
     created_at = Column(DateTime(timezone=True), nullable=False)
     updated_at = Column(DateTime(timezone=True), nullable=False)

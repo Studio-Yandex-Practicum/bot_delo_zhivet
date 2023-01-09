@@ -37,28 +37,26 @@ class CRUDBase:
         await session.refresh(db_obj)
         return db_obj
 
-    async def update(
-        self,
-        db_obj,
-        obj_in,
-        session: AsyncSession,
-    ):
-        """Update record."""
-        # obj_data = jsonable_encoder(db_obj)
-        # update_data = obj_in.dict(exclude_unset=True)
-        obj_data = db_obj.__mapper__
-        print(obj_data)
-        update_data = obj_in.__dict__.pop("_sa_instance_state", None)
-        update_data = obj_in.__dict__
-        print(update_data)
-
-        for field in obj_data:
-            if field in update_data:
-                setattr(db_obj, field, update_data[field])
-        session.add(db_obj)
-        await session.commit()
-        await session.refresh(db_obj)
-        return db_obj
+    # async def update(
+    #     self,
+    #     db_obj,
+    #     obj_in,
+    #     session: AsyncSession,
+    # ):
+    #     """Update record."""
+    #     # obj_data = jsonable_encoder(db_obj)
+    #     # update_data = obj_in.dict(exclude_unset=True)
+    #     # obj_data = db_obj.__mapper__
+    #     # print(obj_data)
+    #     # update_data = obj_in.__dict__.pop("_sa_instance_state", None)
+    #     # update_data = obj_in.__dict__
+    #     for field in obj_data:
+    #         if field in update_data:
+    #             setattr(db_obj, field, update_data[field])
+    #     session.add(db_obj)
+    #     await session.commit()
+    #     await session.refresh(db_obj)
+    #     return db_obj
 
     async def remove(
         self,

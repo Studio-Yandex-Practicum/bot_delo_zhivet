@@ -16,8 +16,12 @@ class PreBase:
 
 
 Base = declarative_base(cls=PreBase)
-engine = create_async_engine(settings.database_url)
-
+database_url = (
+    f"postgresql+asyncpg://{settings.POSTGRES_USER}:"
+    f"{settings.POSTGRES_PASSWORD}@{settings.DB_HOST}:"
+    f"{settings.DB_PORT}/{settings.POSTGRES_DB}"
+)
+engine = create_async_engine(database_url)
 AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession)
 
 

@@ -1,8 +1,8 @@
 """First migration
 
-Revision ID: 1099b94962a7
+Revision ID: 2f387fd648c6
 Revises:
-Create Date: 2022-12-28 21:14:12.250338
+Create Date: 2023-01-09 17:40:08.676099
 
 """
 import sqlalchemy as sa
@@ -11,7 +11,7 @@ from sqlalchemy.dialects import postgresql
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "1099b94962a7"
+revision = "2f387fd648c6"
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -29,7 +29,9 @@ def upgrade() -> None:
         sa.Column("final_message", sa.String(length=255), nullable=False),
         sa.Column("tasks", postgresql.JSON(astext_type=sa.Text()), nullable=True),
         sa.Column(
-            "status", sa.Enum("preparing", "started", "finished", "cancelled", name="statusshift"), nullable=False
+            "status",
+            sa.Enum("preparing", "started", "finished", "cancelled", name="statusshift"),
+            nullable=False,
         ),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
         sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False),
@@ -45,7 +47,14 @@ def upgrade() -> None:
         sa.Column("ulr", sa.String(length=255), nullable=False),
         sa.Column(
             "status",
-            sa.Enum("new", "wait_report", "under_review", "approved", "declined", name="statususertask"),
+            sa.Enum(
+                "new",
+                "wait_report",
+                "under_review",
+                "approved",
+                "declined",
+                name="statususertask",
+            ),
             nullable=False,
         ),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
@@ -73,7 +82,11 @@ def upgrade() -> None:
         sa.Column("phone_number", sa.String(length=13), nullable=False),
         sa.Column("telegram_id", sa.String(length=64), nullable=False),
         sa.Column("volunteer_id", sa.Integer(), nullable=True),
-        sa.Column("status", sa.Enum("pending", "verified", "declined", name="statususer"), nullable=False),
+        sa.Column(
+            "status",
+            sa.Enum("pending", "verified", "declined", name="statususer"),
+            nullable=False,
+        ),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
         sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False),
         sa.ForeignKeyConstraint(
@@ -138,7 +151,9 @@ def upgrade() -> None:
         sa.Column("uploaded_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("attempt_number", sa.Integer(), nullable=True),
         sa.Column(
-            "status", sa.Enum("waiting", "reviewing", "approved", "declined", name="statusreport"), nullable=False
+            "status",
+            sa.Enum("waiting", "reviewing", "approved", "declined", name="statusreport"),
+            nullable=False,
         ),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
         sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False),
