@@ -1,0 +1,21 @@
+version: '3.8'
+
+volumes:
+  postgres_data:
+
+services:
+  postgres-local:
+    container_name: db-local
+    image: postgres:14.5-alpine
+    restart: always
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - ./.env.example
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:?err} -d ${POSTGRES_DB:?err}"]
+      timeout: 10s
+      interval: 1s
+      retries: 10
+    ports:
+      - "5432:5432"

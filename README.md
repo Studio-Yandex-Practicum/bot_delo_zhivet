@@ -1,13 +1,21 @@
 # bot_delo_zhivet
 Телеграм-бот для организации эко-субботников.
+___
+## Оглавление:
+0. [Установка pre-commit hook](#Установка-pre-commit-hook)
+    1. [Установка pre-commit](#Установка-pre-commit)
+    2. [Установка hook](#Установка-hook)
 
-
+___
 ## Установка pre-commit hook
 Для того чтобы при каждом коммите выполнялись pre-commit проверки, необходимо:
 1. Установить pre-commit
 2. Установить pre-commit hooks
 
+[:arrow_up:Оглавление](#Оглавление)
+
 ### Установка pre-commit
+
 Модуль pre-commit уже добавлен в requirements, таким образом после настройки виртуального окружения, должен установится автоматически
 Если этого не произошло, то установка осуществляется согласно требованиям [инструкций](https://pre-commit.com/#install):
 * установка через менеджер пакетов brew `brew install pre-commit`
@@ -22,8 +30,12 @@ pre-commit --version
 >>pre-commit 2.20.0
 ```
 
+[:arrow_up:Оглавление](#Оглавление)
+
+
 
 ### Установка hook
+
 Установка осуществляется hook командой
 ```bash
 pre-commit install --all
@@ -36,3 +48,6 @@ pre-commit install --all
 ```bash
 pre-commit run --all-files
 ```
+
+[:arrow_up:Оглавление](#Оглавление)
+
