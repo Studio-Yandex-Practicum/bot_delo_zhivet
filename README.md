@@ -27,7 +27,7 @@ poetry install
 ```
 Запуск оболочки и активация виртуального окружения
 ```bash
-your@device:~/your_project_pwd/bot_delo_zhivet$ poetry sell
+your@device:~/your_project_pwd/bot_delo_zhivet$ poetry shell
 ```
 ___
 ## Установка pre-commit hook
