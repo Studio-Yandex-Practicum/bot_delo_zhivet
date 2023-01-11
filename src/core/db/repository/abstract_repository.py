@@ -18,17 +18,22 @@ class CRUDBase:
         session: AsyncSession,
     ):
         """get one record by id from DB."""
-        db_obj = await session.execute(select(self.model).where(self.model.id == obj_id))
+        db_obj = await session.execute(
+            select(self.model).where(self.model.id == obj_id)
+        )
+        db_obj = db_obj.scalars().first()
 
-        logger.info("Получена запись из БД.")
+        logger.info(f"Retrieved record from database: {db_obj}.")
 
-        return db_obj.scalars().first()
+        return db_obj
 
     async def get_multi(self, session: AsyncSession):
         """get all records from DB."""
         db_objs = await session.execute(select(self.model))
 
-        logger.info("Получены все записи из БД.")
+        logger.info(
+            f"Retrieved all records from database: {self.model.__name__}."
+        )
 
         return db_objs.scalars().all()
 
@@ -46,7 +51,7 @@ class CRUDBase:
         await session.commit()
         await session.refresh(db_obj)
 
-        logger.info("Создана запись в БД.")
+        logger.info(f"Database record created: {db_obj}.")
 
         return db_obj
 
@@ -79,6 +84,9 @@ class CRUDBase:
         """Remove record"""
         await session.delete(db_obj)
         await session.commit()
+
+        logger.info(f"Database record deleted: {db_obj}.")
+
         return db_obj
 
     async def get_by_attribute(
@@ -89,8 +97,14 @@ class CRUDBase:
     ):
         """get record by attribute value from DB."""
         attr = getattr(self.model, attr_name)
-        db_obj = await session.execute(select(self.model).where(attr == attr_value))
+        db_obj = await session.execute(
+            select(self.model).where(attr == attr_value)
+        )
+        db_obj = db_obj.scalars().first()
 
-        logger.info("Удалена запись из БД.")
+        logger.info(
+            "Retrieved record from database with "
+            f"{attr_name} = {attr_value}: {db_obj}."
+        )
 
-        return db_obj.scalars().first()
+        return db_obj

@@ -1,7 +1,12 @@
 from telegram.ext import Application, CommandHandler, MessageHandler
 from telegram.ext.filters import Regex
 
-from bot.const import BECOME_VOLUNTEER_CMD, MAKE_DONATION_CMD, REPORT_ECO_PROBLEM_CMD, REPORT_SOCIAL_PROBLEM_CMD
+from bot.const import (
+    BECOME_VOLUNTEER_CMD,
+    MAKE_DONATION_CMD,
+    REPORT_ECO_PROBLEM_CMD,
+    REPORT_SOCIAL_PROBLEM_CMD,
+)
 from core.settings import settings
 
 from .handlers.loggers import get_logger
@@ -17,14 +22,20 @@ def start_bot() -> None:
     bot = Application.builder().token(settings.telegram_bot_token).build()
 
     bot.add_handler(CommandHandler("start", start))
-    bot.add_handler(MessageHandler(Regex(REPORT_SOCIAL_PROBLEM_CMD), report_social_problem))
-    bot.add_handler(MessageHandler(Regex(REPORT_ECO_PROBLEM_CMD), report_eco_problem))
-    bot.add_handler(MessageHandler(Regex(BECOME_VOLUNTEER_CMD), become_volunteer))
+    bot.add_handler(
+        MessageHandler(Regex(REPORT_SOCIAL_PROBLEM_CMD), report_social_problem)
+    )
+    bot.add_handler(
+        MessageHandler(Regex(REPORT_ECO_PROBLEM_CMD), report_eco_problem)
+    )
+    bot.add_handler(
+        MessageHandler(Regex(BECOME_VOLUNTEER_CMD), become_volunteer)
+    )
     bot.add_handler(MessageHandler(Regex(MAKE_DONATION_CMD), make_donation))
     bot.add_handler(CommandHandler("help", help_command))
 
-    logger.info("Бот запущен.")
+    logger.info("Service started.")
 
     bot.run_polling()
 
-    logger.info("Бот завершил работу.")
+    logger.info("Service stopped.")

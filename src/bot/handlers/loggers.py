@@ -1,7 +1,10 @@
 import logging
 import sys
 
-STR_FORMAT = "[%(asctime)s] %(filename)s:%(lineno)d [%(levelname)s] %(message)s"
+STR_FORMAT = (
+    "[%(asctime)s] %(filename)s:%(lineno)d "
+    "[%(levelname)s] %(message)s"
+)
 DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 
 
