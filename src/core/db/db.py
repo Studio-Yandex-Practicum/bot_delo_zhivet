@@ -14,6 +14,9 @@ class PreBase:
 
     id = Column(Integer, primary_key=True)
 
+    def __repr__(self):
+        return f"{self.__class__.__name__}, id = {self.id}."
+
 
 Base = declarative_base(cls=PreBase)
 database_url = (
