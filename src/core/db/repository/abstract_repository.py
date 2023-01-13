@@ -18,23 +18,16 @@ class CRUDBase:
         session: AsyncSession,
     ):
         """get one record by id from DB."""
-        db_obj = await session.execute(
-            select(self.model).where(self.model.id == obj_id)
-        )
+        db_obj = await session.execute(select(self.model).where(self.model.id == obj_id))
         db_obj = db_obj.scalars().first()
-
         logger.info(f"Retrieved record from database: {db_obj}.")
-
-        return db_obj
+        return db_obj.scalars().first()
 
     async def get_multi(self, session: AsyncSession):
         """get all records from DB."""
         db_objs = await session.execute(select(self.model))
-
-        logger.info(
-            f"Retrieved all records from database: {self.model.__name__}."
-        )
-
+        db_objs = await session.execute(select(self.model))
+        logger.info(f"Retrieved all records from database: {self.model.__name__}.")
         return db_objs.scalars().all()
 
     async def create(
@@ -43,38 +36,38 @@ class CRUDBase:
         session: AsyncSession,
     ):
         """create new record."""
-        # ! уточнить формат фходных данных для записи словарь или объект модели
+        # ! уточнить формат входных данных для записи словарь или объект модели
         # obj_in_data = obj_in.dict()
         # db_obj = self.model(**obj_in_data)
         db_obj = obj_in
         session.add(db_obj)
         await session.commit()
         await session.refresh(db_obj)
-
         logger.info(f"Database record created: {db_obj}.")
-
         return db_obj
 
-    # async def update(
-    #     self,
-    #     db_obj,
-    #     obj_in,
-    #     session: AsyncSession,
-    # ):
-    #     """Update record."""
-    #     # obj_data = jsonable_encoder(db_obj)
-    #     # update_data = obj_in.dict(exclude_unset=True)
-    #     # obj_data = db_obj.__mapper__
-    #     # print(obj_data)
-    #     # update_data = obj_in.__dict__.pop("_sa_instance_state", None)
-    #     # update_data = obj_in.__dict__
-    #     for field in obj_data:
-    #         if field in update_data:
-    #             setattr(db_obj, field, update_data[field])
-    #     session.add(db_obj)
-    #     await session.commit()
-    #     await session.refresh(db_obj)
-    #     return db_obj
+    async def update(
+        self,
+        db_obj,
+        obj_in,
+        session: AsyncSession,
+    ):
+        """Update record."""
+        db_obj_keys = [column.key for column in db_obj.__table__.columns]
+        update_obj = obj_in.__dict__
+        update_obj.pop("_sa_instance_state", None)
+        obj_in_keys = update_obj.keys()
+        for db_key in db_obj_keys:
+            if db_key != "id" and db_key in obj_in_keys:
+                db_value = getattr(db_obj, db_key)
+                update_value = getattr(obj_in, db_key)
+                if update_value != db_value:
+                    setattr(db_obj, db_key, update_value)
+        session.add(db_obj)
+        await session.commit()
+        await session.refresh(db_obj)
+        logger.info(f"Database record updated: {db_obj}.")
+        return db_obj
 
     async def remove(
         self,
@@ -84,9 +77,7 @@ class CRUDBase:
         """Remove record"""
         await session.delete(db_obj)
         await session.commit()
-
         logger.info(f"Database record deleted: {db_obj}.")
-
         return db_obj
 
     async def get_by_attribute(
@@ -97,14 +88,7 @@ class CRUDBase:
     ):
         """get record by attribute value from DB."""
         attr = getattr(self.model, attr_name)
-        db_obj = await session.execute(
-            select(self.model).where(attr == attr_value)
-        )
+        db_obj = await session.execute(select(self.model).where(attr == attr_value))
         db_obj = db_obj.scalars().first()
-
-        logger.info(
-            "Retrieved record from database with "
-            f"{attr_name} = {attr_value}: {db_obj}."
-        )
-
+        logger.info("Retrieved record from database with " f"{attr_name} = {attr_value}: {db_obj}.")
         return db_obj

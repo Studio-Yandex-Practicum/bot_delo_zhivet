@@ -65,7 +65,7 @@ class User(Base):
     date_of_birth = Column(Date, nullable=True)
     city = Column(String(100), index=True, nullable=False)
     phone_number = Column(String(13), unique=True, index=True, nullable=False)
-    telegram_id = Column(String(64), unique=True, index=True, nullable=False)
+    telegram_id = Column(Integer, nullable=True)
     volunteer_id = Column(Integer, ForeignKey("volunteer.id"), nullable=True)
     status = Column(Enum(StatusUser), nullable=False)
     created_at = Column(DateTime(timezone=True), nullable=False)
@@ -95,7 +95,7 @@ class Request(Base):
 
 
 class Shift(Base):
-    """Model Shift."""
+    """Model Shift. Смена."""
 
     sequence_number = Column(Integer, default=0)
     title = Column(String(50), nullable=False)
@@ -134,9 +134,41 @@ class Task(Base):
 
 
 class Volunteer(Base):
+    """Model Volunteer."""
+
     city = Column(String(100), nullable=False)
     radius = Column(Text, nullable=False)
     car = Column(Text, nullable=False)
+    telegram_id = Column(Integer, nullable=True)
+    created_at = Column(DateTime(timezone=True), nullable=False)
+    updated_at = Column(DateTime(timezone=True))
+    deleted_at = Column(DateTime(timezone=True))
+
+
+class Pollution(Base):
+    """Model Pollution. Инфо о загрязнении."""
+
+    latitude = Column(Text, nullable=False)
+    longitude = Column(Text, nullable=False)
+    comment = Column(Text, nullable=True)
+    telegram_id = Column(Integer, nullable=True)
+    volunteer_id = Column(Integer, ForeignKey("volunteer.id"))
+    users_id = Column(Integer, ForeignKey("user.id"))
+    created_at = Column(DateTime(timezone=True), nullable=False)
+    updated_at = Column(DateTime(timezone=True))
+    deleted_at = Column(DateTime(timezone=True))
+
+
+class Assistance_disabled(Base):
+    """Model Assistance_disabled. Инфо о помощи инвалиду."""
+
+    city = Column(Text, nullable=False)
+    street = Column(Text, nullable=False)
+    house = Column(Text, nullable=False)
+    comment = Column(Text, nullable=True)
+    telegram_id = Column(Integer, nullable=True)
+    volunteer_id = Column(Integer, ForeignKey("volunteer.id"))
+    users_id = Column(Integer, ForeignKey("user.id"))
     created_at = Column(DateTime(timezone=True), nullable=False)
     updated_at = Column(DateTime(timezone=True))
     deleted_at = Column(DateTime(timezone=True))

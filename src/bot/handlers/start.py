@@ -1,4 +1,4 @@
-from telegram import Update, KeyboardButton, ReplyKeyboardMarkup
+from telegram import KeyboardButton, ReplyKeyboardMarkup, Update
 from telegram.ext import ContextTypes
 
 
@@ -16,13 +16,9 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     ]
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
 
-    await update.message.reply_text(
-        "Выберете действие", reply_markup=reply_markup
-    )
+    await update.message.reply_text("Выберете действие", reply_markup=reply_markup)
 
 
-async def help_command(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
-) -> None:
+async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Обработчик команды /help."""
     await update.message.reply_text("help text")
