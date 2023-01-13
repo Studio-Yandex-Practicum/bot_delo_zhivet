@@ -8,13 +8,21 @@ authors = ["Александр Ниязов <76659786+personage-hub@users.norepl
            "Денис Швецов <denshvetsov@users.noreply.github.com>",
            "Владислав Василенко <vasilekx@users.noreply.github.com>"]
 readme = "README.md"
-packages = [{include = "bot_delo_zhivet"}]
+packages = [{include = "src"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"
 pre-commit = "^2.20.0"
-
+fastapi = "0.82.0"
+python-telegram-bot = "20.0"
+pydantic = "1.10.4"
+requests = "2.28.1"
+python-dotenv = "^0.21.0"
+sqlalchemy = "^1.4.36"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+runbot = "main:start_bot"
