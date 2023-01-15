@@ -1,0 +1,11 @@
+START_OVER = "start_over"
+TOP_MENU = "top_menu"
+END = "end"
+CURRENT_FEATURE = "current_feature"
+TYPING = "typing"
+FEATURES = "features"
+
+ADD_VOLUNTEER = "add_volunteer"
+CITY = "add_city"
+ACTIVITY_RADIUS = "activity_radius"
+CAR = "car"
