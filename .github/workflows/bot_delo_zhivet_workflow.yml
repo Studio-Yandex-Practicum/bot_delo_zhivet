@@ -65,8 +65,8 @@ jobs:
         if: github.ref == 'refs/heads/feature/deploy' # для теста
         uses: docker/build-push-action@v3
         with:
-          context: bot_delo_zhivet
-          file: .
+          context: .
+          file: Dockerfile
           push: true
           no-cache: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/delo_zhivet_bot:latest
