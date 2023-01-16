@@ -52,7 +52,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Show ref
-        run:
+        run: |
           echo "ref: ${{ github.ref }}"
 
       - name: Build and push image for master to Docker Hub
