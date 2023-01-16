@@ -96,9 +96,10 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           passphrase: ${{ secrets.SERVER_PASSPHRASE }}
-          source: "infrastructure/docker-compose-develop.yaml:docker-compose-develop.yaml"
+          source: "infrastructure/docker-compose-develop.yaml"
           target: "~/develop"
           overwrite: true
+          strip_components: 1
 
       - name: executing remote ssh commands to deploy
         if: github.ref == 'refs/heads/feature/deploy' # для теста
