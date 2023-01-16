@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  db-develop:
+    container_name: develop_db
+    image: postgres:14.5-alpine
+    volumes:
+      - develop_postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - ./.env
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:?err} -d ${POSTGRES_DB:?err}"]
+      timeout: 10s
+      interval: 1s
+      retries: 10
+  web-develop:
+    container_name: develop_bot
+    image: vasilekx/delo_zhivet_bot_develop:latest
+    restart: always
+    depends_on:
+      db-develop:
+        condition: service_healthy
+    env_file:
+      - ./.env
+
+volumes:
+  develop_postgres_data:
