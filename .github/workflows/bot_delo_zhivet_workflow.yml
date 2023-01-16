@@ -13,6 +13,7 @@ jobs:
       matrix:
         python-version: [ "3.10", "3.11" ]
 
+    if: github.ref == 'refs/heads/master' # del
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python ${{ matrix.python-version }}
@@ -40,7 +41,7 @@ jobs:
 
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
@@ -72,8 +73,8 @@ jobs:
         if: github.ref == 'refs/heads/feature/deploy' # для теста
         uses: docker/build-push-action@v3
         with:
-          context: bot_delo_zhivet
-          file: .
+          context: .
+          file: .Dockerfile
           push: true
           no-cache: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/delo_zhivet_bot_develop:latest
