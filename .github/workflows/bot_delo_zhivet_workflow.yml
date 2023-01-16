@@ -96,7 +96,7 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           passphrase: ${{ secrets.SERVER_PASSPHRASE }}
           source: "infrastructure/docker-compose-develop.yaml"
-          target: "~/develop"
+          target: "~/develop/docker-compose-develop.yaml"
           overwrite: true
 
       - name: executing remote ssh commands to deploy
