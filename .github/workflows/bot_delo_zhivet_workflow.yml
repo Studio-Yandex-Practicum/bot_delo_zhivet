@@ -96,7 +96,7 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           passphrase: ${{ secrets.SERVER_PASSPHRASE }}
           source: "infrastructure/docker-compose-develop.yaml"
-          target: "~/"
+          target: "~/develop"
           overwrite: true
 
       - name: executing remote ssh commands to deploy
@@ -108,8 +108,9 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           passphrase: ${{ secrets.SERVER_PASSPHRASE }}
           script: |
-              docker-compose stop
-              docker-compose rm -f web
+              cd ~/develop
+              docker-compose -f docker-compose-develop.yaml stop
+              docker-compose -f docker-compose-develop.yaml rm -f db-develop
               docker image rm ${{ secrets.DOCKER_USERNAME }}/delo_zhivet_bot_develop:latest
               rm .env
               touch .env
@@ -122,4 +123,4 @@ jobs:
               echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}_dev >> .env
               echo DB_HOST=${{ secrets.DEVELOPER_DB_HOST }} >> .env
               echo DB_PORT=${{ secrets.DEVELOPER_DB_PORT }} >> .env
-              docker-compose up -d
+              docker-compose -f docker-compose-develop.yaml up -d
