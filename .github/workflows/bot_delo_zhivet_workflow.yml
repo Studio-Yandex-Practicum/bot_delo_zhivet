@@ -74,7 +74,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: .
-          file: .Dockerfile
+#          file: .Dockerfile
           push: true
           no-cache: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/delo_zhivet_bot_develop:latest
