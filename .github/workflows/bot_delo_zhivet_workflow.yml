@@ -113,7 +113,7 @@ jobs:
               cd ~/develop
               docker-compose -f docker-compose-develop.yaml stop
               docker-compose -f docker-compose-develop.yaml rm -f db-develop
-              docker image rm ${{ secrets.DOCKER_USERNAME }}/delo_zhivet_bot_develop:latest
+              docker image rm -f ${{ secrets.DOCKER_USERNAME }}/delo_zhivet_bot_develop:latest
               rm .env
               touch .env
               echo telegram_bot_token=${{ secrets.TELEGRAM_BOT_DEVELOPER_TOKEN }} >> .env
@@ -125,4 +125,5 @@ jobs:
               echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}_dev >> .env
               echo DB_HOST=${{ secrets.DEVELOPER_DB_HOST }} >> .env
               echo DB_PORT=${{ secrets.DEVELOPER_DB_PORT }} >> .env
+              echo TEST=TEST >> .env
               docker-compose -f docker-compose-develop.yaml up -d
