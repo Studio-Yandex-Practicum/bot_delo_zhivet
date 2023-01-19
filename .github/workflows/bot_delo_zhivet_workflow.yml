@@ -1,9 +1,11 @@
-name: Deploy to master and develop
+name: Deploy for master bot and developer bot
 
 on:
   push:
     branches:
-      - feature/deploy
+      - master
+      - develop
+      - feature/deploy # del
 
 jobs:
   tests:
@@ -13,7 +15,6 @@ jobs:
       matrix:
         python-version: [ "3.10", "3.11" ]
 
-#    if: github.ref == 'refs/heads/master' # del
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python ${{ matrix.python-version }}
@@ -37,9 +38,8 @@ jobs:
   build_and_push_to_docker_hub:
     name: Build and push Docker image to Docker Hub
     runs-on: ubuntu-latest
-    needs: tests # edit
+    needs: tests
 
-#    if: github.ref == 'refs/heads/master' # del
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
@@ -50,17 +50,13 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      - name: Login to Docker
+      - name: Login to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Show ref
-        run: |
-          echo "ref: ${{ github.ref }}"
-
-      - name: Build and push image for master to Docker Hub
+      - name: Build and push master image to Docker Hub
 #        if: github.ref == 'refs/heads/master'
         if: github.ref == 'refs/heads/feature/deploy' # для теста
         uses: docker/build-push-action@v3
@@ -71,7 +67,8 @@ jobs:
           no-cache: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/delo_zhivet_bot:latest
 
-      - name: Build and push image for develop to Docker Hub
+      - name: Build and push developer image to Docker Hub
+#        if: github.ref == 'refs/heads/develop'
         if: github.ref == 'refs/heads/feature/deploy' # для теста
         uses: docker/build-push-action@v3
         with:
@@ -84,7 +81,7 @@ jobs:
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
-    needs: build_and_push_to_docker_hub # edit
+    needs: build_and_push_to_docker_hub
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
@@ -105,6 +102,7 @@ jobs:
 
       - name: Copy file docker-compose-develop.yaml
         uses: appleboy/scp-action@master
+#        if: github.ref == 'refs/heads/develop'
         if: github.ref == 'refs/heads/feature/deploy' # для теста
         with:
           host: ${{ secrets.SERVER_HOST }}
@@ -144,6 +142,7 @@ jobs:
               docker-compose -f docker-compose-master.yaml up -d
 
       - name: Executing remote ssh commands to deploy developer bot
+#        if: github.ref == 'refs/heads/develop'
         if: github.ref == 'refs/heads/feature/deploy' # для теста
         uses: appleboy/ssh-action@master
         with:
