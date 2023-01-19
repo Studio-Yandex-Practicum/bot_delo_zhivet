@@ -9,6 +9,7 @@ from bot.handlers.state_constants import (
     CAR_COMMAND,
     CITY_COMMAND,
     CURRENT_FEATURE,
+    CURRENT_LEVEL,
     END,
     FEATURES,
     RADIUS_COMMAND,
@@ -29,6 +30,9 @@ async def add_volunteer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> s
         "\t- Расстояние, на которое ты готов выезжать;"
         "\t- Наличие автомобиля, и готовность задействовать его."
     )
+    level = update.callback_query.data
+    context.user_data[CURRENT_LEVEL] = level
+
     buttons = [
         [
             InlineKeyboardButton(text="Указать город", callback_data=SPECIFY_CITY),

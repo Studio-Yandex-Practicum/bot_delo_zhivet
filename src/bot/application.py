@@ -14,7 +14,6 @@ from bot.const import (
 from core.settings import settings
 
 from .handlers.common import end_describing, stop, stop_nested
-from .handlers.loggers import get_logger
 from .handlers.participation import make_donation
 from .handlers.start import help_command, start
 from .handlers.state_constants import (
@@ -34,8 +33,6 @@ from .handlers.volunteer import (
     handle_radius_input,
     save_input,
 )
-
-logger = get_logger()
 
 
 def start_bot() -> None:
@@ -79,8 +76,8 @@ def start_bot() -> None:
     bot.add_handler(MessageHandler(Regex(MAKE_DONATION_CMD), make_donation))
     bot.add_handler(CommandHandler("help", help_command))
 
-    logger.info("Service started.")
+    aps_logger.info("Service started.")
 
     bot.run_polling()
 
-    logger.info("Service stopped.")
+    aps_logger.info("Service stopped.")
