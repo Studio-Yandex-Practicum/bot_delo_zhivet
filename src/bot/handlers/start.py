@@ -1,6 +1,8 @@
-from telegram import KeyboardButton, ReplyKeyboardMarkup, Update
+from telegram import (InlineKeyboardButton, InlineKeyboardMarkup,
+                      KeyboardButton, ReplyKeyboardMarkup, Update)
 from telegram.ext import ContextTypes
 
+from bot import const
 from bot.handlers import state_constants
 
 GREETING_MESSAGE = (
@@ -9,19 +11,27 @@ GREETING_MESSAGE = (
     " Выбери необходимое действие."
 )
 
-BYE_MESSAGE = "До свидания, {username}. Возращайтесь в любой момент." 'Фонд "Дело живёт" ждёт тебя.'
+BYE_MESSAGE = "До свидания, {username}. Возвращайтесь в любой момент." 'Фонд "Дело живёт" ждёт тебя.'
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Отправка сообщения с кнопками главного меню"""
     keyboard = [
         [
-            KeyboardButton("Сообщить о социальной проблеме"),
-            KeyboardButton("Сообщить о экологической проблеме"),
+            InlineKeyboardButton(
+                text="Сообщить о социальной проблеме",
+                callback_data=const.REPORT_SOCIAL_PROBLEM_CMD),
+            InlineKeyboardButton(
+                text="Сообщить о экологической проблеме",
+                callback_data=const.REPORT_ECO_PROBLEM_CMD),
         ],
         [
-            KeyboardButton("Стать волонтёром"),
-            KeyboardButton("Сделать пожертвование"),
+            InlineKeyboardButton(
+                text="Стать волонтёром",
+                callback_data=const.BECOME_VOLUNTEER_CMD),
+            InlineKeyboardButton(
+                text="Сделать пожертвование",
+                callback_data=const.MAKE_DONATION_CMD),
         ],
     ]
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
