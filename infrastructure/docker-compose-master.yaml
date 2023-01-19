@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  db-master:
+    container_name: master_db
+    image: postgres:14.5-alpine
+    volumes:
+      - master_postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - ./.env
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:?err} -d ${POSTGRES_DB:?err}"]
+      timeout: 10s
+      interval: 1s
+      retries: 10
+  web-master:
+    container_name: master_bot
+    image: vasilekx/delo_zhivet_bot:latest
+    restart: always
+    depends_on:
+      db-master:
+        condition: service_healthy
+    env_file:
+      - ./.env
+
+volumes:
+  master_postgres_data:
