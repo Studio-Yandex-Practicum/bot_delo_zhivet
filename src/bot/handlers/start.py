@@ -1,9 +1,16 @@
-from telegram import (InlineKeyboardButton, InlineKeyboardMarkup,
-                      KeyboardButton, ReplyKeyboardMarkup, Update)
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
 
-from bot import const
-from bot.handlers import state_constants
+from bot.handlers.state_constants import (
+    ADDING_ECO_TASK,
+    ADDING_SOCIAL_TASK,
+    ADDING_VOLUNTEER,
+    END,
+    MAKING_DONATION,
+    SELECTING_ACTION,
+    START_OVER,
+    TOP_LEVEL_MENU_TEXT,
+)
 
 GREETING_MESSAGE = (
     'Привет, {username}. Я бот экологического проекта "Дело живёт".'
@@ -11,52 +18,44 @@ GREETING_MESSAGE = (
     " Выбери необходимое действие."
 )
 
-BYE_MESSAGE = "До свидания, {username}. Возвращайтесь в любой момент." 'Фонд "Дело живёт" ждёт тебя.'
+BYE_MESSAGE = "До свидания, {username}. Возвращайся в любой момент." 'Фонд "Дело живёт" ждёт тебя.'
 
 
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Отправка сообщения с кнопками главного меню"""
-    keyboard = [
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
+    """Выбор действия: Добавление проблемы/регистрация волонтера."""
+    text = TOP_LEVEL_MENU_TEXT
+
+    buttons = [
         [
-            InlineKeyboardButton(
-                text="Сообщить о социальной проблеме",
-                callback_data=const.REPORT_SOCIAL_PROBLEM_CMD),
-            InlineKeyboardButton(
-                text="Сообщить о экологической проблеме",
-                callback_data=const.REPORT_ECO_PROBLEM_CMD),
+            InlineKeyboardButton(text="Стать волонтером", callback_data=ADDING_VOLUNTEER),
+            InlineKeyboardButton(text="Сделать пожертвование", callback_data=MAKING_DONATION),
         ],
         [
-            InlineKeyboardButton(
-                text="Стать волонтёром",
-                callback_data=const.BECOME_VOLUNTEER_CMD),
-            InlineKeyboardButton(
-                text="Сделать пожертвование",
-                callback_data=const.MAKE_DONATION_CMD),
+            InlineKeyboardButton(text="Сообщить об эко проблеме", callback_data=ADDING_ECO_TASK),
+        ],
+        [
+            InlineKeyboardButton(text="Сообщить о социальной проблеме", callback_data=ADDING_SOCIAL_TASK),
+        ],
+        [
+            InlineKeyboardButton(text="Готово", callback_data=END),
         ],
     ]
-    reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+    keyboard = InlineKeyboardMarkup(buttons)
 
-    if context.user_data.get(state_constants.START_OVER):
-        await update.message.reply_text("Выберете действие", reply_markup=reply_markup)
-    else:
+    # Если пользователь в первый раз обращается к боту, то покажем ему приветственное сообщение
+    if not context.user_data.get(START_OVER):
         user = update.message.from_user
         username = user["username"]
         text = GREETING_MESSAGE.format(username=username)
-        await update.message.reply_text(text=text, reply_markup=reply_markup)
-    context.user_data[state_constants.START_OVER] = False
-    return state_constants.TOP_MENU
+        await update.message.reply_text(text=text, reply_markup=keyboard)
+    else:
+        await update.callback_query.answer()
+        await update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
+
+    context.user_data[START_OVER] = False
+    return SELECTING_ACTION
 
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Обработчик команды /help."""
     await update.message.reply_text("help text")
-
-
-async def stop(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Обработчик команды /stop."""
-    user = update.message.from_user
-    username = user["username"]
-    text = BYE_MESSAGE.format(username=username)
-    await update.message.reply_text(text)
-
-    return state_constants.END
