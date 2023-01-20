@@ -15,7 +15,7 @@ SPECIFY_CAR_AVAILABILITY = "specify_car_availability"
 TYPING_CITY = "typing_city"
 TYPING_RADIUS = "typing_radius"
 TYPING = "TYPING"
-
+SOCIAL_PROBLEM_TYPING = "social_problem_typing"
 SELECTING_OVER = "selecting_city"
 
 # Meta состояния
@@ -36,6 +36,8 @@ CAR_COMMAND = "CAR="
 POLLUTION_FOTO = "pollution_foto"
 POLLUTION_COORDINATES = "pollution_coordinates"
 POLLUTION_COMMENT = "pollution_comment"
+SOCIAL_ADDRESS = "social_address"
+SOCIAL_COMMENT = "social_comment"
 SAVE = "save"
 ACTIVITY_RADIUS = [
     list(range(5, 30, 5)),
