@@ -4,40 +4,10 @@ from telegram.ext import (Application, CallbackQueryHandler, CommandHandler,
                           filters)
 
 from .start import start
-
-SELECTING_ACTION = "SELECTING_ACTION"
-HERE_IS_DIRTY = "HERE_IS_DIRTY"
-SELECTING_FEATURE = "SELECTING_FEATURE"
-TYPING = "TYPING"
-END = ConversationHandler.END
-STOPPING = "STOPPING"
-POLLUTION_FOTO = "POLLUTION_FOTO"
-POLLUTION_COORDINATES = "POLLUTION_COORDINATES"
-POLLUTION_COMMENT = "POLLUTION_COMMENT"
-POLLUTION_DONE = "POLLUTION_DONE"
-START_OVER = "START_OVER"
-FEATURES = "FEATURES"
-CURRENT_FEATURE = "CURRENT_FEATURE"
-TYPING = "TYPING"
-SAVE = "SAVE"
-
-
-async def stop(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
-    await update.message.reply_text("Ок, пока")
-
-    return END
-
-
-async def end(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
-) -> str:
-    """Завершить вложенную беседу"""
-    await update.callback_query.answer()
-
-    text = "Увидимся!"
-    await update.callback_query.edit_message_text(text=text)
-
-    return END
+from .state_constants import (CURRENT_FEATURE, END, FEATURES,
+                              POLLUTION_COMMENT, POLLUTION_COORDINATES,
+                              POLLUTION_FOTO, SAVE, SELECTING_FEATURE,
+                              START_OVER, TYPING)
 
 
 async def select_option_to_report_about_pollution(
@@ -166,71 +136,3 @@ def check_data(user_data):
         return True
     else:
         return False
-
-
-async def end_describing(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
-) -> int:
-    """Прекращение ввода и возврат в родительский диалог"""
-
-    await start(update, context)
-
-    return END
-
-
-async def stop_nested(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
-) -> str:
-    """Полностью завершить беседу из вложенного разговора"""
-    await update.message.reply_text("Ок, пока!")
-
-    return STOPPING
-
-
-add_pollution_conv = ConversationHandler(
-    entry_points=[
-        CallbackQueryHandler(
-            select_option_to_report_about_pollution,
-            pattern="^" + HERE_IS_DIRTY + "$"
-        )
-    ],
-    states={
-        SELECTING_FEATURE: [
-            CallbackQueryHandler(
-                input, pattern="^" + POLLUTION_COMMENT + "$"),
-            CallbackQueryHandler(
-                input, pattern="^" + POLLUTION_COORDINATES + "$"),
-            CallbackQueryHandler(
-                input, pattern="^" + POLLUTION_FOTO + "$"),
-            CallbackQueryHandler(
-                save_and_exit, pattern="^" + SAVE + "$"
-            )
-        ],
-        TYPING: [
-            MessageHandler(
-                filters.TEXT & ~filters.COMMAND, save_comment),
-            MessageHandler(
-                filters.PHOTO & ~filters.COMMAND, save_foto),
-            MessageHandler(
-                filters.LOCATION & ~filters.COMMAND, save_location)
-        ],
-    },
-    fallbacks=[
-        CallbackQueryHandler(
-            end_describing, pattern="^" + str(END) + "$"
-        ),
-        CommandHandler("stop", stop_nested)
-    ],
-)
-conv_handler = ConversationHandler(
-    entry_points=[
-        CommandHandler("start", start)
-    ],
-    states={
-        SELECTING_ACTION: [
-            add_pollution_conv,
-        ],
-    },
-    fallbacks=[CommandHandler("stop", stop)],
-)
-

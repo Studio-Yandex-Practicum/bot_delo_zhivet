@@ -1,38 +1,29 @@
 import logging
 
-from telegram.ext import Application, CallbackQueryHandler, CommandHandler, ConversationHandler, MessageHandler, filters
+from telegram.ext import (Application, CallbackQueryHandler, CommandHandler,
+                          ConversationHandler, MessageHandler, filters)
 from telegram.ext.filters import Regex
 
-from bot.const import (
-    BECOME_VOLUNTEER_CMD,
-    END_CMD,
-    MAKE_DONATION_CMD,
-    SPECIFY_ACTIVITY_RADIUS_CMD,
-    SPECIFY_CAR_AVAILABILITY_CMD,
-    SPECIFY_CITY_CMD,
-)
+from bot.const import (BECOME_VOLUNTEER_CMD, END_CMD, MAKE_DONATION_CMD,
+                       REPORT_ECO_PROBLEM_CMD, SPECIFY_ACTIVITY_RADIUS_CMD,
+                       SPECIFY_CAR_AVAILABILITY_CMD, SPECIFY_CITY_CMD)
 from core.settings import settings
 
 from .handlers.common import end_describing, help_command, stop, stop_nested
 from .handlers.participation import make_donation
+from .handlers.pollution import (input, save_and_exit, save_comment, save_foto,
+                                 save_location,
+                                 select_option_to_report_about_pollution)
 from .handlers.start import start
-from .handlers.state_constants import (
-    ADDING_VOLUNTEER,
-    CAR_COMMAND,
-    CITY_COMMAND,
-    RADIUS_COMMAND,
-    SELECTING_ACTION,
-    SELECTING_OVER,
-    TYPING_CITY,
-)
-from .handlers.volunteer import (
-    add_volunteer,
-    ask_for_input_city,
-    handle_car_input,
-    handle_city_input,
-    handle_radius_input,
-    save_input,
-)
+from .handlers.state_constants import (ADDING_VOLUNTEER, CAR_COMMAND,
+                                       CITY_COMMAND, POLLUTION_COMMENT,
+                                       POLLUTION_COORDINATES, POLLUTION_FOTO,
+                                       RADIUS_COMMAND, SAVE, SELECTING_ACTION,
+                                       SELECTING_FEATURE, SELECTING_OVER,
+                                       TYPING, TYPING_CITY)
+from .handlers.volunteer import (add_volunteer, ask_for_input_city,
+                                 handle_car_input, handle_city_input,
+                                 handle_radius_input, save_input)
 
 
 def start_bot() -> None:
@@ -40,6 +31,7 @@ def start_bot() -> None:
     aps_logger = logging.getLogger("apscheduler")
     aps_logger.setLevel(logging.DEBUG)
     bot = Application.builder().token(settings.telegram_bot_token).build()
+    
     add_volunteer_conv = ConversationHandler(
         entry_points=[CallbackQueryHandler(add_volunteer, pattern=BECOME_VOLUNTEER_CMD)],
         states={
@@ -60,12 +52,49 @@ def start_bot() -> None:
             CommandHandler("stop", stop_nested),
         ],
     )
+    
+    add_pollution_conv = ConversationHandler(
+        entry_points=[
+            CallbackQueryHandler(
+                select_option_to_report_about_pollution,
+                pattern=REPORT_ECO_PROBLEM_CMD
+            )
+        ],
+        states={
+            SELECTING_FEATURE: [
+                CallbackQueryHandler(
+                    input, pattern="^" + POLLUTION_COMMENT + "$"),
+                CallbackQueryHandler(
+                    input, pattern="^" + POLLUTION_COORDINATES + "$"),
+                CallbackQueryHandler(
+                    input, pattern="^" + POLLUTION_FOTO + "$"),
+                CallbackQueryHandler(
+                    save_and_exit, pattern="^" + SAVE + "$"
+                )
+            ],
+            TYPING: [
+                MessageHandler(
+                    filters.TEXT & ~filters.COMMAND, save_comment),
+                MessageHandler(
+                    filters.PHOTO & ~filters.COMMAND, save_foto),
+                MessageHandler(
+                    filters.LOCATION & ~filters.COMMAND, save_location)
+            ],
+        },
+        fallbacks=[
+            CallbackQueryHandler(
+                end_describing, pattern=END_CMD
+            ),
+            CommandHandler("stop", stop_nested)
+        ],
+    )
 
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler("start", start)],
         states={
             SELECTING_ACTION: [
                 add_volunteer_conv,
+                add_pollution_conv,
             ],
         },
         fallbacks=[CommandHandler("stop", stop)],
