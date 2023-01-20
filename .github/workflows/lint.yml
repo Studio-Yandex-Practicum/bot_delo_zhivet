@@ -24,7 +24,7 @@ jobs:
 
     steps:
       - name: Set up Python
-      - uses: actions/setup-python@v3
+        uses: actions/setup-python@v3
         with:
           python-version: "3.x"
 
@@ -34,5 +34,5 @@ jobs:
           pip3 install flake8 pep8-naming flake8-broken-line flake8-return
 
       - name: Test with flake8
-      - run: |
+        run: |
           python -m flake8
