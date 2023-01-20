@@ -21,6 +21,9 @@ from bot.handlers.state_constants import (
 
 async def input_social_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Добавление информации"""
+
+    # TODO: Если вбиваем адрес, нужна проверка корректности(или отдельная функция инпута адреса с проверкой)
+
     context.user_data[CURRENT_FEATURE] = update.callback_query.data
     text = "Отлично, что ты хочешь добавить?"
     await update.callback_query.answer()
@@ -89,9 +92,9 @@ async def save_and_exit_from_social_problem(
     await update.callback_query.edit_message_text(
         text=context.user_data.get("features")
     )
-    # Исключительно для демонстрации в чате, что в context.user_data.get("features") сохранены данные.
-    # TO DO: Сохранить данные в базу, создать таску в трекере.
-    # Переход должен быть на экран предложения стать волонтёром.
+    # TODO: Исключительно для демонстрации в чате, что в context.user_data.get("features") сохранены данные.
+    # TODO: Сохранить данные в базу, создать таску в трекере.
+    # TODO: Переход должен быть на экран предложения стать волонтёром.
     sleep(5)
     await start(update, context)
     return END
