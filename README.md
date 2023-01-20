@@ -1,5 +1,8 @@
 # bot_delo_zhivet
 Телеграм-бот для организации эко-субботников.
+
+[![Build status](https://github.com/Studio-Yandex-Practicum/bot_delo_zhivet/actions/workflows/bot_delo_zhivet_workflow.yml/badge.svg)](https://github.com/Studio-Yandex-Practicum/bot_delo_zhivet/actions/workflows/bot_delo_zhivet_workflow.yml)
+
 ___
 ## Оглавление:
 1. [Установка poetry и запуск виртауального окружения](#Установка-poetry-и-запуск-виртауального-окружения)
