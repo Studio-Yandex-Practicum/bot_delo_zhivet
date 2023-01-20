@@ -91,6 +91,7 @@ async def save_and_exit_from_social_problem(
     )
     # Исключительно для демонстрации в чате, что в context.user_data.get("features") сохранены данные.
     # TO DO: Сохранить данные в базу, создать таску в трекере.
+    # Переход должен быть на экран предложения стать волонтёром.
     sleep(5)
     await start(update, context)
     return END
