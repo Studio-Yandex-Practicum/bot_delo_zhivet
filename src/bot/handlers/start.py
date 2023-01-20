@@ -54,8 +54,3 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
 
     context.user_data[START_OVER] = False
     return SELECTING_ACTION
-
-
-async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Обработчик команды /help."""
-    await update.message.reply_text("help text")

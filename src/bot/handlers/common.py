@@ -41,3 +41,8 @@ async def stop_nested(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str
     await update.message.reply_text("Okay, bye.")
 
     return STOPPING
+
+
+async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Обработчик команды /help."""
+    await update.message.reply_text("help text")
