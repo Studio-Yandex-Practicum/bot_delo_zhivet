@@ -76,7 +76,7 @@ ___
 ## Запуск бота
 Для Linux, macOS, Windows (WSL):
 ```bash
-your@device:~/your_project_pwd/bot_delo_zhivet/src/$ poetry run runbot
+your@device:~/your_project_pwd/bot_delo_zhivet/$ poetry run runbot
 ```
 ___
 [:arrow_up:Оглавление](#Оглавление)
