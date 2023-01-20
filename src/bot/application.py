@@ -13,9 +13,9 @@ from bot.const import (
 )
 from core.settings import settings
 
-from .handlers.common import end_describing, stop, stop_nested
+from .handlers.common import end_describing, help_command, stop, stop_nested
 from .handlers.participation import make_donation
-from .handlers.start import help_command, start
+from .handlers.start import start
 from .handlers.state_constants import (
     ADDING_VOLUNTEER,
     CAR_COMMAND,
