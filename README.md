@@ -13,6 +13,24 @@ ___
 ```bash
 curl -sSL https://install.python-poetry.org | python3 -
 ```
+Для Windows (Powershell):
+```bash
+(Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | py -
+```
+В macOS и Windows сценарий установки предложит добавить папку с исполняемым файлом poetry в переменную PATH. Сделайте это, выполнив следующую команду:
+
+macOS
+```bash
+export PATH="/Users/jetbrains/.local/bin:$PATH"
+```
+Windows
+```bash
+$Env:Path += ";C:\Users\jetbrains\AppData\Roaming\Python\Scripts"; setx PATH "$Env:Path"
+```
+Для проверки установки выполните следующую команду:
+```bash
+poetry --version
+```
 Установка автодополнений bash(опцонально)
 ```bash
 poetry completions bash >> ~/.bash_completion
@@ -28,6 +46,10 @@ poetry install
 Запуск оболочки и активация виртуального окружения
 ```bash
 your@device:~/your_project_pwd/bot_delo_zhivet$ poetry shell
+```
+Проверка активации виртуального окружения
+```bash
+poetry env list
 ```
 ___
 ## Установка pre-commit hook
