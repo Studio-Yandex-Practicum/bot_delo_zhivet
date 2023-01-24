@@ -2,10 +2,55 @@
 Телеграм-бот для организации эко-субботников.
 ___
 ## Оглавление:
-0. [Установка pre-commit hook](#Установка-pre-commit-hook)
+1. [Установка poetry и запуск виртауального окружения](#Установка-poetry-и-запуск-виртауального-окружения)
+2. [Установка pre-commit hook](#Установка-pre-commit-hook)
     1. [Установка pre-commit](#Установка-pre-commit)
     2. [Установка hook](#Установка-hook)
+3. [Запуск бота](#Запуск-бота)
+___
+## Установка poetry и запуск виртауального окружения
+Для Linux, macOS, Windows (WSL):
+```bash
+curl -sSL https://install.python-poetry.org | python3 -
+```
+Для Windows (Powershell):
+```bash
+(Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | py -
+```
+В macOS и Windows сценарий установки предложит добавить папку с исполняемым файлом poetry в переменную PATH. Сделайте это, выполнив следующую команду:
 
+macOS
+```bash
+export PATH="/Users/jetbrains/.local/bin:$PATH"
+```
+Windows
+```bash
+$Env:Path += ";C:\Users\jetbrains\AppData\Roaming\Python\Scripts"; setx PATH "$Env:Path"
+```
+Для проверки установки выполните следующую команду:
+```bash
+poetry --version
+```
+Установка автодополнений bash(опцонально)
+```bash
+poetry completions bash >> ~/.bash_completion
+```
+Создание виртуально окружения
+```bash
+poetry env use python3.10
+```
+Установка зависимостей
+```bash
+poetry install
+```
+Запуск оболочки и активация виртуального окружения
+```bash
+your@device:~/your_project_pwd/bot_delo_zhivet$ poetry shell
+```
+Проверка активации виртуального окружения
+```bash
+poetry env list
+```
 ___
 ## Установка pre-commit hook
 Для того чтобы при каждом коммите выполнялись pre-commit проверки, необходимо:
@@ -49,5 +94,12 @@ pre-commit install --all
 pre-commit run --all-files
 ```
 
+___
+## Запуск бота
+Для Linux, macOS, Windows (WSL):
+```bash
+your@device:~/your_project_pwd/bot_delo_zhivet/$ poetry run runbot
+```
+___
 [:arrow_up:Оглавление](#Оглавление)
 

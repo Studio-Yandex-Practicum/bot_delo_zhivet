@@ -1,28 +1,56 @@
-from telegram import Update, KeyboardButton, ReplyKeyboardMarkup
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
 
+from bot.handlers.state_constants import (
+    ADDING_ECO_TASK,
+    ADDING_SOCIAL_TASK,
+    ADDING_VOLUNTEER,
+    END,
+    MAKING_DONATION,
+    SELECTING_ACTION,
+    START_OVER,
+    TOP_LEVEL_MENU_TEXT,
+)
 
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Отправка сообщения с кнопками главного меню"""
-    keyboard = [
+GREETING_MESSAGE = (
+    'Привет, {username}. Я бот экологического проекта "Дело живёт".'
+    " Я могу принять заявку на помощь, или зарегистрировать тебя волонтером."
+    " Выбери необходимое действие."
+)
+
+BYE_MESSAGE = "До свидания, {username}. Возвращайся в любой момент." 'Фонд "Дело живёт" ждёт тебя.'
+
+
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
+    """Выбор действия: Добавление проблемы/регистрация волонтера."""
+    text = TOP_LEVEL_MENU_TEXT
+
+    buttons = [
         [
-            KeyboardButton("Сообщить о социальной проблеме"),
-            KeyboardButton("Сообщить о экологической проблеме"),
+            InlineKeyboardButton(text="Стать волонтером", callback_data=ADDING_VOLUNTEER),
+            InlineKeyboardButton(text="Сделать пожертвование", callback_data=MAKING_DONATION),
         ],
         [
-            KeyboardButton("Стать волонтёром"),
-            KeyboardButton("Сделать пожертвование"),
+            InlineKeyboardButton(text="Сообщить об эко проблеме", callback_data=ADDING_ECO_TASK),
+        ],
+        [
+            InlineKeyboardButton(text="Сообщить о социальной проблеме", callback_data=ADDING_SOCIAL_TASK),
+        ],
+        [
+            InlineKeyboardButton(text="Готово", callback_data=END),
         ],
     ]
-    reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+    keyboard = InlineKeyboardMarkup(buttons)
 
-    await update.message.reply_text(
-        "Выберете действие", reply_markup=reply_markup
-    )
+    # Если пользователь в первый раз обращается к боту, то покажем ему приветственное сообщение
+    if not context.user_data.get(START_OVER):
+        user = update.message.from_user
+        username = user["username"]
+        text = GREETING_MESSAGE.format(username=username)
+        await update.message.reply_text(text=text, reply_markup=keyboard)
+    else:
+        await update.callback_query.answer()
+        await update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
 
-
-async def help_command(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
-) -> None:
-    """Обработчик команды /help."""
-    await update.message.reply_text("help text")
+    context.user_data[START_OVER] = False
+    return SELECTING_ACTION

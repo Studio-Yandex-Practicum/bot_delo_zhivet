@@ -2,3 +2,9 @@
 .gitignore
 .pre-commit-config.yaml
 infrastructure/*
+.env.example
+.venv
+venv
+env
+.DS_Store
+.idea
