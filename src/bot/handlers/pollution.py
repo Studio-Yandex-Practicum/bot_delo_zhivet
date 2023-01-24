@@ -1,7 +1,6 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
-from telegram.ext import (Application, CallbackQueryHandler, CommandHandler,
-                          ContextTypes, ConversationHandler, MessageHandler,
-                          filters)
+from telegram.ext import ContextTypes
+
 
 from .start import start
 from .state_constants import (CURRENT_FEATURE, END, FEATURES,
