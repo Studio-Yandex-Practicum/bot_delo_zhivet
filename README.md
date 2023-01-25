@@ -6,7 +6,8 @@ ___
 2. [Установка pre-commit hook](#Установка-pre-commit-hook)
     1. [Установка pre-commit](#Установка-pre-commit)
     2. [Установка hook](#Установка-hook)
-3. [Запуск бота](#Запуск-бота)
+4. [Запуск базы и применение миграций на локальной машине](#Запуск-базы-и-применение-миграций-на-локальной-машине)
+4. [Запуск бота](#Запуск-бота)
 ___
 ## Установка poetry и запуск виртауального окружения
 Для Linux, macOS, Windows (WSL):
@@ -51,6 +52,26 @@ your@device:~/your_project_pwd/bot_delo_zhivet$ poetry shell
 ```bash
 poetry env list
 ```
+___
+## Запуск базы и применение миграций на локальной машине
+Сначала поднимаем контейнер с базой Postgres
+```bash
+docker-compose -f postgres-local.yaml up -d --build
+```
+Если есть чьи-то миграции в проекте, до применяем их
+```bash
+alembic stamp head
+```
+Cоздаём новую миграцию
+```bash
+alembic revision --autogenerate -m "First migration"
+```
+Дальше применяем
+```bash
+alembic upgrade head
+```
+
+[:arrow_up:Оглавление](#Оглавление)
 ___
 ## Установка pre-commit hook
 Для того чтобы при каждом коммите выполнялись pre-commit проверки, необходимо:
