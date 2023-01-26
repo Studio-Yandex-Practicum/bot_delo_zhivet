@@ -1,6 +1,6 @@
 import uuid
 
-from sqlalchemy import Column, Integer, DateTime
+from sqlalchemy import Column, DateTime
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import declarative_base, declared_attr, sessionmaker
 from sqlalchemy.dialects.postgresql import UUID

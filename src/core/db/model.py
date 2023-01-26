@@ -42,6 +42,3 @@ class Assistance_disabled(Base):
     ticketID = Column(Integer, nullable=True)
     latitude = Column(Integer, nullable=True)
     longitude = Column(Integer, nullable=True)
-
-
-
