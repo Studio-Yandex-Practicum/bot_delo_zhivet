@@ -1,5 +1,3 @@
-from time import sleep
-
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
     ContextTypes,
@@ -89,13 +87,13 @@ async def save_and_exit_from_social_problem(
 ) -> int:
     """Сохранение данных в базу"""
     context.user_data[START_OVER] = True
-    await update.callback_query.edit_message_text(
-        text=context.user_data.get("features")
-    )
-    # TODO: Исключительно для демонстрации в чате, что в context.user_data.get("features") сохранены данные.
-    # TODO: Сохранить данные в базу, создать таску в трекере.
-    # TODO: Переход должен быть на экран предложения стать волонтёром.
-    sleep(5)
+    print(f"""
+
+
+    {context.user_data[FEATURES]}
+
+
+    """)
     await start(update, context)
     return END
 

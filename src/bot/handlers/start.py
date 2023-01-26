@@ -5,7 +5,6 @@ from bot.handlers.state_constants import (
     ADDING_ECO_TASK,
     ADDING_SOCIAL_TASK,
     ADDING_VOLUNTEER,
-    END,
     MAKING_DONATION,
     SELECTING_ACTION,
     START_OVER,
@@ -35,9 +34,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
         ],
         [
             InlineKeyboardButton(text="Сообщить о социальной проблеме", callback_data=ADDING_SOCIAL_TASK),
-        ],
-        [
-            InlineKeyboardButton(text="Готово", callback_data=END),
         ],
     ]
     keyboard = InlineKeyboardMarkup(buttons)

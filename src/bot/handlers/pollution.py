@@ -106,7 +106,6 @@ async def save_foto(
     await photo_file.download_to_drive("user_photo.jpg")
     user_data[FEATURES][user_data[CURRENT_FEATURE]] = photo_file
     user_data[START_OVER] = True
-    print(user_data)
 
     return await select_option_to_report_about_pollution(update, context)
 
@@ -122,10 +121,18 @@ async def save_location(
     return await select_option_to_report_about_pollution(update, context)
 
 
-async def save_and_exit(
+async def save_and_exit_pollution(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> str:
     """Сохранение данных в базу"""
+    context.user_data[START_OVER] = True
+    print(f"""
+
+
+    {context.user_data[FEATURES]}
+
+
+    """)
     await start(update, context)
     return END
 
