@@ -127,12 +127,12 @@ async def save_and_exit(
     """Сохранение данных в базу"""
     context.user_data[START_OVER] = True
     print(f"""
-    
-    
+
+
     {context.user_data[FEATURES]}
-    
-    
-    """)   
+
+
+    """)
     await start(update, context)
     return END
 
