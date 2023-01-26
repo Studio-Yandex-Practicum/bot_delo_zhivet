@@ -8,15 +8,19 @@ from pathlib import Path
 import os
 
 load_dotenv()
-env_path = Path('.') / '.env'
+env_path = Path('.')/'.env'
 load_dotenv(dotenv_path=env_path)
 
-from src.core.db.model import (User, Member, Request,
-                               Shift, Report, Task,
-                               Volunteer, Pollution, Assistance_disabled)
+
+from src.core.db.model import (Assistance_disabled, Member, Pollution,
+                               Report, Request,
+                               Shift, Task, User,
+                               Volunteer)
+
 
 app = Flask(__name__)
 app.config['FLASK_ENV'] = 'development'
+
 
 app.config['SQLALCHEMY_DATABASE_URI'] = (
     f"postgresql://{os.getenv('POSTGRES_USER')}:"
@@ -26,7 +30,9 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 
 db = SQLAlchemy(app)
 
+
 admin = Admin(app, name='bot_delo_zhivet', template_mode='bootstrap3')
+
 
 admin.add_view(ModelView(User, db.session, name='User'))
 admin.add_view(ModelView(Member, db.session, name='Member'))
