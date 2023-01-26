@@ -24,7 +24,7 @@ from .handlers.common import end_describing, help_command, stop, stop_nested
 from .handlers.participation import make_donation
 from .handlers.pollution import (
     input,
-    save_and_exit,
+    save_and_exit_pollution,
     save_comment,
     save_foto,
     save_location,
@@ -63,6 +63,7 @@ from .handlers.volunteer import (
     handle_city_input,
     handle_radius_input,
     save_input,
+    save_and_exit_volunteer
 )
 
 
@@ -85,6 +86,7 @@ def start_bot() -> None:
                 CallbackQueryHandler(
                     handle_car_input, pattern=SPECIFY_CAR_AVAILABILITY_CMD
                 ),
+                CallbackQueryHandler(save_and_exit_volunteer, pattern="^" + SAVE + "$"),
             ],
             TYPING_CITY: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, handle_city_input)
@@ -112,7 +114,7 @@ def start_bot() -> None:
                 CallbackQueryHandler(input, pattern="^" + POLLUTION_COMMENT + "$"),
                 CallbackQueryHandler(input, pattern="^" + POLLUTION_COORDINATES + "$"),
                 CallbackQueryHandler(input, pattern="^" + POLLUTION_FOTO + "$"),
-                CallbackQueryHandler(save_and_exit, pattern="^" + SAVE + "$"),
+                CallbackQueryHandler(save_and_exit_pollution, pattern="^" + SAVE + "$"),
             ],
             TYPING: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, save_comment),

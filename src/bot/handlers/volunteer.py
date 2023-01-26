@@ -19,6 +19,7 @@ from bot.handlers.state_constants import (
     SPECIFY_CITY,
     START_OVER,
     TYPING_CITY,
+    SAVE
 )
 
 
@@ -55,6 +56,13 @@ async def add_volunteer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> s
         await update.callback_query.answer()
         await update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
     else:
+        if check_data(context.user_data[FEATURES]) is True:
+            buttons.append(
+                [InlineKeyboardButton(
+                    text="Сохранить и выйти", callback_data=SAVE
+                )]
+            )
+            keyboard = InlineKeyboardMarkup(buttons)
         text = "Понял-принял!. Выбери следующую опцию"
         if update.message is not None:
             await update.message.reply_text(text=text, reply_markup=keyboard)
@@ -156,3 +164,27 @@ async def save_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     user_data[START_OVER] = True
 
     return await add_volunteer(update, context)
+
+
+async def save_and_exit_volunteer(
+    update: Update, context: ContextTypes.DEFAULT_TYPE
+) -> str:
+    """Сохранение данных в базу"""
+    context.user_data[START_OVER] = True
+    print(f"""
+
+
+    {context.user_data[FEATURES]}
+
+
+    """)
+    await start(update, context)
+    return END
+
+
+def check_data(user_data):
+    if (SPECIFY_CITY in user_data
+            and SPECIFY_ACTIVITY_RADIUS in user_data) and SPECIFY_CAR_AVAILABILITY in user_data:
+        return True
+    else:
+        return False

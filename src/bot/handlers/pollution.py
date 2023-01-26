@@ -121,7 +121,7 @@ async def save_location(
     return await select_option_to_report_about_pollution(update, context)
 
 
-async def save_and_exit(
+async def save_and_exit_pollution(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> str:
     """Сохранение данных в базу"""
