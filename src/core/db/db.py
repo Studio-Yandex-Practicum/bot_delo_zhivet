@@ -1,6 +1,6 @@
 import uuid
 
-from sqlalchemy import Column, DateTime
+from sqlalchemy import Column, TIMESTAMP, func
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import declarative_base, declared_attr, sessionmaker
 from sqlalchemy.dialects.postgresql import UUID
@@ -9,15 +9,20 @@ from src.core.config import settings
 
 
 class PreBase:
-    """init class add table name and id field."""
+    """Абстрактная модель для наследования"""
 
     @declared_attr
     def __tablename__(cls):  # noqa
         return cls.__name__.lower()
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    created_at = Column(DateTime(timezone=True), nullable=False)
-    updated_at = Column(DateTime(timezone=True), nullable=False)
+    created_at = Column(TIMESTAMP, server_default=func.current_timestamp(), nullable=False)
+    updated_at = Column(
+        TIMESTAMP,
+        server_default=func.current_timestamp(),
+        nullable=False,
+        onupdate=func.current_timestamp(),
+    )
 
     def __repr__(self):
         return f"{self.__class__.__name__}, id = {self.id}."

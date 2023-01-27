@@ -1,27 +1,31 @@
-from sqlalchemy import Column, Date, DateTime, ForeignKey, Integer, String, Text, BigInteger, Float
+from sqlalchemy import Column, Date, DateTime, ForeignKey, Integer, String, Text, BigInteger, Float, \
+    Boolean
 
 from src.core.db.db import Base
 
 
 class User(Base):
-    """Model User."""
+    """Модель пользователя"""
+
     telegram_id = Column(BigInteger, unique=True, nullable=False)
+    is_banned = Column(Boolean, default=True)
 
 
 class Volunteer(Base):
-    """Model Volunteer."""
+    """Модель волонтера"""
+
     telegram_id = Column(BigInteger, ForeignKey("user.telegram_id"))
     name = Column(String(100), nullable=True)
     city = Column(String(100), nullable=False)
     phone = Column(String(13), unique=True, nullable=True)
-    radius = Column(Text, nullable=False)
-    has_car = Column(Text, nullable=False)
+    radius = Column(Integer, nullable=False)
+    has_car = Column(Boolean, nullable=False)
     birthday = Column(Date, nullable=True)
     deleted_at = Column(DateTime(timezone=True))
 
 
 class Pollution(Base):
-    """Model Pollution. Инфо о загрязнении."""
+    """Модель сообщения о загрязнении"""
 
     photo = Column(String(100), nullable=False)
     latitude = Column(Float, nullable=False)
@@ -32,7 +36,7 @@ class Pollution(Base):
 
 
 class Assistance_disabled(Base):
-    """Model Assistance_disabled. Инфо о помощи инвалиду."""
+    """Модель сообщения о социальной помощи"""
 
     city = Column(Text, nullable=False)
     street = Column(Text, nullable=False)
