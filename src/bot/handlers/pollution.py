@@ -1,12 +1,13 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
 
-
+from api.tracker import client
 from .start import start
 from .state_constants import (CURRENT_FEATURE, END, FEATURES,
                               POLLUTION_COMMENT, POLLUTION_COORDINATES,
                               POLLUTION_FOTO, SAVE, SELECTING_FEATURE,
-                              START_OVER, TYPING)
+                              START_OVER, TYPING, FILE_PATH, POLLUTION,
+                              LATITUDE, LONGITUDE)
 
 
 async def select_option_to_report_about_pollution(
@@ -126,13 +127,24 @@ async def save_and_exit_pollution(
 ) -> str:
     """Сохранение данных в базу"""
     context.user_data[START_OVER] = True
-    print(f"""
+    user_data = context.user_data[FEATURES]
+    file_path = user_data[POLLUTION_FOTO][FILE_PATH]
+    latitude = user_data[POLLUTION_COORDINATES][LATITUDE]
+    longitude = user_data[POLLUTION_COORDINATES][LONGITUDE]
+    if POLLUTION_COMMENT in user_data:
+        comment = user_data[POLLUTION_COMMENT]
+    else:
+        comment = "Комментариев не оставили"
+    summary = f"{latitude}, {longitude}"
+    description = f"""
+    Координаты: {latitude}, {longitude}
+    Комментарий: {comment}
+    {file_path}
+    """
+    client.issues.create(
+        queue=POLLUTION, summary=summary, description=description,
+    )
 
-
-    {context.user_data[FEATURES]}
-
-
-    """)
     await start(update, context)
     return END
 

@@ -3,6 +3,7 @@ from telegram.ext import (
     ContextTypes,
 )
 
+from api.tracker import client
 from bot.handlers.start import start
 from bot.handlers.state_constants import (
     END,
@@ -14,6 +15,7 @@ from bot.handlers.state_constants import (
     SAVE,
     CURRENT_FEATURE,
     SOCIAL_PROBLEM_TYPING,
+    SOCIAL,
 )
 
 
@@ -85,15 +87,14 @@ async def report_about_social_problem(
 async def save_and_exit_from_social_problem(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
-    """Сохранение данных в базу"""
+    """Сохранение данных в базу и отправка в трекер"""
     context.user_data[START_OVER] = True
-    print(f"""
-
-
-    {context.user_data[FEATURES]}
-
-
-    """)
+    user_data = context.user_data[FEATURES]
+    city = user_data[SOCIAL_ADDRESS]
+    comment = user_data[SOCIAL_COMMENT]
+    client.issues.create(
+        queue=SOCIAL, summary=city, description=comment,
+    )
     await start(update, context)
     return END
 

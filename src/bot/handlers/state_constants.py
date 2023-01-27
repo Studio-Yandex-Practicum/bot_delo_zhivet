@@ -1,6 +1,11 @@
 # Обозначим состояния главного менюSELECTING_ACTION
 from telegram.ext import ConversationHandler
 
+# Константы для API трекера
+VOLUNTEER = "VOLUNTEER"
+SOCIAL = "SOCIAL"
+POLLUTION = "POLLUTION"
+
 SELECTING_ACTION = "select_action"
 ADDING_VOLUNTEER = "adding_volunteer"
 MAKING_DONATION = "making_donations"
@@ -26,6 +31,9 @@ SHOWING = "showing"
 END = ConversationHandler.END
 
 # Различные константы для проекта
+LONGITUDE = "longitude"
+LATITUDE = 'latitude'
+FILE_PATH = "file_path"
 START_OVER = "start_over"
 FEATURES = "features"
 CURRENT_FEATURE = "current_feature"
