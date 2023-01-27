@@ -6,8 +6,8 @@ from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
 import os
 
-from src.core.db.model import (Assistance_disabled, Member, Pollution, Report,
-                               Request, Shift, Task, User, Volunteer)
+from src.core.db.model import (Assistance_disabled, Pollution,
+                               User, Volunteer)
 
 load_dotenv()
 
@@ -25,11 +25,6 @@ db = SQLAlchemy(app)
 admin = Admin(app, name='bot_delo_zhivet', template_mode='bootstrap3')
 
 admin.add_view(ModelView(User, db.session, name='User'))
-admin.add_view(ModelView(Member, db.session, name='Member'))
-admin.add_view(ModelView(Request, db.session, name='Request'))
-admin.add_view(ModelView(Shift, db.session, name='Shift'))
-admin.add_view(ModelView(Report, db.session, name='Report'))
-admin.add_view(ModelView(Task, db.session, name='Task'))
 admin.add_view(ModelView(Volunteer, db.session, name='Volunteer'))
 admin.add_view(ModelView(Pollution, db.session, name='Pollution'))
 admin.add_view(
