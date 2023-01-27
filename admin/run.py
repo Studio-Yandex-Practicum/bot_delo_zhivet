@@ -6,13 +6,10 @@ from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
 import os
 
+
 load_dotenv()
 
-from src.core.db.model import (Assistance_disabled, Member, Pollution,
-                               Report, Request,
-                               Shift, Task, User,
-                               Volunteer
-                               )
+from src.core.db.model import (Assistance_disabled, Member, Pollution, Report, Request, Shift, Task, User, Volunteer) # noqa
 
 app = Flask(__name__)
 app.config['FLASK_ENV'] = 'development'
