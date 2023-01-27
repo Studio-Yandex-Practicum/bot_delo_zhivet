@@ -18,7 +18,7 @@ class Volunteer(Base):
     name = Column(String(100), nullable=True)
     city = Column(String(100), nullable=False)
     phone = Column(String(13), unique=True, nullable=True)
-    radius = Column(Integer, nullable=True)
+    radius = Column(Integer, nullable=False)
     has_car = Column(Boolean, nullable=False)
     birthday = Column(Date, nullable=True)
     deleted_at = Column(DateTime(timezone=True))
