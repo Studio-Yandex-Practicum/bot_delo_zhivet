@@ -6,3 +6,8 @@ poetry add flask_sqlalchemy
 poetry add psycopg2-binary
 python3 -m pip install psycopg2-binary
 
+
+Запуск:
+poetry run python admin/run.py
+
+

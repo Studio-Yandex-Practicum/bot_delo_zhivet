@@ -8,7 +8,7 @@ authors = ["Александр Ниязов <alexander.niyazov@gmail.com>",
            "Денис Швецов <denshvetsov@users.noreply.github.com>",
            "Владислав Василенко <vasilekx@users.noreply.github.com>"]
 readme = "README.md"
-packages = [{include = "*", from = "src"}]
+packages = [{include = "*", from = "src"}, {include = "**/*.py", from = "."}]
 
 [tool.poetry.dependencies]
 python = "^3.10"
@@ -25,6 +25,7 @@ asyncpg = "^0.27.0"
 flask = "^2.2.2"
 flask-sqlalchemy = "^3.0.2"
 flask-admin = "^1.6.0"
+psycopg2-binary = "^2.9.5"
 
 [build-system]
 requires = ["poetry-core"]
