@@ -1,6 +1,8 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
 
+from api.tracker import client
+
 from bot.address.address_api import mock_get_city_name
 from bot.handlers.start import start
 from bot.handlers.state_constants import (
@@ -19,7 +21,8 @@ from bot.handlers.state_constants import (
     SPECIFY_CITY,
     START_OVER,
     TYPING_CITY,
-    SAVE
+    SAVE,
+    VOLUNTEER,
 )
 
 
@@ -169,15 +172,23 @@ async def save_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
 async def save_and_exit_volunteer(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> str:
-    """Сохранение данных в базу"""
+    """Сохранение данных в базу и отправка в трекер"""
     context.user_data[START_OVER] = True
-    print(f"""
-
-
-    {context.user_data[FEATURES]}
-
-
-    """)
+    username = update.effective_user.username
+    user_data = context.user_data[FEATURES]
+    city = user_data[SPECIFY_CITY][5:]
+    radius = user_data[SPECIFY_ACTIVITY_RADIUS][7:]
+    car = user_data[SPECIFY_CAR_AVAILABILITY][4:]
+    summary = f"{username} - {city}"
+    description = f"""
+    Ник в телеграмме: {username}
+    город: {city}
+    наличие машины: {car}
+    радиус выезда{radius}
+    """
+    client.issues.create(
+        queue=VOLUNTEER, summary=summary, description=description,
+    )
     await start(update, context)
     return END
 
