@@ -177,4 +177,4 @@ cython_debug/
 .vscode/
 *.code-workspace
 
-alembic/version/
+alembic/versions/*
