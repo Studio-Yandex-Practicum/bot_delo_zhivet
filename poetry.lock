@@ -158,6 +158,21 @@ files = [
 ]
 
 [[package]]
+name = "dadata"
+version = "21.10.1"
+description = "Data cleansing and enrichment via Dadata API."
+category = "main"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "dadata-21.10.1-py3-none-any.whl", hash = "sha256:7cb9e57c1fb0a423931b2cce99bef2a44d8571e8fba31f871763336ff19e9192"},
+    {file = "dadata-21.10.1.tar.gz", hash = "sha256:379a5a188879ed0dc07bea9d9dda44432bedb60ddda63c445edc6c311fa9828f"},
+]
+
+[package.dependencies]
+httpx = "*"
+
+[[package]]
 name = "distlib"
 version = "0.3.6"
 description = "Distribution utilities"
@@ -1138,4 +1153,4 @@ six = ">=1.9"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "76d74ea74fd5b6f35c0845a6ff99fce6c0c637c566ff6f64fdfcc9fc34e6c1f1"
+content-hash = "68dbf518363dc1af2ac9397b9bffe581be147ee1e94557f1346a823838ae66c2"

@@ -16,7 +16,9 @@ from bot.handlers.state_constants import (
     CURRENT_FEATURE,
     SOCIAL_PROBLEM_TYPING,
     SOCIAL,
+    TELEGRAM_ID,
 )
+from src.bot.service.assistance_disabled import create_new_social
 
 
 async def input_social_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -90,11 +92,13 @@ async def save_and_exit_from_social_problem(
     """Сохранение данных в базу и отправка в трекер"""
     context.user_data[START_OVER] = True
     user_data = context.user_data[FEATURES]
+    user_data[TELEGRAM_ID] = update.effective_user.id
     city = user_data[SOCIAL_ADDRESS]
     comment = user_data[SOCIAL_COMMENT]
     client.issues.create(
         queue=SOCIAL, summary=city, description=comment,
     )
+    create_new_social(user_data)
     await start(update, context)
     return END
 
