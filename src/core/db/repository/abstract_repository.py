@@ -38,8 +38,8 @@ class CRUDBase:
         """create new record."""
         # ! уточнить формат входных данных для записи словарь или объект модели
         # obj_in_data = obj_in.dict()
-        # db_obj = self.model(**obj_in_data)
-        db_obj = obj_in
+        db_obj = self.model(**obj_in)
+        # db_obj = obj_in
         session.add(db_obj)
         await session.commit()
         await session.refresh(db_obj)

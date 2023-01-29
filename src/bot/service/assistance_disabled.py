@@ -18,7 +18,7 @@ secret = "8ad83c107768fa78c0e280c273ed22ad91cfca31"
 dadata = Dadata(token, secret)
 
 
-def get_feilds_from_data(data):
+def get_fields_from_data(data):
     result = dadata.clean('address', data[SOCIAL_ADDRESS])
     if result['city'] is None:
         city = result['settlement']
@@ -44,21 +44,24 @@ def get_feilds_from_data(data):
 
 
 class SocialProblemCreate(BaseModel):
-    city: str
+    city = str
     street = str
     house = int
-    comment = Optional[str]
-    telegram_id = Optional[int]
-    # ticketID = Optional[int]
-    latitude = Optional[float]
-    longitude = Optional[float]
+    # comment = Optional[str]
+    # telegram_id = Optional[int]
+    # # ticketID = Optional[int]
+    # latitude = Optional[float]
+    # longitude = Optional[float]
+
+    class Config:
+        arbitrary_types_allowed = True
 
 
 async def create_new_social(
-        data,
+        data: SocialProblemCreate,
         session: AsyncSession = Depends(get_async_session),
 ):
-    data_in_dict = get_feilds_from_data(data)
-    social_problem = SocialProblemCreate(data_in_dict)
-    new_social_problem = await crud_assistance_disabled.create(social_problem, session)
+    data_in_dict = get_fields_from_data(data)
+    # social_problem = SocialProblemCreate(**data_in_dict)
+    new_social_problem = await crud_assistance_disabled.create(data_in_dict, session)
     return new_social_problem
