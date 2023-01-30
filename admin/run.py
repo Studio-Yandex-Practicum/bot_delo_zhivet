@@ -6,6 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_security import (Security, SQLAlchemyUserDatastore,
                             UserMixin, RoleMixin, login_required, current_user
                             )
+from flask_admin import helpers as admin_helpers
 
 from dotenv import load_dotenv
 import os
@@ -44,7 +45,7 @@ class Role(db.Model, RoleMixin):
         return self.name
 
 
-class User1(db.Model, UserMixin):
+class Staf(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     first_name = db.Column(db.String(255))
     last_name = db.Column(db.String(255))
@@ -60,8 +61,8 @@ class User1(db.Model, UserMixin):
 
 
 # Setup Flask-Security
-# user_datastore = SQLAlchemyUserDatastore(db, User1, Role)
-# security = Security(app, user_datastore)
+user_datastore = SQLAlchemyUserDatastore(db, Staf, Role)
+security = Security(app, user_datastore)
 
 
 # Create customized model view class
@@ -101,12 +102,26 @@ admin = flask_admin.Admin(
 
 # admin = Admin(app, name='bot_delo_zhivet', template_mode='bootstrap3')
 
-admin.add_view(ModelView(User, db.session, name='User'))
-admin.add_view(ModelView(Volunteer, db.session, name='Volunteer'))
-admin.add_view(ModelView(Pollution, db.session, name='Pollution'))
+admin.add_view(MyModelView(Staf, db.session, name='Staf'))
+admin.add_view(MyModelView(User, db.session, name='User'))
+admin.add_view(MyModelView(Volunteer, db.session, name='Volunteer'))
+admin.add_view(MyModelView(Pollution, db.session, name='Pollution'))
 admin.add_view(
-    ModelView(Assistance_disabled, db.session, name='Assistance_disabled')
+    MyModelView(Assistance_disabled, db.session, name='Assistance_disabled')
 )
+
+
+# define a context processor for merging flask-admin's template context into the
+# flask-security views.
+@security.context_processor
+def security_context_processor():
+    return dict(
+        admin_base_template=admin.base_template,
+        admin_view=admin.index_view,
+        h=admin_helpers,
+        get_url=url_for
+    )
+
 
 if __name__ == '__main__':
     app.secret_key = os.urandom(24)
