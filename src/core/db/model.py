@@ -1,4 +1,9 @@
-from sqlalchemy import Column, Date, DateTime, ForeignKey, Integer, String, Text, BigInteger, Float
+from sqlalchemy import Column, Date, DateTime, ForeignKey, Integer, String, \
+    Text, BigInteger, Float, Table, Boolean
+from flask_security import (Security, SQLAlchemyUserDatastore,
+                            UserMixin, RoleMixin, login_required, current_user
+                            )
+from sqlalchemy.orm import relationship, backref
 
 from src.core.db.db import Base
 
@@ -42,3 +47,35 @@ class Assistance_disabled(Base):
     ticketID = Column(Integer, nullable=True)
     latitude = Column(Integer, nullable=True)
     longitude = Column(Integer, nullable=True)
+
+
+# Define models
+roles_users = Table(
+    'roles_users',
+    Column('user_id', Integer(), ForeignKey('user.id')),
+    Column('role_id', Integer(), ForeignKey('role.id'))
+)
+
+
+class Role(Base, RoleMixin):
+    id = Column(Integer(), primary_key=True)
+    name = Column(String(80), unique=True)
+    description = Column(String(255))
+
+    def __str__(self):
+        return self.name
+
+
+class Staf(Base, UserMixin):
+    id = Column(Integer, primary_key=True)
+    first_name = Column(String(255))
+    last_name = Column(String(255))
+    email = Column(String(255), unique=True)
+    password = Column(String(255))
+    active = Column(Boolean())
+    confirmed_at = Column(DateTime())
+    roles = relationship('Role', secondary=roles_users,
+                            backref=backref('users', lazy='dynamic'))
+
+    def __str__(self):
+        return self.email

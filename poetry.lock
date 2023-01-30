@@ -379,6 +379,23 @@ blinker = "*"
 Flask = "*"
 
 [[package]]
+name = "flask-migrate"
+version = "4.0.3"
+description = "SQLAlchemy database migrations for Flask applications using Alembic."
+category = "main"
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "Flask-Migrate-4.0.3.tar.gz", hash = "sha256:a0062c8d3f32de02847086b46cfc389412f78c71c89a619ebd7097e89d72ea4b"},
+    {file = "Flask_Migrate-4.0.3-py3-none-any.whl", hash = "sha256:8662a9dd391ce36deeaf3265987319c20fdb4c8a45306a32ba4f8224459abed4"},
+]
+
+[package.dependencies]
+alembic = ">=1.9.0"
+Flask = ">=0.9"
+Flask-SQLAlchemy = ">=1.0"
+
+[[package]]
 name = "flask-principal"
 version = "0.4.0"
 description = "Identity management for flask"
@@ -1327,4 +1344,4 @@ email = ["email-validator"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "bf3776b99462476b5122b6455ba4bbfc7eb9e3b98dab6c1ec8fa1ddbfbf36524"
+content-hash = "1d886698a5e09a5ede5e3457b71f87220ae051a716746960f182105b3f50f25f"
