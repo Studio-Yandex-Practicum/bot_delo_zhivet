@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 import os
 
 from src.core.db.model import (Assistance_disabled, Pollution,
-                               User, Volunteer)
+                               User, Volunteer, Staf, Role)
 
 load_dotenv()
 

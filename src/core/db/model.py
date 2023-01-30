@@ -50,11 +50,14 @@ class Assistance_disabled(Base):
 
 
 # Define models
-roles_users = Table(
-    'roles_users',
-    Column('user_id', Integer(), ForeignKey('user.id')),
-    Column('role_id', Integer(), ForeignKey('role.id'))
-)
+# roles_users = Table(
+#     'roles_users',
+#     Column('user_id', Integer(), ForeignKey('user.id')),
+#     Column('role_id', Integer(), ForeignKey('role.id'))
+# )
+class roles_users(Base):
+    user_id = Column('user_id', Integer(), ForeignKey('user.id'))
+    role_id = Column('role_id', Integer(), ForeignKey('role.id'))
 
 
 class Role(Base, RoleMixin):
