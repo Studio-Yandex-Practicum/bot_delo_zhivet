@@ -2,7 +2,7 @@ import uuid
 
 from sqlalchemy import Column, DateTime
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import declarative_base, declared_attr, sessionmaker
+from sqlalchemy.orm import declarative_base, declared_attr, sessionmaker, scoped_session
 from sqlalchemy.dialects.postgresql import UUID
 
 from src.core.config import settings
@@ -24,12 +24,17 @@ class PreBase:
 
 
 Base = declarative_base(cls=PreBase)
+
 database_url = (
     f"postgresql+asyncpg://{settings.POSTGRES_USER}:"
     f"{settings.POSTGRES_PASSWORD}@{settings.DB_HOST}:"
     f"{settings.DB_PORT}/{settings.POSTGRES_DB}"
 )
 engine = create_async_engine(database_url)
+db_session = scoped_session(sessionmaker(autocommit=False,
+                                         autoflush=False,))
+Base.query = db_session.query_property()
+
 AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession)
 
 

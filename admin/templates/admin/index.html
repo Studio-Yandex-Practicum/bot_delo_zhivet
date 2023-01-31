@@ -1,37 +1,45 @@
 {% extends 'admin/master.html' %}
 {% block body %}
 {{ super() }}
-<div class="container">
-    <div class="row">
-        <div class="col-sm-10 col-sm-offset-1">
-            <h1>Flask-Admin example</h1>
-            <p class="lead">
-                Authentication
-            </p>
-            <p>
-                This example shows how you can use <a
-                    href="https://pythonhosted.org/Flask-Security/index.html"
-                    target="_blank">Flask-Security</a> for authentication.
-            </p>
-            {% if not current_user.is_authenticated %}
-            <p>You can register as a regular user, or log in as a superuser with
-                the following credentials:
+<div class="row-fluid">
+
+    <div>
+        {% if current_user.is_authenticated %}
+        <div>
+            <h2>Logged in User details</h2>
             <ul>
-                <li>email: <b>admin</b></li>
-                <li>password: <b>admin</b></li>
+                <li>Username: {{ current_user.username }}</li>
+                <li>Email: {{ current_user.email }}</li>
+                <li>Created on: {{ current_user.created_on }}</li>
+                <li>Updated on: {{ current_user.updated_on }}</li>
             </ul>
-            <p>
-                <a class="btn btn-primary"
-                   href="{{ url_for('security.login') }}">login</a> <a
-                    class="btn btn-default"
-                    href="{{ url_for('security.register') }}">register</a>
-            </p>
-            {% endif %}
-            <p>
-                <a class="btn btn-primary" href="/"><i
-                        class="glyphicon glyphicon-chevron-left"></i> Back</a>
-            </p>
+
+            <h2>Основные ваши настройки</h2>
+            <p class="lead">Вы можете:</p>
+            <p><a href="/admin/change/">Изменить пароль</a></p>
         </div>
+
+        {% else %}
+        <form method="POST" action="">
+            {{ form.hidden_tag() if form.hidden_tag }}
+            {% for f in form if f.type != 'CSRFTokenField' %}
+            <div>
+                {{ f.label }}
+                {{ f }}
+                {% if f.errors %}
+                <ul>
+                    {% for e in f.errors %}
+                    <li>{{ e }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+            </div>
+            {% endfor %}
+            <button class="btn" type="submit">Submit</button>
+        </form>
+        {{ link | safe }}
+        {% endif %}
     </div>
+
 </div>
 {% endblock body %}

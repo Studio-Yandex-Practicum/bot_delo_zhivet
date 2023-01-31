@@ -7,6 +7,7 @@ from flask_security import (Security, SQLAlchemyUserDatastore,
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.dialects.postgresql import UUID
+from werkzeug.security import check_password_hash, generate_password_hash
 
 from src.core.db.db import Base
 
@@ -52,37 +53,72 @@ class Assistance_disabled(Base):
     longitude = Column(Integer, nullable=True)
 
 
-# Define models
-roles_users = Table(
-    'roles_users',
-    Base.metadata,
-    Column('staff_id', UUID(), ForeignKey('staff.id')),
-    Column('role_id', UUID(), ForeignKey('role.id'))
-)
+# # Define models
+# roles_users = Table(
+#     'roles_users',
+#     Base.metadata,
+#     Column('staff_id', UUID(), ForeignKey('staff.id')),
+#     Column('role_id', UUID(), ForeignKey('role.id'))
+# )
+#
+#
+# class Role(Base, RoleMixin):
+#     name = Column(String, unique=True)
+#     description = Column(String(255))
+#
+#     def __str__(self):
+#         return self.name
+#
+#
+# class Staff(Base, UserMixin):
+#
+#     def createSession(self):
+#         Session = sessionmaker()
+#         self.session = Session.configure(bind=self.engine)
+#
+#     name = Column(String(255))
+#     username = Column(String(255), unique=True)
+#     email = Column(String(255), unique=True)
+#     password = Column(String(255))
+#     active = Column(Boolean())
+#     roles = relationship('Role', secondary=roles_users,
+#                          backref=backref('users', lazy='dynamic'))
+#
+#     # Flask - Login
+#     @property
+#     def is_authenticated(self):
+#         return True
+#
+#     @property
+#     def is_active(self):
+#         return True
+#
+#     @property
+#     def is_anonymous(self):
+#         return False
+#
+#     # Flask-Security
+#     def has_role(self, *args):
+#         return set(args).issubset({role.name for role in self.roles})
+#
+#     def get_id(self):
+#         return self.id
+#
+#     # Required for administrative interface
+#     def __unicode__(self):
+#         return self.username
+#
+#     def set_password(self, password):
+#         self.password = generate_password_hash(password)
+#
+#     def check_password(self, password):
+#         return check_password_hash(self.password, password)
 
 
-class Role(Base, RoleMixin):
-    name = Column(String, unique=True)
-    description = Column(String(255))
-
-    def __str__(self):
-        return self.name
-
-
-class Staff(Base, UserMixin):
-
-    def createSession(self):
-        Session = sessionmaker()
-        self.session = Session.configure(bind=self.engine)
-
-    first_name = Column(String(255))
-    last_name = Column(String(255))
-    email = Column(String(255), unique=True)
-    password = Column(String(255))
-    active = Column(Boolean())
-    confirmed_at = Column(DateTime())
-    roles = relationship('Role', secondary=roles_users,
-                         backref=backref('users', lazy='dynamic'))
-
-    def __str__(self):
-        return self.email
+# Отвечает за сессию пользователей. Запрещает доступ к роутам, перед которыми указано @login_required
+# @login_manager.user_loader
+# def load_user(user_id):
+#     return session.query(User).get(user_id)
+#
+#     def __str__(self):
+#         return self.email
