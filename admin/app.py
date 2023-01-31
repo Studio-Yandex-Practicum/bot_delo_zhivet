@@ -1,3 +1,7 @@
+from datetime import datetime
+from werkzeug.security import generate_password_hash, check_password_hash
+
+
 import flask_admin
 from flask import abort, Flask, render_template, redirect, url_for, request
 from flask_admin import Admin, expose
@@ -15,8 +19,8 @@ import flask_login as login
 from dotenv import load_dotenv
 import os
 
-from src.core.db.model import (Assistance_disabled, Pollution,
-                               User, Volunteer)
+from src.core.db.model import (
+                               User, Role)
 
 load_dotenv()
 
@@ -36,15 +40,54 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
+login_manager = LoginManager(app)
+login_manager.login_view = 'admin_blueprint.login'
+
 # Define models
+# roles_users = db.Table(
+#     'roles_users',
+#     db.Column('user_id', db.Integer(), db.ForeignKey('user.id')),
+#     db.Column('role_id', db.Integer(), db.ForeignKey('role.id'))
+# )
+#
+#
+# class Role(db.Model, RoleMixin):
+#     id = db.Column(db.Integer(), primary_key=True)
+#     name = db.Column(db.String(80), unique=True)
+#     description = db.Column(db.String(255))
+#
+#     def __str__(self):
+#         return self.name
+#
+#
+# class Staff(db.Model, UserMixin):
+#     id = db.Column(db.Integer, primary_key=True)
+#     first_name = db.Column(db.String(255))
+#     last_name = db.Column(db.String(255))
+#     email = db.Column(db.String(255), unique=True)
+#     password = db.Column(db.String(255))
+#     active = db.Column(db.Boolean())
+#     confirmed_at = db.Column(db.DateTime())
+#     roles = db.relationship('Role', secondary=roles_users,
+#                             backref=db.backref('users', lazy='dynamic'))
+#
+#     def __str__(self):
+#         return self.email
+
+
+# Setup Flask-Security
+user_datastore = SQLAlchemyUserDatastore(db, User, Role)
+security = Security(app, user_datastore)
+
 roles_users = db.Table(
     'roles_users',
-    db.Column('user_id', db.Integer(), db.ForeignKey('user.id')),
-    db.Column('role_id', db.Integer(), db.ForeignKey('role.id'))
+    db.Column('user_id', db.Integer(), db.ForeignKey('users.id')),
+    db.Column('role_id', db.Integer(), db.ForeignKey('roles.id'))
 )
 
 
 class Role(db.Model, RoleMixin):
+    __tablename__ = 'roles'
     id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String(80), unique=True)
     description = db.Column(db.String(255))
@@ -53,24 +96,55 @@ class Role(db.Model, RoleMixin):
         return self.name
 
 
-class Staff(db.Model, UserMixin):
-    id = db.Column(db.Integer, primary_key=True)
-    first_name = db.Column(db.String(255))
-    last_name = db.Column(db.String(255))
-    email = db.Column(db.String(255), unique=True)
-    password = db.Column(db.String(255))
+class User(db.Model, UserMixin):
+    __tablename__ = 'users'
+    id = db.Column(db.Integer, unique=True, primary_key=True)
+    name = db.Column(db.String)
+    username = db.Column(db.String, unique=True)
+    email = db.Column(db.String, unique=True)
+    password = db.Column(db.String)
+    created_on = db.Column(db.DateTime(), default=datetime.utcnow)
+    updated_on = db.Column(db.DateTime(), default=datetime.utcnow, onupdate=datetime.utcnow)
+    # Нужен для security!
     active = db.Column(db.Boolean())
-    confirmed_at = db.Column(db.DateTime())
-    roles = db.relationship('Role', secondary=roles_users,
-                            backref=db.backref('users', lazy='dynamic'))
+    # Для получения доступа к связанным объектам
+    roles = db.relationship('Role', secondary=roles_users, backref=db.backref('users', lazy='dynamic'))
 
-    def __str__(self):
-        return self.email
+    # Flask - Login
+    @property
+    def is_authenticated(self):
+        return True
+
+    @property
+    def is_active(self):
+        return True
+
+    @property
+    def is_anonymous(self):
+        return False
+
+    # Flask-Security
+    def has_role(self, *args):
+        return set(args).issubset({role.name for role in self.roles})
+
+    def get_id(self):
+        return self.id
+
+    # Required for administrative interface
+    def __unicode__(self):
+        return self.username
+
+    def set_password(self, password):
+        self.password = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password, password)
 
 
-# Setup Flask-Security
-user_datastore = SQLAlchemyUserDatastore(db, Staff, Role)
-security = Security(app, user_datastore)
+# Отвечает за сессию пользователей. Запрещает доступ к роутам, перед которыми указано @login_required
+@login_manager.user_loader
+def load_user(user_id):
+    return db.session.query(User).get(user_id)
 
 
 # Create customized model view class
