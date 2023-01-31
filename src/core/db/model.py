@@ -154,7 +154,7 @@ class User(db.Model, UserMixin):
     updated_on = db.Column(db.DateTime(), default=datetime.utcnow, onupdate=datetime.utcnow)
     # Нужен для security!
     active = db.Column(db.Boolean())
-    # Для получения доступа к связанным объектам
+    # Для получения доступа к связанным
     roles = db.relationship('Role', secondary=roles_users, backref=db.backref('users', lazy='dynamic'))
 
     # Flask - Login
