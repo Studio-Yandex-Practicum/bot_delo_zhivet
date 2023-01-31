@@ -3,7 +3,10 @@ from sqlalchemy import Column, Date, DateTime, ForeignKey, Integer, String, \
 from flask_security import (Security, SQLAlchemyUserDatastore,
                             UserMixin, RoleMixin, login_required, current_user
                             )
+
+from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import relationship, backref
+from sqlalchemy.dialects.postgresql import UUID
 
 from src.core.db.db import Base
 
@@ -50,27 +53,28 @@ class Assistance_disabled(Base):
 
 
 # Define models
-# roles_users = Table(
-#     'roles_users',
-#     Column('user_id', Integer(), ForeignKey('user.id')),
-#     Column('role_id', Integer(), ForeignKey('role.id'))
-# )
-class roles_users(Base):
-    user_id = Column('user_id', Integer(), ForeignKey('user.id'))
-    role_id = Column('role_id', Integer(), ForeignKey('role.id'))
+roles_users = Table(
+    'roles_users',
+    Base.metadata,
+    Column('staff_id', UUID(), ForeignKey('staff.id')),
+    Column('role_id', UUID(), ForeignKey('role.id'))
+)
 
 
 class Role(Base, RoleMixin):
-    id = Column(Integer(), primary_key=True)
-    name = Column(String(80), unique=True)
+    name = Column(String, unique=True)
     description = Column(String(255))
 
     def __str__(self):
         return self.name
 
 
-class Staf(Base, UserMixin):
-    id = Column(Integer, primary_key=True)
+class Staff(Base, UserMixin):
+
+    def createSession(self):
+        Session = sessionmaker()
+        self.session = Session.configure(bind=self.engine)
+
     first_name = Column(String(255))
     last_name = Column(String(255))
     email = Column(String(255), unique=True)
@@ -78,7 +82,7 @@ class Staf(Base, UserMixin):
     active = Column(Boolean())
     confirmed_at = Column(DateTime())
     roles = relationship('Role', secondary=roles_users,
-                            backref=backref('users', lazy='dynamic'))
+                         backref=backref('users', lazy='dynamic'))
 
     def __str__(self):
         return self.email

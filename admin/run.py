@@ -13,11 +13,13 @@ from dotenv import load_dotenv
 import os
 
 from src.core.db.model import (Assistance_disabled, Pollution,
-                               User, Volunteer, Staf, Role)
+                               User, Volunteer, Staff, Role, roles_users)
 
 load_dotenv()
 
 app = Flask(__name__)
+app.secret_key = 'xxxxyyyyyzzzzz'
+
 app.config['FLASK_ENV'] = 'development'
 app.config.from_pyfile('config.py')
 
@@ -63,7 +65,7 @@ migrate = Migrate(app, db)
 
 
 # Setup Flask-Security
-user_datastore = SQLAlchemyUserDatastore(db, Staf, Role)
+user_datastore = SQLAlchemyUserDatastore(db, Staff, Role)
 security = Security(app, user_datastore)
 
 
@@ -95,21 +97,24 @@ def index():
 
 
 # Create admin
-admin = flask_admin.Admin(
-    app,
-    'Example: Auth',
-    base_template='my_master.html',
-    template_mode='bootstrap4',
-)
+# admin = flask_admin.Admin(
+#     app,
+#     'Example: Auth',
+#     base_template='my_master.html',
+#     template_mode='bootstrap4',
+# )
 
-# admin = Admin(app, name='bot_delo_zhivet', template_mode='bootstrap3')
+admin = Admin(app, name='bot_delo_zhivet', template_mode='bootstrap3')
 
-admin.add_view(MyModelView(Staf, db.session, name='Staf'))
-admin.add_view(MyModelView(User, db.session, name='User'))
-admin.add_view(MyModelView(Volunteer, db.session, name='Volunteer'))
-admin.add_view(MyModelView(Pollution, db.session, name='Pollution'))
+admin.add_view(ModelView(Staff, db.session, name='Staff'))
+admin.add_view(ModelView(Role, db.session, name='Role'))
+
+
+admin.add_view(ModelView(User, db.session, name='User'))
+admin.add_view(ModelView(Volunteer, db.session, name='Volunteer'))
+admin.add_view(ModelView(Pollution, db.session, name='Pollution'))
 admin.add_view(
-    MyModelView(Assistance_disabled, db.session, name='Assistance_disabled')
+    ModelView(Assistance_disabled, db.session, name='Assistance_disabled')
 )
 
 
