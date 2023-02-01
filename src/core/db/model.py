@@ -39,10 +39,9 @@ class Assistance_disabled(Base):
     """Модель сообщения о социальной помощи"""
 
     city = Column(Text, nullable=False)
-    street = Column(Text, nullable=False)
-    house = Column(Text, nullable=False)
+    full_adress = Column(Text, nullable=False)
     comment = Column(Text, nullable=False)
-    # telegram_id = Column(BigInteger, ForeignKey("user.telegram_id"))
-    ticketID = Column(Integer, nullable=True)
-    latitude = Column(Integer, nullable=True)
-    longitude = Column(Integer, nullable=True)
+    telegram_id = Column(BigInteger, ForeignKey("user.telegram_id"))
+    ticketID = Column(Text, nullable=True)
+    latitude = Column(Float, nullable=True)
+    longitude = Column(Float, nullable=True)

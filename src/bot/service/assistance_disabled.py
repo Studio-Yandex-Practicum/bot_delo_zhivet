@@ -21,27 +21,25 @@ dadata = Dadata(token, secret)
 
 
 def get_fields_from_data(data):
-    result = dadata.clean('address', data[SOCIAL_ADDRESS])
-    if result['city'] is None:
-        city = result['settlement']
+    result = dadata.suggest('address', data[SOCIAL_ADDRESS])[0]
+    if result['data']['settlement_with_type'] is not None:
+        city = result['data']['settlement_with_type']
     else:
-        city = result['city']
-    street = result['street_with_type']
-    house = result['house']
-    latitude = int(float(result['geo_lat']))
-    longitude = int(float(result['geo_lon']))
+        city = result['data']['city_with_type']
+    full_adress = result['unrestricted_value']
+    latitude = float(result['data']['geo_lat'])
+    longitude = float(result['data']['geo_lon'])
     comment = data[SOCIAL_COMMENT]
-    # telegram_id = data[TELEGRAM_ID]
+    telegram_id = data[TELEGRAM_ID]
     # ticketID = data.ticketID
     return dict(
         city=city,
-        street=street,
-        house=house,
+        full_adress=full_adress,
         comment=comment,
-        # telegram_id=telegram_id,
-        # ticketID=ticketID,
+        telegram_id=telegram_id,
         latitude=latitude,
         longitude=longitude
+        # ticketID=ticketID,
     )
 
 
@@ -49,11 +47,11 @@ class SocialProblemCreate(BaseModel):
     city = str
     street = str
     house = int
-    # comment = Optional[str]
-    # telegram_id = Optional[int]
+    comment = Optional[str]
+    telegram_id = Optional[int]
     # ticketID = Optional[int]
-    # latitude = Optional[float]
-    # longitude = Optional[float]
+    latitude = Optional[float]
+    longitude = Optional[float]
 
     class Config:
         arbitrary_types_allowed = True
@@ -64,7 +62,5 @@ async def create_new_social(
         session: AsyncSession,
 ):
     data_in_dict = get_fields_from_data(data)
-    # data_model = Assistance_disabled(data_in_dict)
-    # social_problem = SocialProblemCreate(**data_in_dict)
     new_social_problem = await crud_assistance_disabled.create(data_in_dict, session)
     return new_social_problem
