@@ -16,7 +16,7 @@ from dotenv import load_dotenv
 import os
 
 from src.core.db.model import (Assistance_disabled, Pollution,
-                               User, Volunteer, Staff, Role, roles_users)
+                               User, Volunteer, Role, roles_users)
 
 load_dotenv()
 
@@ -73,7 +73,7 @@ login_manager.login_view = 'admin_blueprint.login'
 
 
 # Setup Flask-Security
-user_datastore = SQLAlchemyUserDatastore(db, Staff, Role)
+user_datastore = SQLAlchemyUserDatastore(db, User, Role)
 security = Security(app, user_datastore)
 
 
@@ -143,7 +143,7 @@ admin = flask_admin.Admin(app, index_view=MyAdminIndexView(), base_template='adm
 
 # admin = Admin(app, name='bot_delo_zhivet', template_mode='bootstrap3')
 
-admin.add_view(ModelView(Staff, db.session, name='Staff'))
+# admin.add_view(ModelView(Staff, db.session, name='Staff'))
 admin.add_view(ModelView(Role, db.session, name='Role'))
 # admin.add_view(ModelView(roles_users, db.session, name='roles_users'))
 
