@@ -9,19 +9,18 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.dialects.postgresql import UUID
 from werkzeug.security import check_password_hash, generate_password_hash
-# from admin.app import login_manager, db
 
 from src.core.db.db import Base
 
 
-# class User(Base):
-#     """Model User."""
-#     telegram_id = Column(BigInteger, unique=True, nullable=False)
+class User(Base):
+    """Model User."""
+    telegram_id = Column(BigInteger, unique=True, nullable=False)
 
 
 class Volunteer(Base):
     """Model Volunteer."""
-    # telegram_id = Column(BigInteger, ForeignKey("user.telegram_id"))
+    telegram_id = Column(BigInteger, ForeignKey("user.telegram_id"))
     name = Column(String(100), nullable=True)
     city = Column(String(100), nullable=False)
     phone = Column(String(13), unique=True, nullable=True)
@@ -38,7 +37,7 @@ class Pollution(Base):
     latitude = Column(Float, nullable=False)
     longitude = Column(Float, nullable=False)
     comment = Column(Text, nullable=True)
-    # telegram_id = Column(BigInteger, ForeignKey("user.telegram_id"))
+    telegram_id = Column(BigInteger, ForeignKey("user.telegram_id"))
     ticketID = Column(BigInteger, nullable=True)
 
 
@@ -49,7 +48,7 @@ class Assistance_disabled(Base):
     street = Column(Text, nullable=False)
     house = Column(Text, nullable=False)
     comment = Column(Text, nullable=False)
-    # telegram_id = Column(BigInteger, ForeignKey("user.telegram_id"))
+    telegram_id = Column(BigInteger, ForeignKey("user.telegram_id"))
     ticketID = Column(Integer, nullable=True)
     latitude = Column(Integer, nullable=True)
     longitude = Column(Integer, nullable=True)
@@ -57,13 +56,12 @@ class Assistance_disabled(Base):
 
 # Define models
 roles_users = Table(
-    'roles_users',
+'roles_users',
     Base.metadata,
-    Column('user_id', Integer, ForeignKey('user.id')),
+    Column('staff_id', Integer, ForeignKey('staff.id')),
     Column('role_id', Integer, ForeignKey('role.id'))
-    # Column('staff_id', UUID(), ForeignKey('staff.id')),
-    # Column('role_id', UUID(), ForeignKey('role.id'))
 )
+
 
 
 class Role(Base, RoleMixin):
@@ -74,20 +72,19 @@ class Role(Base, RoleMixin):
         return self.name
 
 
-class User(Base, UserMixin):
+class Staff(Base, UserMixin):
 
-    # def createSession(self):
-    #     Session = sessionmaker()
-    #     self.session = Session.configure(bind=self.engine)
-
-    name = Column(String(255))
-    user = Column(String(255), unique=True)
+    first_name = Column(String(255))
+    last_name = Column(String(255))
     email = Column(String(255), unique=True)
     password = Column(String(255))
     active = Column(Boolean())
-    # confirmed_at = Column(DateTime())
+    confirmed_at = Column(DateTime())
     roles = relationship('Role', secondary=roles_users,
-                         backref=backref('users', lazy='dynamic'))
+                            backref=backref('users', lazy='dynamic'))
+
+    def __str__(self):
+        return self.email
 
     # Flask - Login
     @property

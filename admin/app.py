@@ -16,7 +16,7 @@ from dotenv import load_dotenv
 import os
 
 from src.core.db.model import (Assistance_disabled, Pollution,
-                               User, Volunteer, Role, roles_users)
+                               User, Volunteer, Role, roles_users, Staff)
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy import create_engine
 from src.core.db.db import Base
@@ -50,70 +50,15 @@ Session = sessionmaker(binds={Base: engine})
 session = Session()
 
 
-# included_parts = session.query(
-#                 User.sub_part,
-#                 User.part,
-#                 Part.quantity).\
-#                     filter(Part.part=="our part").\
-#                     cte(name="included_parts", recursive=True)
-#
-# incl_alias = aliased(included_parts, name="pr")
-# parts_alias = aliased(Part, name="p")
-# included_parts = included_parts.union_all(
-#     session.query(
-#         parts_alias.sub_part,
-#         parts_alias.part,
-#         parts_alias.quantity).\
-#             filter(parts_alias.part==incl_alias.c.sub_part)
-#     )
-#
-# q = session.query(
-#         included_parts.c.sub_part,
-#         func.sum(included_parts.c.quantity).
-#             label('total_quantity')
-#     ).\
-#     group_by(included_parts.c.sub_part)
-
 
 
 # Ставим редирект, если пользователь не авторизован, для страниц где обязательна авторизация
 login_manager = LoginManager(app)
 login_manager.login_view = 'admin_blueprint.login'
 
-# # Define models
-# roles_users = db.Table(
-#     'roles_users',
-#     db.Column('user_id', db.Integer(), db.ForeignKey('user.id')),
-#     db.Column('role_id', db.Integer(), db.ForeignKey('role.id'))
-# )
-#
-#
-# class Role(db.Model, RoleMixin):
-#     id = db.Column(db.Integer(), primary_key=True)
-#     name = db.Column(db.String(80), unique=True)
-#     description = db.Column(db.String(255))
-#
-#     def __str__(self):
-#         return self.name
-#
-#
-# class Staff(db.Model, UserMixin):
-#     id = db.Column(db.Integer, primary_key=True)
-#     first_name = db.Column(db.String(255))
-#     last_name = db.Column(db.String(255))
-#     email = db.Column(db.String(255), unique=True)
-#     password = db.Column(db.String(255))
-#     active = db.Column(db.Boolean())
-#     confirmed_at = db.Column(db.DateTime())
-#     roles = db.relationship('Role', secondary=roles_users,
-#                             backref=db.backref('users', lazy='dynamic'))
-#
-#     def __str__(self):
-#         return self.email
-
 
 # Setup Flask-Security
-user_datastore = SQLAlchemyUserDatastore(db, User, Role)
+user_datastore = SQLAlchemyUserDatastore(db, Staff, Role)
 security = Security(app, user_datastore)
 
 
@@ -171,30 +116,15 @@ def index():
     return render_template('index.html')
 
 
-# Create admin
-# admin = flask_admin.Admin(app, base_template='admin/master-extended.html')
 admin = flask_admin.Admin(app, index_view=MyAdminIndexView(), base_template='admin/master-extended.html')
 
-# admin = flask_admin.Admin(
-#     app,
-#     'Example: Auth',
-#     base_template='my_master.html',
-#     template_mode='bootstrap4',
-# )
 
-# admin = Admin(app, name='bot_delo_zhivet', template_mode='bootstrap3')
-
-# admin.add_view(ModelView(Staff, db.session, name='Staff'))
+admin.add_view(ModelView(Staff, db.session, name='Staff'))
 admin.add_view(MyModelView(Role, session, name='Role'))
-# admin.add_view(ModelView(roles_users, db.session, name='roles_users'))
-
-
 admin.add_view(ModelView(User, session, name='User'))
 admin.add_view(ModelView(Volunteer, session, name='Volunteer'))
 admin.add_view(ModelView(Pollution, session, name='Pollution'))
-admin.add_view(
-    ModelView(Assistance_disabled, session, name='Assistance_disabled')
-)
+admin.add_view(ModelView(Assistance_disabled, session, name='Assistance_disabled'))
 
 
 # define a context processor for merging flask-admin's template context into the
