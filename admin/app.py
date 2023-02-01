@@ -16,7 +16,7 @@ from dotenv import load_dotenv
 import os
 
 from src.core.db.model import (Assistance_disabled, Pollution,
-                               User, Volunteer)
+                               User, Volunteer, Staff, Role, roles_users)
 
 load_dotenv()
 
@@ -36,36 +36,40 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
-# Define models
-roles_users = db.Table(
-    'roles_users',
-    db.Column('user_id', db.Integer(), db.ForeignKey('user.id')),
-    db.Column('role_id', db.Integer(), db.ForeignKey('role.id'))
-)
+# Ставим редирект, если пользователь не авторизован, для страниц где обязательна авторизация
+login_manager = LoginManager(app)
+login_manager.login_view = 'admin_blueprint.login'
 
-
-class Role(db.Model, RoleMixin):
-    id = db.Column(db.Integer(), primary_key=True)
-    name = db.Column(db.String(80), unique=True)
-    description = db.Column(db.String(255))
-
-    def __str__(self):
-        return self.name
-
-
-class Staff(db.Model, UserMixin):
-    id = db.Column(db.Integer, primary_key=True)
-    first_name = db.Column(db.String(255))
-    last_name = db.Column(db.String(255))
-    email = db.Column(db.String(255), unique=True)
-    password = db.Column(db.String(255))
-    active = db.Column(db.Boolean())
-    confirmed_at = db.Column(db.DateTime())
-    roles = db.relationship('Role', secondary=roles_users,
-                            backref=db.backref('users', lazy='dynamic'))
-
-    def __str__(self):
-        return self.email
+# # Define models
+# roles_users = db.Table(
+#     'roles_users',
+#     db.Column('user_id', db.Integer(), db.ForeignKey('user.id')),
+#     db.Column('role_id', db.Integer(), db.ForeignKey('role.id'))
+# )
+#
+#
+# class Role(db.Model, RoleMixin):
+#     id = db.Column(db.Integer(), primary_key=True)
+#     name = db.Column(db.String(80), unique=True)
+#     description = db.Column(db.String(255))
+#
+#     def __str__(self):
+#         return self.name
+#
+#
+# class Staff(db.Model, UserMixin):
+#     id = db.Column(db.Integer, primary_key=True)
+#     first_name = db.Column(db.String(255))
+#     last_name = db.Column(db.String(255))
+#     email = db.Column(db.String(255), unique=True)
+#     password = db.Column(db.String(255))
+#     active = db.Column(db.Boolean())
+#     confirmed_at = db.Column(db.DateTime())
+#     roles = db.relationship('Role', secondary=roles_users,
+#                             backref=db.backref('users', lazy='dynamic'))
+#
+#     def __str__(self):
+#         return self.email
 
 
 # Setup Flask-Security
@@ -139,9 +143,9 @@ admin = flask_admin.Admin(app, index_view=MyAdminIndexView(), base_template='adm
 
 # admin = Admin(app, name='bot_delo_zhivet', template_mode='bootstrap3')
 
-admin.add_view(MyModelView(Staff, db.session, name='Staff'))
+admin.add_view(ModelView(Staff, db.session, name='Staff'))
 admin.add_view(ModelView(Role, db.session, name='Role'))
-admin.add_view(ModelView(roles_users, db.session, name='roles_users'))
+# admin.add_view(ModelView(roles_users, db.session, name='roles_users'))
 
 
 admin.add_view(ModelView(User, db.session, name='User'))

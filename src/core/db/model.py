@@ -53,66 +53,66 @@ class Assistance_disabled(Base):
     longitude = Column(Integer, nullable=True)
 
 
-# # Define models
-# roles_users = Table(
-#     'roles_users',
-#     Base.metadata,
-#     Column('staff_id', UUID(), ForeignKey('staff.id')),
-#     Column('role_id', UUID(), ForeignKey('role.id'))
-# )
-#
-#
-# class Role(Base, RoleMixin):
-#     name = Column(String, unique=True)
-#     description = Column(String(255))
-#
-#     def __str__(self):
-#         return self.name
-#
-#
-# class Staff(Base, UserMixin):
-#
-#     def createSession(self):
-#         Session = sessionmaker()
-#         self.session = Session.configure(bind=self.engine)
-#
-#     name = Column(String(255))
-#     username = Column(String(255), unique=True)
-#     email = Column(String(255), unique=True)
-#     password = Column(String(255))
-#     active = Column(Boolean())
-#     roles = relationship('Role', secondary=roles_users,
-#                          backref=backref('users', lazy='dynamic'))
-#
-#     # Flask - Login
-#     @property
-#     def is_authenticated(self):
-#         return True
-#
-#     @property
-#     def is_active(self):
-#         return True
-#
-#     @property
-#     def is_anonymous(self):
-#         return False
-#
-#     # Flask-Security
-#     def has_role(self, *args):
-#         return set(args).issubset({role.name for role in self.roles})
-#
-#     def get_id(self):
-#         return self.id
-#
-#     # Required for administrative interface
-#     def __unicode__(self):
-#         return self.username
-#
-#     def set_password(self, password):
-#         self.password = generate_password_hash(password)
-#
-#     def check_password(self, password):
-#         return check_password_hash(self.password, password)
+# Define models
+roles_users = Table(
+    'roles_users',
+    Base.metadata,
+    Column('staff_id', UUID(), ForeignKey('staff.id')),
+    Column('role_id', UUID(), ForeignKey('role.id'))
+)
+
+
+class Role(Base, RoleMixin):
+    name = Column(String, unique=True)
+    description = Column(String(255))
+
+    def __str__(self):
+        return self.name
+
+
+class Staff(Base, UserMixin):
+
+    def createSession(self):
+        Session = sessionmaker()
+        self.session = Session.configure(bind=self.engine)
+
+    name = Column(String(255))
+    username = Column(String(255), unique=True)
+    email = Column(String(255), unique=True)
+    password = Column(String(255))
+    active = Column(Boolean())
+    roles = relationship('Role', secondary=roles_users,
+                         backref=backref('users', lazy='dynamic'))
+
+    # Flask - Login
+    @property
+    def is_authenticated(self):
+        return True
+
+    @property
+    def is_active(self):
+        return True
+
+    @property
+    def is_anonymous(self):
+        return False
+
+    # Flask-Security
+    def has_role(self, *args):
+        return set(args).issubset({role.name for role in self.roles})
+
+    def get_id(self):
+        return self.id
+
+    # Required for administrative interface
+    def __unicode__(self):
+        return self.username
+
+    def set_password(self, password):
+        self.password = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password, password)
 
 
 # Отвечает за сессию пользователей. Запрещает доступ к роутам, перед которыми указано @login_required
