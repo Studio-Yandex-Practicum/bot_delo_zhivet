@@ -51,7 +51,7 @@ class SocialProblemCreate(BaseModel):
     house = int
     # comment = Optional[str]
     # telegram_id = Optional[int]
-    # # ticketID = Optional[int]
+    # ticketID = Optional[int]
     # latitude = Optional[float]
     # longitude = Optional[float]
 

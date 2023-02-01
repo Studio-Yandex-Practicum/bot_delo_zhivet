@@ -5,7 +5,6 @@ from telegram.ext import (
 )
 
 from src.core.db.db import get_async_session
-from sqlalchemy.ext.asyncio import AsyncSession
 from api.tracker import client
 from bot.handlers.start import start
 from bot.handlers.state_constants import (
@@ -22,6 +21,7 @@ from bot.handlers.state_constants import (
     TELEGRAM_ID,
 )
 from src.bot.service.assistance_disabled import create_new_social
+from src.bot.service.save_new_user import create_new_user
 
 
 load_dotenv(".env")
@@ -101,12 +101,13 @@ async def save_and_exit_from_social_problem(
     user_data[TELEGRAM_ID] = update.effective_user.id
     city = user_data[SOCIAL_ADDRESS]
     comment = user_data[SOCIAL_COMMENT]
+    session_generator = get_async_session()
+    session = await session_generator.asend(None)
+    await create_new_user(user_data[TELEGRAM_ID], session)
+    await create_new_social(user_data, session)
     client.issues.create(
         queue=SOCIAL, summary=city, description=comment,
     )
-    session_generator = get_async_session()
-    session = await session_generator.asend(None)
-    await create_new_social(user_data, session)
     await start(update, context)
     return END
 
