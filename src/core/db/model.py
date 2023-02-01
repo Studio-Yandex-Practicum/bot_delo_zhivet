@@ -1,8 +1,9 @@
 from sqlalchemy import Column, Date, DateTime, ForeignKey, Integer, String, \
     Text, BigInteger, Float, Table, Boolean
 from flask_security import (Security, SQLAlchemyUserDatastore,
-                            UserMixin, RoleMixin, login_required, current_user
+                            RoleMixin, login_required, current_user
                             )
+from flask_login import UserMixin
 
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import relationship, backref
@@ -57,8 +58,10 @@ class Assistance_disabled(Base):
 roles_users = Table(
     'roles_users',
     Base.metadata,
-    Column('staff_id', UUID(), ForeignKey('staff.id')),
-    Column('role_id', UUID(), ForeignKey('role.id'))
+    Column('staff_id', Integer, ForeignKey('staff.id')),
+    Column('role_id', Integer, ForeignKey('role.id'))
+    # Column('staff_id', UUID(), ForeignKey('staff.id')),
+    # Column('role_id', UUID(), ForeignKey('role.id'))
 )
 
 
@@ -72,9 +75,9 @@ class Role(Base, RoleMixin):
 
 class Staff(Base, UserMixin):
 
-    def createSession(self):
-        Session = sessionmaker()
-        self.session = Session.configure(bind=self.engine)
+    # def createSession(self):
+    #     Session = sessionmaker()
+    #     self.session = Session.configure(bind=self.engine)
 
     name = Column(String(255))
     username = Column(String(255), unique=True)
