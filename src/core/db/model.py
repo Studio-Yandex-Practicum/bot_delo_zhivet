@@ -42,7 +42,7 @@ class Assistance_disabled(Base):
     street = Column(Text, nullable=False)
     house = Column(Text, nullable=False)
     comment = Column(Text, nullable=False)
-    telegram_id = Column(BigInteger, ForeignKey("user.telegram_id"))
+    # telegram_id = Column(BigInteger, ForeignKey("user.telegram_id"))
     ticketID = Column(Integer, nullable=True)
     latitude = Column(Integer, nullable=True)
     longitude = Column(Integer, nullable=True)

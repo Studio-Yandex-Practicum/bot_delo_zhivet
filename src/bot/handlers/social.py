@@ -1,8 +1,11 @@
+from dotenv import load_dotenv
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
     ContextTypes,
 )
 
+from src.core.db.db import get_async_session
+from sqlalchemy.ext.asyncio import AsyncSession
 from api.tracker import client
 from bot.handlers.start import start
 from bot.handlers.state_constants import (
@@ -19,6 +22,9 @@ from bot.handlers.state_constants import (
     TELEGRAM_ID,
 )
 from src.bot.service.assistance_disabled import create_new_social
+
+
+load_dotenv(".env")
 
 
 async def input_social_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -98,7 +104,9 @@ async def save_and_exit_from_social_problem(
     client.issues.create(
         queue=SOCIAL, summary=city, description=comment,
     )
-    create_new_social(user_data)
+    session_generator = get_async_session()
+    session = await session_generator.asend(None)
+    await create_new_social(user_data, session)
     await start(update, context)
     return END
 

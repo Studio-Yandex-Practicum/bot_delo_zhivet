@@ -1,3 +1,4 @@
+import os
 from typing import Optional
 from dadata import Dadata
 from pydantic import BaseModel
@@ -12,8 +13,9 @@ from bot.handlers.state_constants import (
     TELEGRAM_ID
 )
 
-
-token = '678a0ddcf1c81baff82a28bc613932cf1dcefdbd'
+# token = os.environ["DADATA_TOKEN"]
+# secret = os.environ["DADATA_SECRET"]
+token = "678a0ddcf1c81baff82a28bc613932cf1dcefdbd"
 secret = "8ad83c107768fa78c0e280c273ed22ad91cfca31"
 dadata = Dadata(token, secret)
 
@@ -26,20 +28,20 @@ def get_fields_from_data(data):
         city = result['city']
     street = result['street_with_type']
     house = result['house']
-    latitude = result['geo_lat']
-    longitude = result['geo_lon']
+    latitude = int(float(result['geo_lat']))
+    longitude = int(float(result['geo_lon']))
     comment = data[SOCIAL_COMMENT]
-    telegram_id = data[TELEGRAM_ID]
+    # telegram_id = data[TELEGRAM_ID]
     # ticketID = data.ticketID
     return dict(
-        city = city,
-        street = street,
-        house = house,
-        comment = comment,
-        telegram_id = telegram_id,
-        # ticketID = ticketID,
-        latitude = latitude,
-        longitude = longitude
+        city=city,
+        street=street,
+        house=house,
+        comment=comment,
+        # telegram_id=telegram_id,
+        # ticketID=ticketID,
+        latitude=latitude,
+        longitude=longitude
     )
 
 
@@ -59,9 +61,10 @@ class SocialProblemCreate(BaseModel):
 
 async def create_new_social(
         data: SocialProblemCreate,
-        session: AsyncSession = Depends(get_async_session),
+        session: AsyncSession,
 ):
     data_in_dict = get_fields_from_data(data)
+    # data_model = Assistance_disabled(data_in_dict)
     # social_problem = SocialProblemCreate(**data_in_dict)
     new_social_problem = await crud_assistance_disabled.create(data_in_dict, session)
     return new_social_problem

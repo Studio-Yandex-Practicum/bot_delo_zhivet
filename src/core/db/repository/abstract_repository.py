@@ -40,6 +40,16 @@ class CRUDBase:
         # obj_in_data = obj_in.dict()
         db_obj = self.model(**obj_in)
         # db_obj = obj_in
+        # print(f""""
+        
+        
+        # {db_obj.id}
+        # {db_obj.created_at}
+        # {db_obj.updated_at}
+
+
+
+        # """)
         session.add(db_obj)
         await session.commit()
         await session.refresh(db_obj)
