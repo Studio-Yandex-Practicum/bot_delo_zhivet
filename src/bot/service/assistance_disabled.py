@@ -13,8 +13,8 @@ from bot.handlers.state_constants import (
     TELEGRAM_ID
 )
 
-# token = os.environ["DADATA_TOKEN"]
-# secret = os.environ["DADATA_SECRET"]
+# token = os.environ['DADATA_TOKEN']
+# secret = os.environ['DADATA_SECRET']
 token = "678a0ddcf1c81baff82a28bc613932cf1dcefdbd"
 secret = "8ad83c107768fa78c0e280c273ed22ad91cfca31"
 dadata = Dadata(token, secret)
