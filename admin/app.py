@@ -145,7 +145,7 @@ admin = flask_admin.Admin(app, index_view=MyAdminIndexView(), base_template='adm
 # admin = Admin(app, name='bot_delo_zhivet', template_mode='bootstrap3')
 
 # admin.add_view(ModelView(Staff, db.session, name='Staff'))
-admin.add_view(ModelView(Role, db.session, name='Role'))
+admin.add_view(MyModelView(Role, db.session, name='Role'))
 # admin.add_view(ModelView(roles_users, db.session, name='roles_users'))
 
 

@@ -81,7 +81,7 @@ class User(Base, UserMixin):
         self.session = Session.configure(bind=self.engine)
 
     name = Column(String(255))
-    username = Column(String(255), unique=True)
+    user = Column(String(255), unique=True)
     email = Column(String(255), unique=True)
     password = Column(String(255))
     active = Column(Boolean())
@@ -120,7 +120,7 @@ class User(Base, UserMixin):
         return check_password_hash(self.password, password)
 
 
-# # Отвечает за сессию пользователей. Запрещает доступ к роутам, перед которыми указано @login_required
+# Отвечает за сессию пользователей. Запрещает доступ к роутам, перед которыми указано @login_required
 # @login_manager.user_loader
 # def load_user(user_id):
 #     return db.session.query(User).get(user_id)
