@@ -132,6 +132,7 @@ def index():
 
 
 # Create admin
+# admin = flask_admin.Admin(app, base_template='admin/master-extended.html')
 admin = flask_admin.Admin(app, index_view=MyAdminIndexView(), base_template='admin/master-extended.html')
 
 # admin = flask_admin.Admin(

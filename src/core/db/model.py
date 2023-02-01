@@ -85,6 +85,7 @@ class User(Base, UserMixin):
     email = Column(String(255), unique=True)
     password = Column(String(255))
     active = Column(Boolean())
+    # confirmed_at = Column(DateTime())
     roles = relationship('Role', secondary=roles_users,
                          backref=backref('users', lazy='dynamic'))
 
