@@ -76,9 +76,9 @@ class Role(Base, RoleMixin):
 
 class User(Base, UserMixin):
 
-    # def createSession(self):
-    #     Session = sessionmaker()
-    #     self.session = Session.configure(bind=self.engine)
+    def createSession(self):
+        Session = sessionmaker()
+        self.session = Session.configure(bind=self.engine)
 
     name = Column(String(255))
     username = Column(String(255), unique=True)

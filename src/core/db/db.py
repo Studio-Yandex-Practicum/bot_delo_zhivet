@@ -1,8 +1,10 @@
 import uuid
+from datetime import datetime
 
 from sqlalchemy import Column, DateTime, Integer
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import declarative_base, declared_attr, sessionmaker, scoped_session
+from sqlalchemy.orm import (declarative_base, declared_attr, sessionmaker,
+                            scoped_session)
 from sqlalchemy.dialects.postgresql import UUID
 
 from src.core.config import settings
@@ -19,8 +21,9 @@ class PreBase:
     # id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     # created_at = Column(DateTime(timezone=True), nullable=False)
     # updated_at = Column(DateTime(timezone=True), nullable=False)
-    created_at = Column(DateTime(timezone=True))
-    updated_at = Column(DateTime(timezone=True))
+    created_at = Column(DateTime(timezone=True), default=datetime.utcnow)
+    updated_at = Column(DateTime(timezone=True), default=datetime.utcnow,
+                        onupdate=datetime.utcnow)
 
     def __repr__(self):
         return f"{self.__class__.__name__}, id = {self.id}."
