@@ -17,6 +17,9 @@ import os
 
 from src.core.db.model import (Assistance_disabled, Pollution,
                                User, Volunteer, Role, roles_users)
+from sqlalchemy.orm import scoped_session, sessionmaker
+from sqlalchemy import create_engine
+from src.core.db.db import Base
 
 load_dotenv()
 
@@ -35,6 +38,43 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
+
+engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'], echo=True)
+db_session = scoped_session(sessionmaker(autocommit=False,
+                                         autoflush=False,
+                                         bind=engine))
+Base.query = db_session.query_property()
+Base.metadata.create_all(engine)
+Session = sessionmaker(binds={Base: engine})
+# Session = sessionmaker(bind=engine)
+session = Session()
+
+
+# included_parts = session.query(
+#                 User.sub_part,
+#                 User.part,
+#                 Part.quantity).\
+#                     filter(Part.part=="our part").\
+#                     cte(name="included_parts", recursive=True)
+#
+# incl_alias = aliased(included_parts, name="pr")
+# parts_alias = aliased(Part, name="p")
+# included_parts = included_parts.union_all(
+#     session.query(
+#         parts_alias.sub_part,
+#         parts_alias.part,
+#         parts_alias.quantity).\
+#             filter(parts_alias.part==incl_alias.c.sub_part)
+#     )
+#
+# q = session.query(
+#         included_parts.c.sub_part,
+#         func.sum(included_parts.c.quantity).
+#             label('total_quantity')
+#     ).\
+#     group_by(included_parts.c.sub_part)
+
+
 
 # Ставим редирект, если пользователь не авторизован, для страниц где обязательна авторизация
 login_manager = LoginManager(app)
@@ -145,15 +185,15 @@ admin = flask_admin.Admin(app, index_view=MyAdminIndexView(), base_template='adm
 # admin = Admin(app, name='bot_delo_zhivet', template_mode='bootstrap3')
 
 # admin.add_view(ModelView(Staff, db.session, name='Staff'))
-admin.add_view(MyModelView(Role, db.session, name='Role'))
+admin.add_view(MyModelView(Role, session, name='Role'))
 # admin.add_view(ModelView(roles_users, db.session, name='roles_users'))
 
 
-admin.add_view(ModelView(User, db.session, name='User'))
-admin.add_view(ModelView(Volunteer, db.session, name='Volunteer'))
-admin.add_view(ModelView(Pollution, db.session, name='Pollution'))
+admin.add_view(ModelView(User, session, name='User'))
+admin.add_view(ModelView(Volunteer, session, name='Volunteer'))
+admin.add_view(ModelView(Pollution, session, name='Pollution'))
 admin.add_view(
-    ModelView(Assistance_disabled, db.session, name='Assistance_disabled')
+    ModelView(Assistance_disabled, session, name='Assistance_disabled')
 )
 
 
@@ -172,3 +212,4 @@ def security_context_processor():
 if __name__ == '__main__':
     app.secret_key = os.urandom(24)
     app.run(debug=True)
+    # q.all()

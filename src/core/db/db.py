@@ -37,9 +37,9 @@ database_url = (
     f"{settings.DB_PORT}/{settings.POSTGRES_DB}"
 )
 engine = create_async_engine(database_url)
-db_session = scoped_session(sessionmaker(autocommit=False,
-                                         autoflush=False,))
-Base.query = db_session.query_property()
+# db_session = scoped_session(sessionmaker(autocommit=False,
+#                                          autoflush=False,))
+# Base.query = db_session.query_property()
 
 AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession)
 
