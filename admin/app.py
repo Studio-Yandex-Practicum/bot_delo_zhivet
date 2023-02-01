@@ -1,3 +1,4 @@
+import psycopg2
 import flask_admin
 from flask import abort, Flask, render_template, redirect, url_for, request
 from flask_admin import Admin, expose
@@ -29,9 +30,10 @@ app.secret_key = 'xxxxyyyyyzzzzz'
 
 app.config['FLASK_ENV'] = 'development'
 app.config.from_pyfile('config.py')
-
+conn_string="host='localhost' dbname='delo_zhivet' user='admin_delo_zhivet' password='RJlcSxU&5c9c3L!P7h'"
+conn = psycopg2.connect(conn_string)
 app.config['SQLALCHEMY_DATABASE_URI'] = (
-    f"postgresql://{os.getenv('POSTGRES_USER')}:"
+    f"postgresql+psycopg2://{os.getenv('POSTGRES_USER')}:"
     f"{os.getenv('POSTGRES_PASSWORD')}@"
     f"{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('POSTGRES_DB')}")
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
@@ -39,7 +41,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
-engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'], echo=True)
+engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'],pool_size=10000, max_overflow=100)
 db_session = scoped_session(sessionmaker(autocommit=False,
                                          autoflush=False,
                                          bind=engine))
@@ -119,12 +121,12 @@ def index():
 admin = flask_admin.Admin(app, index_view=MyAdminIndexView(), base_template='admin/master-extended.html')
 
 
-admin.add_view(ModelView(Staff, db.session, name='Staff'))
+admin.add_view(MyModelView(Staff, db.session, name='Staff'))
 admin.add_view(MyModelView(Role, session, name='Role'))
-admin.add_view(ModelView(User, session, name='User'))
-admin.add_view(ModelView(Volunteer, session, name='Volunteer'))
-admin.add_view(ModelView(Pollution, session, name='Pollution'))
-admin.add_view(ModelView(Assistance_disabled, session, name='Assistance_disabled'))
+admin.add_view(MyModelView(User, session, name='User'))
+admin.add_view(MyModelView(Volunteer, session, name='Volunteer'))
+admin.add_view(MyModelView(Pollution, session, name='Pollution'))
+admin.add_view(MyModelView(Assistance_disabled, session, name='Assistance_disabled'))
 
 
 # define a context processor for merging flask-admin's template context into the
