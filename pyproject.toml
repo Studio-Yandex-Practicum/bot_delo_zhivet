@@ -27,6 +27,7 @@ flask-sqlalchemy = "^3.0.2"
 flask-admin = "^1.6.0"
 psycopg2-binary = "^2.9.5"
 yandex-tracker-client = "^2.3"
+dadata = "^21.10.1"
 
 [build-system]
 requires = ["poetry-core"]
