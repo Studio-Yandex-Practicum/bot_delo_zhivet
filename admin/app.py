@@ -6,7 +6,7 @@ from flask_login import LoginManager
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_security import (Security, SQLAlchemyUserDatastore,
-                            UserMixin, RoleMixin, login_required, current_user,
+                            current_user,
                             RegisterForm
                             )
 from flask_admin import helpers as admin_helpers
@@ -15,8 +15,15 @@ import flask_login as login
 from dotenv import load_dotenv
 import os
 
+# from flask_wtf import FlaskForm
+from sqlalchemy import create_engine
+from sqlalchemy.orm import scoped_session, sessionmaker
+# from wtforms.validators import DataRequired
+
+from src.core.db.db import Base
 from src.core.db.model import (Assistance_disabled, Pollution,
-                               User, Volunteer, Role, roles_users)
+                               Volunteer, Role, User, roles_users)
+
 
 load_dotenv()
 
@@ -36,10 +43,33 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
+
+engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'], pool_size=10000, max_overflow=100)
+db_session = scoped_session(sessionmaker(autocommit=False,
+                                         autoflush=False,
+                                         bind=engine))
+Base.query = db_session.query_property()
+Base.metadata.create_all(engine)
+Session = sessionmaker(binds={Base: engine})
+# Session = sessionmaker(bind=engine)
+session = Session()
+
 # Ставим редирект, если пользователь не авторизован, для страниц где обязательна авторизация
 login_manager = LoginManager(app)
-login_manager.login_view = 'admin_blueprint.login'
+# login_manager.login_view = 'admin_blueprint.login'
 
+# # Setup Flask-Security
+# user_datastore = SQLAlchemyUserDatastore(db, User, Role)
+# security = Security(app, user_datastore)
+
+# from wtforms import StringField, SubmitField, TextAreaField,  BooleanField, PasswordField
+#
+#
+# class LoginForm(FlaskForm):
+#     username = StringField("Username", validators=[DataRequired()])
+#     password = PasswordField("Password", validators=[DataRequired()])
+#     remember = BooleanField("Remember Me")
+#     submit = SubmitField()
 # # Define models
 # roles_users = db.Table(
 #     'roles_users',
@@ -70,11 +100,19 @@ login_manager.login_view = 'admin_blueprint.login'
 #
 #     def __str__(self):
 #         return self.email
+# from admin.app import login_manager, db
+#
+#
+# # Отвечает за сессию пользователей. Запрещает доступ к роутам, перед которыми указано @login_required
+# @login_manager.user_loader
+# def load_user(user_id):
+#     return db.session.query(User).get(user_id)
+#
+#     def __str__(self):
+#         return self.email
 
 
-# Setup Flask-Security
-user_datastore = SQLAlchemyUserDatastore(db, User, Role)
-security = Security(app, user_datastore)
+
 
 
 # Create customized model view class
@@ -130,6 +168,9 @@ class MyAdminIndexView(flask_admin.AdminIndexView):
 def index():
     return render_template('index.html')
 
+# Setup Flask-Security
+user_datastore = SQLAlchemyUserDatastore(db, User, Role)
+security = Security(app, user_datastore)
 
 # Create admin
 # admin = flask_admin.Admin(app, base_template='admin/master-extended.html')
@@ -145,16 +186,17 @@ admin = flask_admin.Admin(app, index_view=MyAdminIndexView(), base_template='adm
 # admin = Admin(app, name='bot_delo_zhivet', template_mode='bootstrap3')
 
 # admin.add_view(ModelView(Staff, db.session, name='Staff'))
-admin.add_view(MyModelView(Role, db.session, name='Role'))
+admin.add_view(ModelView(Role, db.session, name='Role'))
 # admin.add_view(ModelView(roles_users, db.session, name='roles_users'))
 
 
 admin.add_view(ModelView(User, db.session, name='User'))
-admin.add_view(ModelView(Volunteer, db.session, name='Volunteer'))
+admin.add_view(MyModelView(Volunteer, db.session, name='Volunteer'))
 admin.add_view(ModelView(Pollution, db.session, name='Pollution'))
 admin.add_view(
     ModelView(Assistance_disabled, db.session, name='Assistance_disabled')
 )
+
 
 
 # define a context processor for merging flask-admin's template context into the
@@ -168,7 +210,6 @@ def security_context_processor():
         get_url=url_for
     )
 
-
 if __name__ == '__main__':
-    app.secret_key = os.urandom(24)
+    # app.secret_key = os.urandom(24)
     app.run(debug=True)

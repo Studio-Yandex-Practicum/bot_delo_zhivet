@@ -1,7 +1,8 @@
 from sqlalchemy import Column, Date, DateTime, ForeignKey, Integer, String, \
     Text, BigInteger, Float, Table, Boolean
 from flask_security import (Security, SQLAlchemyUserDatastore,
-                            RoleMixin, login_required, current_user
+                            RoleMixin, login_required, current_user,
+                            RegisterForm
                             )
 from flask_login import UserMixin
 
@@ -9,7 +10,6 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.dialects.postgresql import UUID
 from werkzeug.security import check_password_hash, generate_password_hash
-# from admin.app import login_manager, db
 
 from src.core.db.db import Base
 
@@ -74,14 +74,16 @@ class Role(Base, RoleMixin):
         return self.name
 
 
+
+
 class User(Base, UserMixin):
 
-    def createSession(self):
-        Session = sessionmaker()
-        self.session = Session.configure(bind=self.engine)
+    # def createSession(self):
+    #     Session = sessionmaker()
+    #     self.session = Session.configure(bind=self.engine)
 
     name = Column(String(255))
-    user = Column(String(255), unique=True)
+    username = Column(String(255), unique=True)
     email = Column(String(255), unique=True)
     password = Column(String(255))
     active = Column(Boolean())
@@ -89,30 +91,30 @@ class User(Base, UserMixin):
     roles = relationship('Role', secondary=roles_users,
                          backref=backref('users', lazy='dynamic'))
 
-    # Flask - Login
-    @property
-    def is_authenticated(self):
-        return True
-
-    @property
-    def is_active(self):
-        return True
-
-    @property
-    def is_anonymous(self):
-        return False
-
+    # # Flask - Login
+    # @property
+    # def is_authenticated(self):
+    #     return True
+    #
+    # @property
+    # def is_active(self):
+    #     return True
+    #
+    # @property
+    # def is_anonymous(self):
+    #     return False
+    #
     # Flask-Security
     def has_role(self, *args):
         return set(args).issubset({role.name for role in self.roles})
-
-    def get_id(self):
-        return self.id
-
+    #
+    # def get_id(self):
+    #     return self.id
+    #
     # Required for administrative interface
     def __unicode__(self):
         return self.username
-
+    #
     def set_password(self, password):
         self.password = generate_password_hash(password)
 
@@ -120,10 +122,14 @@ class User(Base, UserMixin):
         return check_password_hash(self.password, password)
 
 
+
+from admin.app import login_manager, db
+
+
 # Отвечает за сессию пользователей. Запрещает доступ к роутам, перед которыми указано @login_required
-# @login_manager.user_loader
-# def load_user(user_id):
-#     return db.session.query(User).get(user_id)
-#
-#     def __str__(self):
-#         return self.email
+@login_manager.user_loader
+def load_user(user_id):
+    return db.session.query(User).get(user_id)
+
+    def __str__(self):
+        return self.email
