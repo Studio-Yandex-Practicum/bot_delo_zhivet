@@ -1,30 +1,20 @@
 from dotenv import load_dotenv
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import (
-    ContextTypes,
-)
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram.ext import ContextTypes
 
-from src.bot.service.save_tracker_id import save_tracker_id
-from src.core.db.db import get_async_session
-from src.core.db.repository.assistance_disabled_repository import crud_assistance_disabled
 from api.tracker import client
 from bot.handlers.start import start
-from bot.handlers.state_constants import (
-    END,
-    START_OVER,
-    FEATURES,
-    SELECTING_FEATURE,
-    SOCIAL_COMMENT,
-    SOCIAL_ADDRESS,
-    SAVE,
-    CURRENT_FEATURE,
-    SOCIAL_PROBLEM_TYPING,
-    SOCIAL,
-    TELEGRAM_ID,
-)
+from bot.handlers.state_constants import (CURRENT_FEATURE, END, FEATURES, SAVE,
+                                          SELECTING_FEATURE, SOCIAL,
+                                          SOCIAL_ADDRESS, SOCIAL_COMMENT,
+                                          SOCIAL_PROBLEM_TYPING, START_OVER,
+                                          TELEGRAM_ID)
 from src.bot.service.assistance_disabled import create_new_social
 from src.bot.service.save_new_user import create_new_user
-
+from src.bot.service.save_tracker_id import save_tracker_id_assistance_disabled
+from src.core.db.db import get_async_session
+from src.core.db.repository.assistance_disabled_repository import \
+    crud_assistance_disabled
 
 load_dotenv(".env")
 
@@ -110,7 +100,7 @@ async def save_and_exit_from_social_problem(
     client.issues.create(
         queue=SOCIAL, summary=city, description=comment,
     )
-    await save_tracker_id(city, user_data[TELEGRAM_ID], session)
+    await save_tracker_id_assistance_disabled(city, user_data[TELEGRAM_ID], session)
     await start(update, context)
     return END
 

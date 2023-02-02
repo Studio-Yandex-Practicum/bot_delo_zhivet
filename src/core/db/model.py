@@ -1,5 +1,5 @@
-from sqlalchemy import Column, Date, DateTime, ForeignKey, Integer, String, Text, BigInteger, Float, \
-    Boolean
+from sqlalchemy import (BigInteger, Boolean, Column, Date, DateTime, Float,
+                        ForeignKey, Integer, String, Text)
 
 from src.core.db.db import Base
 
@@ -8,20 +8,27 @@ class User(Base):
     """Модель пользователя"""
 
     telegram_id = Column(BigInteger, unique=True, nullable=False)
-    is_banned = Column(Boolean, default=True)
+    is_banned = Column(Boolean, default=False)
 
 
 class Volunteer(Base):
     """Модель волонтера"""
 
     telegram_id = Column(BigInteger, ForeignKey("user.telegram_id"))
-    name = Column(String(100), nullable=True)
     city = Column(String(100), nullable=False)
-    phone = Column(String(13), unique=True, nullable=True)
+    full_address = Column(Text, nullable=False)
     radius = Column(Integer, nullable=False)
     has_car = Column(Boolean, nullable=False)
+    latitude = Column(Float, nullable=True)
+    longitude = Column(Float, nullable=True)
+    telegram_username = Column(String(100), nullable=True)
+    first_name = Column(String(100), nullable=True)
+    last_name = Column(String(100), nullable=True)
+    phone = Column(String(13), unique=True, nullable=True)
     birthday = Column(Date, nullable=True)
     deleted_at = Column(DateTime(timezone=True))
+    is_banned = Column(Boolean, default=False)
+    ticketID = Column(Text, nullable=True)
 
 
 class Pollution(Base):
