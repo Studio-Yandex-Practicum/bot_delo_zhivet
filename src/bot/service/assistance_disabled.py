@@ -1,11 +1,9 @@
-import os
+# import os
 from typing import Optional
 from dadata import Dadata
 from pydantic import BaseModel
-from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.core.db.db import get_async_session
 from src.core.db.repository.assistance_disabled_repository import crud_assistance_disabled
 from bot.handlers.state_constants import (
     SOCIAL_COMMENT,
@@ -26,20 +24,18 @@ def get_fields_from_data(data):
         city = result['data']['settlement_with_type']
     else:
         city = result['data']['city_with_type']
-    full_adress = result['unrestricted_value']
+    full_address = result['unrestricted_value']
     latitude = float(result['data']['geo_lat'])
     longitude = float(result['data']['geo_lon'])
     comment = data[SOCIAL_COMMENT]
     telegram_id = data[TELEGRAM_ID]
-    # ticketID = data.ticketID
     return dict(
         city=city,
-        full_adress=full_adress,
+        full_address=full_address,
         comment=comment,
         telegram_id=telegram_id,
         latitude=latitude,
-        longitude=longitude
-        # ticketID=ticketID,
+        longitude=longitude,
     )
 
 
@@ -49,7 +45,7 @@ class SocialProblemCreate(BaseModel):
     house = int
     comment = Optional[str]
     telegram_id = Optional[int]
-    # ticketID = Optional[int]
+    ticketID = Optional[int]
     latitude = Optional[float]
     longitude = Optional[float]
 

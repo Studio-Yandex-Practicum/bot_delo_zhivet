@@ -39,7 +39,7 @@ class Assistance_disabled(Base):
     """Модель сообщения о социальной помощи"""
 
     city = Column(Text, nullable=False)
-    full_adress = Column(Text, nullable=False)
+    full_address = Column(Text, nullable=False)
     comment = Column(Text, nullable=False)
     telegram_id = Column(BigInteger, ForeignKey("user.telegram_id"))
     ticketID = Column(Text, nullable=True)

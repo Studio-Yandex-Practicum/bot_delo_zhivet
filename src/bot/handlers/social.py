@@ -4,7 +4,9 @@ from telegram.ext import (
     ContextTypes,
 )
 
+from src.bot.service.save_tracker_id import save_tracker_id
 from src.core.db.db import get_async_session
+from src.core.db.repository.assistance_disabled_repository import crud_assistance_disabled
 from api.tracker import client
 from bot.handlers.start import start
 from bot.handlers.state_constants import (
@@ -99,15 +101,16 @@ async def save_and_exit_from_social_problem(
     context.user_data[START_OVER] = True
     user_data = context.user_data[FEATURES]
     user_data[TELEGRAM_ID] = update.effective_user.id
-    city = user_data[SOCIAL_ADDRESS]
     comment = user_data[SOCIAL_COMMENT]
     session_generator = get_async_session()
     session = await session_generator.asend(None)
     await create_new_user(user_data[TELEGRAM_ID], session)
     await create_new_social(user_data, session)
+    city = await crud_assistance_disabled.get_full_address_by_telegram_id(user_data[TELEGRAM_ID], session)
     client.issues.create(
         queue=SOCIAL, summary=city, description=comment,
     )
+    await save_tracker_id(city, user_data[TELEGRAM_ID], session)
     await start(update, context)
     return END
 
