@@ -1,20 +1,17 @@
 import os
 from typing import Optional
+
 from dadata import Dadata
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.core.db.repository.assistance_disabled_repository import crud_assistance_disabled
-from bot.handlers.state_constants import (
-    SOCIAL_COMMENT,
-    SOCIAL_ADDRESS,
-    TELEGRAM_ID
-)
+from bot.handlers.state_constants import (SOCIAL_ADDRESS, SOCIAL_COMMENT,
+                                          TELEGRAM_ID)
+from src.core.db.repository.assistance_disabled_repository import \
+    crud_assistance_disabled
 
 token = os.environ['DADATA_TOKEN']
 secret = os.environ['DADATA_SECRET']
-# token = "678a0ddcf1c81baff82a28bc613932cf1dcefdbd"
-# secret = "8ad83c107768fa78c0e280c273ed22ad91cfca31"
 dadata = Dadata(token, secret)
 
 

@@ -53,6 +53,9 @@ ACTIVITY_RADIUS = [
     list(range(100, 250, 50)),
 ]
 TELEGRAM_ID = "telegram_id"
+TELEGRAM_USERNAME = "telegram_username"
+FIRST_NAME = "first_name"
+LAST_NAME = "last_name"
 
 # Различные сообщения пользователю
 

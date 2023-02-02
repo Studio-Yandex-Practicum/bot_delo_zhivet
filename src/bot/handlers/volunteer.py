@@ -1,29 +1,24 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
 
-from api.tracker import client
-
-from bot.address.address_api import mock_get_city_name
-from bot.handlers.start import start
-from bot.handlers.state_constants import (
-    ACTIVITY_RADIUS,
-    ADDING_VOLUNTEER,
-    CAR_COMMAND,
-    CITY_COMMAND,
-    CURRENT_FEATURE,
-    CURRENT_LEVEL,
-    END,
-    FEATURES,
-    RADIUS_COMMAND,
-    SELECTING_OVER,
-    SPECIFY_ACTIVITY_RADIUS,
-    SPECIFY_CAR_AVAILABILITY,
-    SPECIFY_CITY,
-    START_OVER,
-    TYPING_CITY,
-    SAVE,
-    VOLUNTEER,
-)
+from src.api.tracker import client
+from src.bot.handlers.start import start
+from src.bot.handlers.state_constants import (ACTIVITY_RADIUS,
+                                              ADDING_VOLUNTEER, CAR_COMMAND,
+                                              CITY_COMMAND, CURRENT_FEATURE,
+                                              CURRENT_LEVEL, END, FEATURES,
+                                              FIRST_NAME, LAST_NAME,
+                                              RADIUS_COMMAND, SAVE,
+                                              SELECTING_OVER,
+                                              SPECIFY_ACTIVITY_RADIUS,
+                                              SPECIFY_CAR_AVAILABILITY,
+                                              SPECIFY_CITY, START_OVER,
+                                              TELEGRAM_ID, TELEGRAM_USERNAME,
+                                              TYPING_CITY, VOLUNTEER)
+from src.bot.service.save_new_user import create_new_user
+from src.bot.service.save_tracker_id import save_tracker_id_volunteer
+from src.bot.service.volunteer import create_new_volunteer
+from src.core.db.db import get_async_session
 
 
 async def add_volunteer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
@@ -87,7 +82,7 @@ async def end_second_level(update: Update, context: ContextTypes.DEFAULT_TYPE) -
 async def ask_for_input_city(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     """Предложить пользователю ввести данные о населенном пункте."""
     context.user_data[CURRENT_FEATURE] = update.callback_query.data
-    text = "Напиши населенный пункт, я поищи его в базе."
+    text = "Укажите свой адрес."
 
     await update.callback_query.answer()
     await update.callback_query.edit_message_text(text=text)
@@ -99,16 +94,14 @@ async def handle_city_input(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     """Обработчик данных о населенном пункте с выводом возможных вариантов."""
     user_input = update.message.text
     text = "Пожалуйста, выбери город из представленных"
-    possible_cities = mock_get_city_name(user_input)
     buttons = []
 
-    for city in possible_cities:
-        data = CITY_COMMAND + city
-        buttons.append(
-            [
-                InlineKeyboardButton(text=city, callback_data=data),
-            ]
-        )
+    data = CITY_COMMAND + user_input
+    buttons.append(
+        [
+            InlineKeyboardButton(text=user_input, callback_data=data),
+        ]
+    )
 
     keyboard = InlineKeyboardMarkup(buttons)
 
@@ -174,14 +167,24 @@ async def save_and_exit_volunteer(
 ) -> str:
     """Сохранение данных в базу и отправка в трекер"""
     context.user_data[START_OVER] = True
-    username = update.effective_user.username
     user_data = context.user_data[FEATURES]
     city = user_data[SPECIFY_CITY][5:]
     radius = user_data[SPECIFY_ACTIVITY_RADIUS][7:]
     car = user_data[SPECIFY_CAR_AVAILABILITY][4:]
-    summary = f"{username} - {city}"
+    user_data[SPECIFY_CITY] = city
+    user_data[SPECIFY_ACTIVITY_RADIUS] = int(radius)
+    user_data[SPECIFY_CAR_AVAILABILITY] = car
+    user_data[TELEGRAM_ID] = update.effective_user.id
+    user_data[TELEGRAM_USERNAME] = update.effective_user.username
+    user_data[FIRST_NAME] = update.effective_user.first_name
+    user_data[LAST_NAME] = update.effective_user.last_name
+    session_generator = get_async_session()
+    session = await session_generator.asend(None)
+    await create_new_user(user_data[TELEGRAM_ID], session)
+    await create_new_volunteer(user_data, session)
+    summary = f"{user_data[TELEGRAM_USERNAME]} - {city}"
     description = f"""
-    Ник в телеграмме: {username}
+    Ник в телеграмме: {user_data[TELEGRAM_USERNAME]}
     город: {city}
     наличие машины: {car}
     радиус выезда{radius}
@@ -189,6 +192,7 @@ async def save_and_exit_volunteer(
     client.issues.create(
         queue=VOLUNTEER, summary=summary, description=description,
     )
+    await save_tracker_id_volunteer(summary, user_data[TELEGRAM_ID], session)
     await start(update, context)
     return END
 
