@@ -6,6 +6,10 @@ on:
       - master
       - develop
 
+env:
+  MASTER_GITHUB_REF: 'refs/heads/master'
+  DEVELOP_GITHUB_REF: 'refs/heads/develop'
+
 jobs:
   tests:
     name: Testing
@@ -15,7 +19,9 @@ jobs:
         python-version: [ "3.10", "3.11" ]
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Check out the repo
+        uses: actions/checkout@v3
+
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
@@ -56,7 +62,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push master image to Docker Hub
-        if: github.ref == 'refs/heads/master'
+        if: github.ref == ${{ env.MASTER_GITHUB_REF }}
         uses: docker/build-push-action@v3
         with:
           context: .
@@ -66,7 +72,7 @@ jobs:
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/delo_zhivet_bot:latest
 
       - name: Build and push developer image to Docker Hub
-        if: github.ref == 'refs/heads/develop'
+        if: github.ref == ${{ env.DEVELOP_GITHUB_REF }}
         uses: docker/build-push-action@v3
         with:
           context: .
@@ -85,7 +91,7 @@ jobs:
 
       - name: Copy file docker-compose-master.yaml
         uses: appleboy/scp-action@master
-        if: github.ref == 'refs/heads/master'
+        if: github.ref == ${{ env.MASTER_GITHUB_REF }}
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
@@ -98,7 +104,7 @@ jobs:
 
       - name: Copy file docker-compose-develop.yaml
         uses: appleboy/scp-action@master
-        if: github.ref == 'refs/heads/develop'
+        if: github.ref == ${{ env.DEVELOP_GITHUB_REF }}
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
@@ -110,7 +116,7 @@ jobs:
           strip_components: 1
 
       - name: Executing remote ssh commands to deploy main bot
-        if: github.ref == 'refs/heads/master'
+        if: github.ref == ${{ env.MASTER_GITHUB_REF }}
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SERVER_HOST }}
@@ -124,7 +130,7 @@ jobs:
               docker image rm -f ${{ secrets.DOCKER_USERNAME }}/delo_zhivet_bot:latest
               rm .env
               touch .env
-              echo telegram_bot_token=${{ secrets.TELEGRAM_BOT_TOKEN }} >> .env
+              echo TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }} >> .env
               echo GEOCODER_APIKEY=${{ secrets.GEOCODER_APIKEY }} >> .env
               echo GEOCODER_BASE_URL=${{ secrets.GEOCODER_BASE_URL }} >> .env
               echo MAXIMUM_OBJECTS_FROM_GEOCODER=${{ secrets.MAXIMUM_OBJECTS_FROM_GEOCODER }} >> .env
@@ -136,7 +142,7 @@ jobs:
               docker-compose -f docker-compose-master.yaml up -d
 
       - name: Executing remote ssh commands to deploy developer bot
-        if: github.ref == 'refs/heads/develop'
+        if: github.ref == ${{ env.DEVELOP_GITHUB_REF }}
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SERVER_HOST }}
@@ -150,7 +156,7 @@ jobs:
               docker image rm -f ${{ secrets.DOCKER_USERNAME }}/delo_zhivet_bot_develop:latest
               rm .env
               touch .env
-              echo telegram_bot_token=${{ secrets.TELEGRAM_BOT_DEVELOPER_TOKEN }} >> .env
+              echo TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_DEVELOPER_TOKEN }} >> .env
               echo GEOCODER_APIKEY=${{ secrets.GEOCODER_APIKEY }} >> .env
               echo GEOCODER_BASE_URL=${{ secrets.GEOCODER_BASE_URL }} >> .env
               echo MAXIMUM_OBJECTS_FROM_GEOCODER=${{ secrets.MAXIMUM_OBJECTS_FROM_GEOCODER }} >> .env
