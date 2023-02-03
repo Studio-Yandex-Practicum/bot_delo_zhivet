@@ -1,9 +1,9 @@
 import uuid
 
-from sqlalchemy import Column, TIMESTAMP, func
+from sqlalchemy import TIMESTAMP, Column, func
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import declarative_base, declared_attr, sessionmaker
-from sqlalchemy.dialects.postgresql import UUID
 
 from src.core.config import settings
 
