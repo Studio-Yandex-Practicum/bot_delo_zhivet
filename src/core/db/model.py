@@ -98,7 +98,7 @@ class User(Base, UserMixin):
 
     @property
     def is_active(self):
-        return True
+        return self.active
 
     @property
     def is_anonymous(self):
