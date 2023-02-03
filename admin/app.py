@@ -188,9 +188,10 @@ admin.add_view(
     MyModelView(Assistance_disabled, db.session, name='Assistance_disabled')
 )
 
+
 def build_sample_db():
     print('yes')
-    admin_role = Role(name='user', description='user')
+    admin_role = Role(name='admin', description='admin')
     test_user = User(first_name='admin',
                      last_name='admin',
                      login='admin',
@@ -216,7 +217,8 @@ def build_sample_db():
 
 if __name__ == '__main__':
     print(Role.query.get(1))
-    if not User.query.filter_by(login='admin').all():
+    if (not User.query.filter_by(login='admin').all()
+            and not Role.query.filter_by(name='admin').all()):
         # role = Role.query.get(1)
         with app.app_context():
             build_sample_db()
