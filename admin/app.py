@@ -15,10 +15,11 @@ import flask_login as login
 from dotenv import load_dotenv
 import os
 
-# from flask_wtf import FlaskForm
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
-# from wtforms.validators import DataRequired
+from werkzeug.security import check_password_hash
+from wtforms import form, fields, validators
+
 
 from src.core.db.db import Base
 from src.core.db.model import (Assistance_disabled, Pollution,
@@ -54,9 +55,61 @@ Session = sessionmaker(binds={Base: engine})
 # Session = sessionmaker(bind=engine)
 session = Session()
 
-# Ставим редирект, если пользователь не авторизован, для страниц где обязательна авторизация
-login_manager = LoginManager(app)
+
+# Define login and registration forms (for flask-login)
+class LoginForm(form.Form):
+    login = fields.StringField(validators=[validators.InputRequired()])
+    password = fields.PasswordField(validators=[validators.InputRequired()])
+
+    def validate_login(self, field):
+        user = self.get_user()
+
+        if user is None:
+            raise validators.ValidationError('Invalid user')
+
+        # we're comparing the plaintext pw with the the hash from the db
+        if not check_password_hash(user.password, self.password.data):
+        # to compare plain text passwords use
+        # if user.password != self.password.data:
+            raise validators.ValidationError('Invalid password')
+
+    def get_user(self):
+        return db.session.query(User).filter_by(login=self.login.data).first()
+
+
+class RegistrationForm(form.Form):
+    login = fields.StringField(validators=[validators.InputRequired()])
+    email = fields.StringField()
+    password = fields.PasswordField(validators=[validators.InputRequired()])
+
+    def validate_login(self, field):
+        if db.session.query(User).filter_by(login=self.login.data).count() > 0:
+            raise validators.ValidationError('Duplicate username')
+
+
+# Initialize flask-login
+def init_login():
+    login_manager = login.LoginManager()
+    login_manager.init_app(app)
+
+    # Create user loader function
+    @login_manager.user_loader
+    def load_user(user_id):
+        return db.session.query(User).get(user_id)
+
+
+
+# # Ставим редирект, если пользователь не авторизован, для страниц где обязательна авторизация
+# login_manager = LoginManager(app)
 # login_manager.login_view = 'admin_blueprint.login'
+#
+# # Отвечает за сессию пользователей. Запрещает доступ к роутам, перед которыми указано @login_required
+# @login_manager.user_loader
+# def load_user(user_id):
+#     return db.session.query(User).get(user_id)
+#
+#     def __str__(self):
+#         return self.email
 
 # # Setup Flask-Security
 # user_datastore = SQLAlchemyUserDatastore(db, User, Role)
@@ -168,9 +221,14 @@ class MyAdminIndexView(flask_admin.AdminIndexView):
 def index():
     return render_template('index.html')
 
-# Setup Flask-Security
+# # Setup Flask-Security
 user_datastore = SQLAlchemyUserDatastore(db, User, Role)
 security = Security(app, user_datastore)
+
+
+# Initialize flask-login
+init_login()
+
 
 # Create admin
 # admin = flask_admin.Admin(app, base_template='admin/master-extended.html')
