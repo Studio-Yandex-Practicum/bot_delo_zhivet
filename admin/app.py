@@ -1,6 +1,7 @@
 import flask_admin
 from flask import abort, Flask, render_template, redirect, url_for, request
-from flask_admin import Admin, expose
+from flask_admin import Admin, expose, helpers, AdminIndexView
+from flask_admin.contrib import sqla
 from flask_admin.contrib.sqla import ModelView
 from flask_login import LoginManager
 from flask_migrate import Migrate
@@ -17,7 +18,7 @@ import os
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
-from werkzeug.security import check_password_hash
+from werkzeug.security import check_password_hash, generate_password_hash
 from wtforms import form, fields, validators
 
 
@@ -168,50 +169,106 @@ def init_login():
 
 
 
+# # Create customized model view class
+# class MyModelView(ModelView):
+#     def is_accessible(self):
+#         return (current_user.is_active and
+#                 current_user.is_authenticated and
+#                 current_user.has_role('admin')
+#                 )
+#
+#     def _handle_view(self, name, **kwargs):
+#         """
+#         Override builtin _handle_view in order to redirect users when a view is not accessible.
+#         """
+#         if not self.is_accessible():
+#             if current_user.is_authenticated:
+#                 # permission denied
+#                 abort(403)
+#             else:
+#                 # login
+#                 return redirect(url_for('security.login', next=request.url))
+#
+#
+# # Переадресация страниц (используется в шаблонах)
+# class MyAdminIndexView(flask_admin.AdminIndexView):
+#     @expose('/')
+#     def index(self):
+#         if not current_user.is_authenticated:
+#             return redirect(url_for('.login_page'))
+#         return super(MyAdminIndexView, self).index()
+#
+#     @expose('/login/', methods=('GET', 'POST'))
+#     def login_page(self):
+#         if current_user.is_authenticated:
+#             return redirect(url_for('.index'))
+#         return super(MyAdminIndexView, self).index()
+#
+#     @expose('/logout/')
+#     def logout_page(self):
+#         login.logout_user()
+#         return redirect(url_for('.index'))
+#
+#     @expose('/reset/')
+#     def reset_page(self):
+#         return redirect(url_for('.index'))
+
 # Create customized model view class
-class MyModelView(ModelView):
+class MyModelView(sqla.ModelView):
+
     def is_accessible(self):
-        return (current_user.is_active and
-                current_user.is_authenticated and
-                current_user.has_role('admin')
-                )
-
-    def _handle_view(self, name, **kwargs):
-        """
-        Override builtin _handle_view in order to redirect users when a view is not accessible.
-        """
-        if not self.is_accessible():
-            if current_user.is_authenticated:
-                # permission denied
-                abort(403)
-            else:
-                # login
-                return redirect(url_for('security.login', next=request.url))
+        return login.current_user.is_authenticated
 
 
-# Переадресация страниц (используется в шаблонах)
-class MyAdminIndexView(flask_admin.AdminIndexView):
+# Create customized index view class that handles login & registration
+class MyAdminIndexView(AdminIndexView):
+
     @expose('/')
     def index(self):
-        if not current_user.is_authenticated:
-            return redirect(url_for('.login_page'))
+        if not login.current_user.is_authenticated:
+            return redirect(url_for('.login_view'))
         return super(MyAdminIndexView, self).index()
 
     @expose('/login/', methods=('GET', 'POST'))
-    def login_page(self):
-        if current_user.is_authenticated:
+    def login_view(self):
+        # handle user login
+        form = LoginForm(request.form)
+        if helpers.validate_form_on_submit(form):
+            user = form.get_user()
+            login.login_user(user)
+
+        if login.current_user.is_authenticated:
             return redirect(url_for('.index'))
+        link = '<p>Don\'t have an account? <a href="' + url_for('.register_view') + '">Click here to register.</a></p>'
+        self._template_args['form'] = form
+        self._template_args['link'] = link
+        return super(MyAdminIndexView, self).index()
+
+    @expose('/register/', methods=('GET', 'POST'))
+    def register_view(self):
+        form = RegistrationForm(request.form)
+        if helpers.validate_form_on_submit(form):
+            user = User()
+
+            form.populate_obj(user)
+            # we hash the users password to avoid saving it as plaintext in the db,
+            # remove to use plain text:
+            user.password = generate_password_hash(form.password.data)
+
+            db.session.add(user)
+            db.session.commit()
+
+            login.login_user(user)
+            return redirect(url_for('.index'))
+        link = '<p>Already have an account? <a href="' + url_for('.login_view') + '">Click here to log in.</a></p>'
+        self._template_args['form'] = form
+        self._template_args['link'] = link
         return super(MyAdminIndexView, self).index()
 
     @expose('/logout/')
-    def logout_page(self):
+    def logout_view(self):
         login.logout_user()
         return redirect(url_for('.index'))
-
-    @expose('/reset/')
-    def reset_page(self):
-        return redirect(url_for('.index'))
-
 
 
 
