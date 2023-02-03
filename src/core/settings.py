@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     telegram_bot_token: str = None
 
     class Config:
-        env_file = '.env'
+        env_file = ".env"
 
 
 settings = Settings()
