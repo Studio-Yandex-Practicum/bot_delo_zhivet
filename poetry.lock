@@ -593,6 +593,18 @@ files = [
 setuptools = "*"
 
 [[package]]
+name = "pathlib"
+version = "1.0.1"
+description = "Object-oriented filesystem paths"
+category = "main"
+optional = false
+python-versions = "*"
+files = [
+    {file = "pathlib-1.0.1-py3-none-any.whl", hash = "sha256:f35f95ab8b0f59e6d354090350b44a80a80635d22efdedfa84c7ad1cf0a74147"},
+    {file = "pathlib-1.0.1.tar.gz", hash = "sha256:6940718dfc3eff4258203ad5021090933e5c04707d5ca8cc9e73c94a7894ea9f"},
+]
+
+[[package]]
 name = "platformdirs"
 version = "2.6.2"
 description = "A small Python package for determining appropriate platform-specific dirs, e.g. a \"user data dir\"."
@@ -1153,4 +1165,4 @@ six = ">=1.9"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "68dbf518363dc1af2ac9397b9bffe581be147ee1e94557f1346a823838ae66c2"
+content-hash = "bd2bf320a2706c8db75b9af9cb64a4d648f7190eabcafd67e8388eb9e7acea27"

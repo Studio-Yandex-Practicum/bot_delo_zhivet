@@ -39,7 +39,7 @@ class Pollution(Base):
     longitude = Column(Float, nullable=False)
     comment = Column(Text, nullable=True)
     telegram_id = Column(BigInteger, ForeignKey("user.telegram_id"))
-    ticketID = Column(BigInteger, nullable=True)
+    ticketID = Column(Text, nullable=True)
 
 
 class Assistance_disabled(Base):

@@ -161,7 +161,7 @@ cython_debug/
 .idea/
 
 # Media and Static Django
-/media
+/media/*
 /staticfiles
 
 # Logs Django
