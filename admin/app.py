@@ -231,7 +231,11 @@ def init_login():
 class MyModelView(sqla.ModelView):
 
     def is_accessible(self):
-        return login.current_user.is_authenticated
+        # return login.current_user.is_authenticated
+        return (current_user.is_active and
+                current_user.is_authenticated and
+                current_user.has_role('admin')
+                )
 
 
 # Create customized index view class that handles login & registration
@@ -324,9 +328,9 @@ admin.add_view(ModelView(Role, db.session, name='Role'))
 
 admin.add_view(ModelView(User, db.session, name='User'))
 admin.add_view(MyModelView(Volunteer, db.session, name='Volunteer'))
-admin.add_view(ModelView(Pollution, db.session, name='Pollution'))
+admin.add_view(MyModelView(Pollution, db.session, name='Pollution'))
 admin.add_view(
-    ModelView(Assistance_disabled, db.session, name='Assistance_disabled')
+    MyModelView(Assistance_disabled, db.session, name='Assistance_disabled')
 )
 
 
