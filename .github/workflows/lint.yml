@@ -12,8 +12,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
-      - uses: psf/black@stable
+      - name: Check out repo
+        uses: actions/checkout@v3
+      - name: formatter
+        uses: psf/black@stable
         with:
           src: "."
           options: "--diff"
@@ -24,6 +26,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Check out repo
+        uses: actions/checkout@v3
       - name: Set up Python
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v3
