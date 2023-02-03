@@ -74,10 +74,7 @@ class Role(Base, RoleMixin):
         return self.name
 
 
-
-
 class User(Base, UserMixin):
-
     # def createSession(self):
     #     Session = sessionmaker()
     #     self.session = Session.configure(bind=self.engine)
@@ -114,22 +111,10 @@ class User(Base, UserMixin):
     # Required for administrative interface
     def __unicode__(self):
         return self.username
+
     #
     def set_password(self, password):
         self.password = generate_password_hash(password)
 
     def check_password(self, password):
         return check_password_hash(self.password, password)
-
-
-
-# from admin.app import login_manager, db
-#
-#
-# # Отвечает за сессию пользователей. Запрещает доступ к роутам, перед которыми указано @login_required
-# @login_manager.user_loader
-# def load_user(user_id):
-#     return db.session.query(User).get(user_id)
-#
-#     def __str__(self):
-#         return self.email

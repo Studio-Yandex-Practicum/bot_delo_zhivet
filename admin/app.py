@@ -1,4 +1,5 @@
 import flask_admin
+import psycopg2
 from flask import abort, Flask, render_template, redirect, url_for, request
 from flask_admin import Admin, expose, helpers, AdminIndexView
 from flask_admin.contrib import sqla
@@ -32,6 +33,15 @@ app.config['SQLALCHEMY_DATABASE_URI'] = (
     f"postgresql://{os.getenv('POSTGRES_USER')}:"
     f"{os.getenv('POSTGRES_PASSWORD')}@"
     f"{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('POSTGRES_DB')}")
+
+# conn_string = "host='localhost' dbname='delo_zhivet' user='postgres' password='postgres'"
+# conn = psycopg2.connect(conn_string)
+# app.config['SQLALCHEMY_DATABASE_URI'] = (
+#     f"postgresql+psycopg2://{os.getenv('POSTGRES_USER')}:"
+#     f"{os.getenv('POSTGRES_PASSWORD')}@"
+#     f"{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('POSTGRES_DB')}")
+
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 
 db = SQLAlchemy(app)
@@ -178,6 +188,37 @@ admin.add_view(
     MyModelView(Assistance_disabled, db.session, name='Assistance_disabled')
 )
 
+def build_sample_db():
+    print('yes')
+    admin_role = Role(name='user', description='user')
+    test_user = User(first_name='admin',
+                     last_name='admin',
+                     login='admin',
+                     email='admin@bot_delo_zhivet.ru',
+                     password=generate_password_hash('admin'),
+                     active=True,
+                     )
+    db.session.add(admin_role)
+    db.session.add(test_user)
+    db.session.commit()
+    print('create admin')
+    # admin_role = Role(name='user', description='user')
+    # db.session.add(admin_role)
+    # db.session.commit()
+    # test_user = User(login='admin',
+    #                  password=generate_password_hash('admin'),
+    #                  active=True,
+    #                  roles=Role.query.filter_by(name='user').all())
+    # db.session.add(test_user)
+    # db.session.commit()
+    # print('create admin')
+
+
 if __name__ == '__main__':
+    print(Role.query.get(1))
+    if not User.query.filter_by(login='admin').all():
+        # role = Role.query.get(1)
+        with app.app_context():
+            build_sample_db()
     # app.secret_key = os.urandom(24)
     app.run(debug=True)
