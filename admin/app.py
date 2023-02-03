@@ -62,6 +62,20 @@ class LoginForm(form.Form):
     login = fields.StringField(validators=[validators.InputRequired()])
     password = fields.PasswordField(validators=[validators.InputRequired()])
 
+    # def validate(self, extra_validators=None):
+    #     initial_validation = super(RegisterForm, self).validate(
+    #         extra_validators)
+    #     if not initial_validation:
+    #         return False
+    #     user = User.query.filter_by(email=self.email.data).first()
+    #     if user:
+    #         self.email.errors.append("Email already registered")
+    #         return False
+    #     if self.password.data != self.confirm.data:
+    #         self.password.errors.append("Passwords must match")
+    #         return False
+    #     return True
+
     def validate_login(self, field):
         user = self.get_user()
 
@@ -279,8 +293,8 @@ def index():
     return render_template('index.html')
 
 # # Setup Flask-Security
-user_datastore = SQLAlchemyUserDatastore(db, User, Role)
-security = Security(app, user_datastore)
+# user_datastore = SQLAlchemyUserDatastore(db, User, Role)
+# security = Security(app, user_datastore)
 
 
 # Initialize flask-login
@@ -289,7 +303,10 @@ init_login()
 
 # Create admin
 # admin = flask_admin.Admin(app, base_template='admin/master-extended.html')
-admin = flask_admin.Admin(app, index_view=MyAdminIndexView(), base_template='admin/master-extended.html')
+# admin = flask_admin.Admin(app, index_view=MyAdminIndexView(), base_template='admin/master-extended.html')
+
+# Create admin
+admin = flask_admin.Admin(app, 'Example: Auth', index_view=MyAdminIndexView(), base_template='my_master.html', template_mode='bootstrap4')
 
 # admin = flask_admin.Admin(
 #     app,
@@ -316,14 +333,14 @@ admin.add_view(
 
 # define a context processor for merging flask-admin's template context into the
 # flask-security views.
-@security.context_processor
-def security_context_processor():
-    return dict(
-        admin_base_template=admin.base_template,
-        admin_view=admin.index_view,
-        h=admin_helpers,
-        get_url=url_for
-    )
+# @security.context_processor
+# def security_context_processor():
+#     return dict(
+#         admin_base_template=admin.base_template,
+#         admin_view=admin.index_view,
+#         h=admin_helpers,
+#         get_url=url_for
+#     )
 
 if __name__ == '__main__':
     # app.secret_key = os.urandom(24)
