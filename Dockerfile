@@ -9,7 +9,4 @@ WORKDIR /app
 COPY . .
 RUN poetry config virtualenvs.create false
 RUN poetry install
-# RUN alembic stamp head
-# RUN alembic revision --autogenerate
-# RUN alembic upgrade head
 CMD ["poetry", "run", "runbot"]
