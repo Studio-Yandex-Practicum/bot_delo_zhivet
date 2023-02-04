@@ -143,8 +143,6 @@ jobs:
               echo DADATA_TOKEN=${{ secrets.DADATA_TOKEN }} >> .env
               echo DADATA_SECRET=${{ secrets.DADATA_SECRET }} >> .env
               docker-compose -f docker-compose-master.yaml up -d
-#              docker-compose -f docker-compose-develop.yaml exec web-master alembic stamp head
-#              docker-compose -f docker-compose-develop.yaml exec web-master alembic revision --autogenerate
               docker-compose -f docker-compose-develop.yaml exec web-master alembic upgrade head
 
       - name: Executing remote ssh commands to deploy developer bot
@@ -177,6 +175,4 @@ jobs:
               echo DADATA_TOKEN=${{ secrets.DADATA_TOKEN }} >> .env
               echo DADATA_SECRET=${{ secrets.DADATA_SECRET }} >> .env
               docker-compose -f docker-compose-develop.yaml up -d
-#              docker-compose -f docker-compose-develop.yaml exec web-develop alembic stamp head
-#              docker-compose -f docker-compose-develop.yaml exec web-develop alembic revision --autogenerate
               docker-compose -f docker-compose-develop.yaml exec web-develop alembic upgrade head
