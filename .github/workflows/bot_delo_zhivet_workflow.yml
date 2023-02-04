@@ -6,10 +6,6 @@ on:
       - master
       - develop
 
-env:
-  MASTER_GITHUB_REF: 'refs/heads/master'
-  DEVELOP_GITHUB_REF: 'refs/heads/develop'
-
 jobs:
   tests:
     name: Testing
@@ -62,7 +58,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push master image to Docker Hub
-        if: github.ref == ${{ env.MASTER_GITHUB_REF }}
+        if: github.ref == 'refs/heads/master'
         uses: docker/build-push-action@v3
         with:
           context: .
@@ -72,7 +68,7 @@ jobs:
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/delo_zhivet_bot:latest
 
       - name: Build and push developer image to Docker Hub
-        if: github.ref == ${{ env.DEVELOP_GITHUB_REF }}
+        if: github.ref == 'refs/heads/develop'
         uses: docker/build-push-action@v3
         with:
           context: .
@@ -91,7 +87,7 @@ jobs:
 
       - name: Copy file docker-compose-master.yaml
         uses: appleboy/scp-action@master
-        if: github.ref == ${{ env.MASTER_GITHUB_REF }}
+        if: github.ref == 'refs/heads/master'
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
@@ -104,7 +100,7 @@ jobs:
 
       - name: Copy file docker-compose-develop.yaml
         uses: appleboy/scp-action@master
-        if: github.ref == ${{ env.DEVELOP_GITHUB_REF }}
+        if: github.ref == 'refs/heads/develop'
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
@@ -116,7 +112,7 @@ jobs:
           strip_components: 1
 
       - name: Executing remote ssh commands to deploy main bot
-        if: github.ref == ${{ env.MASTER_GITHUB_REF }}
+        if: github.ref == 'refs/heads/master'
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SERVER_HOST }}
@@ -126,7 +122,7 @@ jobs:
           script: |
               cd ~/master
               docker-compose -f docker-compose-master.yaml stop
-              docker-compose -f docker-compose-master.yaml rm -f db-develop
+              docker-compose -f docker-compose-master.yaml rm -f web-master
               docker image rm -f ${{ secrets.DOCKER_USERNAME }}/delo_zhivet_bot:latest
               rm .env
               touch .env
@@ -139,10 +135,17 @@ jobs:
               echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env
               echo DB_HOST=${{ secrets.DB_HOST }} >> .env
               echo DB_PORT=${{ secrets.DB_PORT }} >> .env
+              echo OAUTH_TOKEN=${{ secrets.OAUTH_TOKEN }} >> .env
+              echo ORG_ID=${{ secrets.ORG_ID }} >> .env
+              echo DADATA_TOKEN=${{ secrets.DADATA_TOKEN }} >> .env
+              echo DADATA_SECRET=${{ secrets.DADATA_SECRET }} >> .env
               docker-compose -f docker-compose-master.yaml up -d
+              docker-compose -f docker-compose-develop.yaml exec web-master alembic stamp head
+              docker-compose -f docker-compose-develop.yaml exec web-master alembic revision --autogenerate
+              docker-compose -f docker-compose-develop.yaml exec web-master alembic upgrade head
 
       - name: Executing remote ssh commands to deploy developer bot
-        if: github.ref == ${{ env.DEVELOP_GITHUB_REF }}
+        if: github.ref == 'refs/heads/develop'
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SERVER_HOST }}
@@ -152,7 +155,7 @@ jobs:
           script: |
               cd ~/develop
               docker-compose -f docker-compose-develop.yaml stop
-              docker-compose -f docker-compose-develop.yaml rm -f db-develop
+              docker-compose -f docker-compose-develop.yaml rm -f web-develop
               docker image rm -f ${{ secrets.DOCKER_USERNAME }}/delo_zhivet_bot_develop:latest
               rm .env
               touch .env
@@ -165,4 +168,11 @@ jobs:
               echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}_dev >> .env
               echo DB_HOST=${{ secrets.DEVELOPER_DB_HOST }} >> .env
               echo DB_PORT=${{ secrets.DEVELOPER_DB_PORT }} >> .env
+              echo OAUTH_TOKEN=${{ secrets.OAUTH_TOKEN }} >> .env
+              echo ORG_ID=${{ secrets.ORG_ID }} >> .env
+              echo DADATA_TOKEN=${{ secrets.DADATA_TOKEN }} >> .env
+              echo DADATA_SECRET=${{ secrets.DADATA_SECRET }} >> .env
               docker-compose -f docker-compose-develop.yaml up -d
+              docker-compose -f docker-compose-develop.yaml exec web-develop alembic stamp head
+              docker-compose -f docker-compose-develop.yaml exec web-develop alembic revision --autogenerate
+              docker-compose -f docker-compose-develop.yaml exec web-develop alembic upgrade head
