@@ -131,7 +131,7 @@ jobs:
           script: |
               cd ~/master
               docker-compose -f docker-compose-master.yaml stop
-              docker-compose -f docker-compose-master.yaml rm -f db-develop
+              docker-compose -f docker-compose-master.yaml rm -f web-master
               docker image rm -f ${{ secrets.DOCKER_USERNAME }}/delo_zhivet_bot:latest
               rm .env
               touch .env
@@ -162,7 +162,7 @@ jobs:
           script: |
               cd ~/develop
               docker-compose -f docker-compose-develop.yaml stop
-              docker-compose -f docker-compose-develop.yaml rm -f db-develop
+              docker-compose -f docker-compose-develop.yaml rm -f web-develop
               docker image rm -f ${{ secrets.DOCKER_USERNAME }}/delo_zhivet_bot_develop:latest
               rm .env
               touch .env
