@@ -7,10 +7,11 @@ on:
       - develop
       - deploy
 
-env:
-  MASTER_GITHUB_REF: 'refs/heads/master'
+#env:
+#  MASTER_GITHUB_REF: 'refs/heads/master'
 #  DEVELOP_GITHUB_REF: 'refs/heads/develop'
-  DEVELOP_GITHUB_REF: 'refs/heads/deploy' # тест
+#  DEVELOP_GITHUB_REF: 'refs/heads/deploy' # тест
+  
 
 jobs:
   tests:
@@ -64,7 +65,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push master image to Docker Hub
-        if: github.ref == ${{ env.MASTER_GITHUB_REF }}
+        if: github.ref == 'refs/heads/master'
         uses: docker/build-push-action@v3
         with:
           context: .
@@ -74,7 +75,8 @@ jobs:
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/delo_zhivet_bot:latest
 
       - name: Build and push developer image to Docker Hub
-        if: github.ref == ${{ env.DEVELOP_GITHUB_REF }}
+#        if: github.ref == 'refs/heads/develop'
+        if: github.ref == 'refs/heads/deploy'
         uses: docker/build-push-action@v3
         with:
           context: .
@@ -93,7 +95,7 @@ jobs:
 
       - name: Copy file docker-compose-master.yaml
         uses: appleboy/scp-action@master
-        if: github.ref == ${{ env.MASTER_GITHUB_REF }}
+        if: github.ref == 'refs/heads/master'
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
@@ -106,7 +108,8 @@ jobs:
 
       - name: Copy file docker-compose-develop.yaml
         uses: appleboy/scp-action@master
-        if: github.ref == ${{ env.DEVELOP_GITHUB_REF }}
+#        if: github.ref == 'refs/heads/develop'
+        if: github.ref == 'refs/heads/deploy'
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
@@ -118,7 +121,7 @@ jobs:
           strip_components: 1
 
       - name: Executing remote ssh commands to deploy main bot
-        if: github.ref == ${{ env.MASTER_GITHUB_REF }}
+        if: github.ref == 'refs/heads/master'
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SERVER_HOST }}
@@ -148,7 +151,8 @@ jobs:
               docker-compose -f docker-compose-master.yaml up -d
 
       - name: Executing remote ssh commands to deploy developer bot
-        if: github.ref == ${{ env.DEVELOP_GITHUB_REF }}
+#        if: github.ref == 'refs/heads/develop'
+        if: github.ref == 'refs/heads/deploy'
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SERVER_HOST }}
