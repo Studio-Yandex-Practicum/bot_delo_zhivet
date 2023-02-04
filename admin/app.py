@@ -179,9 +179,12 @@ admin = flask_admin.Admin(app, 'Example: Auth', index_view=MyAdminIndexView(),
                           base_template='my_master.html',
                           template_mode='bootstrap4')
 
-admin.add_view(ModelView(Role, db.session, name='Role'))
+if User.query.filter_by(login='admin').all():
+    admin.add_view(ModelView(User, db.session, name='User'))
+if not User.query.filter_by(login='admin').all():
+    admin.add_view(MyModelView(User, db.session, name='User'))
 
-admin.add_view(ModelView(User, db.session, name='User'))
+admin.add_view(MyModelView(Role, db.session, name='Role'))
 admin.add_view(MyModelView(Volunteer, db.session, name='Volunteer'))
 admin.add_view(MyModelView(Pollution, db.session, name='Pollution'))
 admin.add_view(
