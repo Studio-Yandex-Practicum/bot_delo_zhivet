@@ -5,6 +5,7 @@ on:
     branches:
       - master
       - develop
+      - deploy
 
 jobs:
   tests:
@@ -68,7 +69,8 @@ jobs:
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/delo_zhivet_bot:latest
 
       - name: Build and push developer image to Docker Hub
-        if: github.ref == 'refs/heads/develop'
+#        if: github.ref == 'refs/heads/develop'
+        if: github.ref == 'refs/heads/deploy'
         uses: docker/build-push-action@v3
         with:
           context: .
@@ -100,7 +102,8 @@ jobs:
 
       - name: Copy file docker-compose-develop.yaml
         uses: appleboy/scp-action@master
-        if: github.ref == 'refs/heads/develop'
+#        if: github.ref == 'refs/heads/develop'
+        if: github.ref == 'refs/heads/deploy'
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
@@ -140,12 +143,13 @@ jobs:
               echo DADATA_TOKEN=${{ secrets.DADATA_TOKEN }} >> .env
               echo DADATA_SECRET=${{ secrets.DADATA_SECRET }} >> .env
               docker-compose -f docker-compose-master.yaml up -d
-              docker-compose -f docker-compose-develop.yaml exec web-master alembic stamp head
-              docker-compose -f docker-compose-develop.yaml exec web-master alembic revision --autogenerate
+#              docker-compose -f docker-compose-develop.yaml exec web-master alembic stamp head
+#              docker-compose -f docker-compose-develop.yaml exec web-master alembic revision --autogenerate
               docker-compose -f docker-compose-develop.yaml exec web-master alembic upgrade head
 
       - name: Executing remote ssh commands to deploy developer bot
-        if: github.ref == 'refs/heads/develop'
+#        if: github.ref == 'refs/heads/develop'
+        if: github.ref == 'refs/heads/deploy'
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SERVER_HOST }}
@@ -173,6 +177,6 @@ jobs:
               echo DADATA_TOKEN=${{ secrets.DADATA_TOKEN }} >> .env
               echo DADATA_SECRET=${{ secrets.DADATA_SECRET }} >> .env
               docker-compose -f docker-compose-develop.yaml up -d
-              docker-compose -f docker-compose-develop.yaml exec web-develop alembic stamp head
-              docker-compose -f docker-compose-develop.yaml exec web-develop alembic revision --autogenerate
+#              docker-compose -f docker-compose-develop.yaml exec web-develop alembic stamp head
+#              docker-compose -f docker-compose-develop.yaml exec web-develop alembic revision --autogenerate
               docker-compose -f docker-compose-develop.yaml exec web-develop alembic upgrade head
