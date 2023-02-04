@@ -19,7 +19,7 @@ from wtforms import form, fields, validators
 
 from src.core.db.db import Base
 from src.core.db.model import (Assistance_disabled, Pollution,
-                               Volunteer, Role, User, roles_users)
+                               Volunteer, Role, Staff, User)
 
 load_dotenv()
 
@@ -77,7 +77,7 @@ class LoginForm(form.Form):
             raise validators.ValidationError('Invalid password')
 
     def get_user(self):
-        return db.session.query(User).filter_by(login=self.login.data).first()
+        return db.session.query(Staff).filter_by(login=self.login.data).first()
 
 
 class RegistrationForm(form.Form):
@@ -86,7 +86,7 @@ class RegistrationForm(form.Form):
     password = fields.PasswordField(validators=[validators.InputRequired()])
 
     def validate_login(self, field):
-        if db.session.query(User).filter_by(login=self.login.data).count() > 0:
+        if db.session.query(Staff).filter_by(login=self.login.data).count() > 0:
             raise validators.ValidationError('Duplicate username')
 
 
@@ -97,8 +97,8 @@ def init_login():
 
     # Create user loader function
     @login_manager.user_loader
-    def load_user(user_id):
-        return db.session.query(User).get(user_id)
+    def load_user(staff_id):
+        return db.session.query(Staff).get(staff_id)
 
 
 # Create customized model view class
@@ -141,7 +141,7 @@ class MyAdminIndexView(AdminIndexView):
     def register_view(self):
         form = RegistrationForm(request.form)
         if helpers.validate_form_on_submit(form):
-            user = User()
+            user = Staff()
 
             form.populate_obj(user)
             # we hash the users password to avoid saving it as plaintext in the db,
@@ -179,12 +179,13 @@ admin = flask_admin.Admin(app, 'Example: Auth', index_view=MyAdminIndexView(),
                           base_template='my_master.html',
                           template_mode='bootstrap4')
 
-if User.query.filter_by(login='admin').all():
-    admin.add_view(MyModelView(User, db.session, name='User'))
-if not User.query.filter_by(login='admin').all():
-    admin.add_view(ModelView(User, db.session, name='User'))
+if Staff.query.filter_by(login='admin').all():
+    admin.add_view(MyModelView(Staff, db.session, name='Staff'))
+if not Staff.query.filter_by(login='admin').all():
+    admin.add_view(ModelView(Staff, db.session, name='Staff'))
 
 admin.add_view(MyModelView(Role, db.session, name='Role'))
+admin.add_view(MyModelView(User, db.session, name='User'))
 admin.add_view(MyModelView(Volunteer, db.session, name='Volunteer'))
 admin.add_view(MyModelView(Pollution, db.session, name='Pollution'))
 admin.add_view(
