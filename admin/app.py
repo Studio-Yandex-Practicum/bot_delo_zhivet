@@ -180,9 +180,9 @@ admin = flask_admin.Admin(app, 'Example: Auth', index_view=MyAdminIndexView(),
                           template_mode='bootstrap4')
 
 if User.query.filter_by(login='admin').all():
-    admin.add_view(ModelView(User, db.session, name='User'))
-if not User.query.filter_by(login='admin').all():
     admin.add_view(MyModelView(User, db.session, name='User'))
+if not User.query.filter_by(login='admin').all():
+    admin.add_view(ModelView(User, db.session, name='User'))
 
 admin.add_view(MyModelView(Role, db.session, name='Role'))
 admin.add_view(MyModelView(Volunteer, db.session, name='Volunteer'))
@@ -193,36 +193,21 @@ admin.add_view(
 
 
 def build_sample_db():
-    print('yes')
     admin_role = Role(name='admin', description='admin')
-    test_user = User(first_name='admin',
-                     last_name='admin',
-                     login='admin',
-                     email='admin@bot_delo_zhivet.ru',
-                     password=generate_password_hash('admin'),
-                     active=True,
-                     )
-    db.session.add(admin_role)
-    db.session.add(test_user)
-    db.session.commit()
-    print('create admin')
-    # admin_role = Role(name='user', description='user')
-    # db.session.add(admin_role)
-    # db.session.commit()
-    # test_user = User(login='admin',
+    # test_user = User(first_name='admin',
+    #                  last_name='admin',
+    #                  login='admin',
+    #                  email='admin@bot_delo_zhivet.ru',
     #                  password=generate_password_hash('admin'),
     #                  active=True,
-    #                  roles=Role.query.filter_by(name='user').all())
+    #                  )
+    db.session.add(admin_role)
     # db.session.add(test_user)
-    # db.session.commit()
-    # print('create admin')
+    db.session.commit()
 
 
 if __name__ == '__main__':
-    print(Role.query.get(1))
-    if (not User.query.filter_by(login='admin').all()
-            and not Role.query.filter_by(name='admin').all()):
-        # role = Role.query.get(1)
+    if not Role.query.filter_by(name='admin').all():
         with app.app_context():
             build_sample_db()
     # app.secret_key = os.urandom(24)
