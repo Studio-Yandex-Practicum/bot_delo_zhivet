@@ -33,6 +33,9 @@ flask-wtf = "^1.1.1"
 flask-migrate = "^4.0.3"
 werkzeug = "^2.2.2"
 coverage = "^7.1.0"
+yandex-tracker-client = "^2.3"
+dadata = "^21.10.1"
+pathlib = "^1.0.1"
 
 [build-system]
 requires = ["poetry-core"]

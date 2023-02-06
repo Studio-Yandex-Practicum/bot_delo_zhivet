@@ -11,7 +11,7 @@ from src.core.config import settings
 
 
 class PreBase_admin:
-    """init class add table name and id field."""
+    """Абстрактная модель для наследования моделей админ"""
 
     @declared_attr
     def __tablename__(cls):  # noqa
@@ -34,6 +34,8 @@ class PreBase:
         return cls.__name__.lower()
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    created_at = Column(TIMESTAMP, server_default=func.current_timestamp(),
+                        nullable=False)
     created_at = Column(TIMESTAMP, server_default=func.current_timestamp(),
                         nullable=False)
     updated_at = Column(

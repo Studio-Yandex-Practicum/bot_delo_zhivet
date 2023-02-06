@@ -1,6 +1,11 @@
 # Обозначим состояния главного менюSELECTING_ACTION
 from telegram.ext import ConversationHandler
 
+# Константы для API трекера
+VOLUNTEER = "VOLUNTEER"
+SOCIAL = "SOCIAL"
+POLLUTION = "POLLUTION"
+
 SELECTING_ACTION = "select_action"
 ADDING_VOLUNTEER = "adding_volunteer"
 MAKING_DONATION = "making_donations"
@@ -26,6 +31,9 @@ SHOWING = "showing"
 END = ConversationHandler.END
 
 # Различные константы для проекта
+LONGITUDE = "longitude"
+LATITUDE = 'latitude'
+FILE_PATH = "file_path"
 START_OVER = "start_over"
 FEATURES = "features"
 CURRENT_FEATURE = "current_feature"
@@ -33,9 +41,9 @@ CURRENT_LEVEL = "current_level"
 CITY_COMMAND = "CITY="
 RADIUS_COMMAND = "RADIUS="
 CAR_COMMAND = "CAR="
-POLLUTION_FOTO = "pollution_foto"
+POLLUTION_FOTO = "photo"
 POLLUTION_COORDINATES = "pollution_coordinates"
-POLLUTION_COMMENT = "pollution_comment"
+POLLUTION_COMMENT = "comment"
 SOCIAL_ADDRESS = "social_address"
 SOCIAL_COMMENT = "social_comment"
 SAVE = "save"
@@ -44,6 +52,11 @@ ACTIVITY_RADIUS = [
     list(range(30, 110, 20)),
     list(range(100, 250, 50)),
 ]
+TELEGRAM_ID = "telegram_id"
+TELEGRAM_USERNAME = "telegram_username"
+FIRST_NAME = "first_name"
+LAST_NAME = "last_name"
+SLEEP_TIME = 3
 
 # Различные сообщения пользователю
 

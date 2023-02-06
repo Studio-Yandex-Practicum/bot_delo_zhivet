@@ -161,7 +161,7 @@ cython_debug/
 .idea/
 
 # Media and Static Django
-/media
+/media/*
 /staticfiles
 
 # Logs Django
@@ -176,5 +176,3 @@ cython_debug/
 
 .vscode/
 *.code-workspace
-
-alembic/versions/*

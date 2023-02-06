@@ -1,6 +1,7 @@
 from sqlalchemy import (BigInteger, Boolean, Column, Date, DateTime, Float,
                         Table, ForeignKey, Integer, String, Text)
 
+
 from flask_security import RoleMixin
 from flask_login import UserMixin
 
@@ -11,13 +12,15 @@ from src.core.db.db import Base, Base_admin
 
 
 class User(Base):
-    """Model User."""
+    """Модель пользователя"""
+
     telegram_id = Column(BigInteger, unique=True, nullable=False)
     is_banned = Column(Boolean, default=False)
 
 
 class Volunteer(Base):
-    """Model Volunteer."""
+    """Модель волонтера"""
+
     telegram_id = Column(BigInteger, ForeignKey("user.telegram_id"))
     city = Column(String(100), nullable=False)
     full_address = Column(Text, nullable=False)
@@ -36,7 +39,7 @@ class Volunteer(Base):
 
 
 class Pollution(Base):
-    """Model Pollution. Инфо о загрязнении."""
+    """Модель сообщения о загрязнении"""
 
     photo = Column(String(100), nullable=False)
     latitude = Column(Float, nullable=False)
@@ -47,7 +50,7 @@ class Pollution(Base):
 
 
 class Assistance_disabled(Base):
-    """Model Assistance_disabled. Инфо о помощи инвалиду."""
+    """Модель сообщения о социальной помощи"""
 
     city = Column(Text, nullable=False)
     full_address = Column(Text, nullable=False)
@@ -64,8 +67,6 @@ roles_users = Table(
     Base_admin.metadata,
     Column('staff_id', Integer, ForeignKey('staff.id')),
     Column('role_id', Integer, ForeignKey('role.id'))
-    # Column('staff_id', UUID(), ForeignKey('staff.id')),
-    # Column('role_id', UUID(), ForeignKey('role.id'))
 )
 
 
@@ -78,16 +79,12 @@ class Role(Base_admin, RoleMixin):
 
 
 class Staff(Base_admin, UserMixin):
-    # def createSession(self):
-    #     Session = sessionmaker()
-    #     self.session = Session.configure(bind=self.engine)
     first_name = Column(String(255))
     last_name = Column(String(255))
     login = Column(String(255), unique=True)
     email = Column(String(255), unique=True)
     password = Column(String(255))
     active = Column(Boolean())
-    # confirmed_at = Column(DateTime())
     roles = relationship('Role', secondary=roles_users,
                          backref=backref('users', lazy='dynamic'))
 

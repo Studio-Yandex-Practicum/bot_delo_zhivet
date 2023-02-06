@@ -1,70 +1,36 @@
 import logging
 
-from telegram.ext import (
-    Application,
-    CallbackQueryHandler,
-    CommandHandler,
-    ConversationHandler,
-    MessageHandler,
-    filters,
-)
+from telegram.ext import (Application, CallbackQueryHandler, CommandHandler,
+                          ConversationHandler, MessageHandler, filters)
 from telegram.ext.filters import Regex
 
-from bot.const import (
-    BECOME_VOLUNTEER_CMD,
-    END_CMD,
-    MAKE_DONATION_CMD,
-    REPORT_ECO_PROBLEM_CMD,
-    SPECIFY_ACTIVITY_RADIUS_CMD,
-    SPECIFY_CAR_AVAILABILITY_CMD,
-    SPECIFY_CITY_CMD,
-)
+from bot.const import (BECOME_VOLUNTEER_CMD, END_CMD, MAKE_DONATION_CMD,
+                       REPORT_ECO_PROBLEM_CMD, SPECIFY_ACTIVITY_RADIUS_CMD,
+                       SPECIFY_CAR_AVAILABILITY_CMD, SPECIFY_CITY_CMD)
 from core.settings import settings
+
 from .handlers.common import end_describing, help_command, stop, stop_nested
 from .handlers.participation import make_donation
-from .handlers.pollution import (
-    input,
-    save_and_exit_pollution,
-    save_comment,
-    save_foto,
-    save_location,
-    select_option_to_report_about_pollution,
-)
-from .handlers.social import (
-    input_social_data,
-    save_social_problem_data,
-    report_about_social_problem,
-    save_and_exit_from_social_problem,
-)
+from .handlers.pollution import (input, save_and_exit_pollution, save_comment,
+                                 save_foto, save_location,
+                                 select_option_to_report_about_pollution)
+from .handlers.social import (input_social_data, report_about_social_problem,
+                              save_and_exit_from_social_problem,
+                              save_social_problem_data)
 from .handlers.start import start
-from .handlers.state_constants import (
-    ADDING_VOLUNTEER,
-    CAR_COMMAND,
-    CITY_COMMAND,
-    POLLUTION_COMMENT,
-    POLLUTION_COORDINATES,
-    POLLUTION_FOTO,
-    RADIUS_COMMAND,
-    SAVE,
-    SELECTING_ACTION,
-    SELECTING_FEATURE,
-    SELECTING_OVER,
-    TYPING,
-    TYPING_CITY,
-    SOCIAL_COMMENT,
-    SOCIAL_ADDRESS,
-    ADDING_SOCIAL_TASK,
-    SOCIAL_PROBLEM_TYPING,
-)
-from .handlers.volunteer import (
-    add_volunteer,
-    ask_for_input_city,
-    handle_car_input,
-    handle_city_input,
-    handle_radius_input,
-    save_input,
-    save_and_exit_volunteer
-)
+from .handlers.state_constants import (ADDING_SOCIAL_TASK, ADDING_VOLUNTEER,
+                                       CAR_COMMAND, CITY_COMMAND,
+                                       POLLUTION_COMMENT,
+                                       POLLUTION_COORDINATES, POLLUTION_FOTO,
+                                       RADIUS_COMMAND, SAVE, SELECTING_ACTION,
+                                       SELECTING_FEATURE, SELECTING_OVER,
+                                       SOCIAL_ADDRESS, SOCIAL_COMMENT,
+                                       SOCIAL_PROBLEM_TYPING, TYPING,
+                                       TYPING_CITY)
+from .handlers.volunteer import (add_volunteer, ask_for_input_city,
+                                 handle_car_input, handle_city_input,
+                                 handle_radius_input, save_and_exit_volunteer,
+                                 save_input)
 
 
 def start_bot() -> None:

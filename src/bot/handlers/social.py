@@ -1,20 +1,22 @@
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import (
-    ContextTypes,
-)
+from dotenv import load_dotenv
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram.ext import ContextTypes
 
+from api.tracker import client
 from bot.handlers.start import start
-from bot.handlers.state_constants import (
-    END,
-    START_OVER,
-    FEATURES,
-    SELECTING_FEATURE,
-    SOCIAL_COMMENT,
-    SOCIAL_ADDRESS,
-    SAVE,
-    CURRENT_FEATURE,
-    SOCIAL_PROBLEM_TYPING,
-)
+from bot.handlers.state_constants import (CURRENT_FEATURE, END, FEATURES, SAVE,
+                                          SELECTING_FEATURE, SOCIAL,
+                                          SOCIAL_ADDRESS, SOCIAL_COMMENT,
+                                          SOCIAL_PROBLEM_TYPING, START_OVER,
+                                          TELEGRAM_ID)
+from src.bot.service.assistance_disabled import create_new_social
+from src.bot.service.save_new_user import create_new_user
+from src.bot.service.save_tracker_id import save_tracker_id_assistance_disabled
+from src.core.db.db import get_async_session
+from src.core.db.repository.assistance_disabled_repository import \
+    crud_assistance_disabled
+
+load_dotenv(".env")
 
 
 async def input_social_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -85,15 +87,20 @@ async def report_about_social_problem(
 async def save_and_exit_from_social_problem(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
-    """Сохранение данных в базу"""
+    """Сохранение данных в базу и отправка в трекер"""
     context.user_data[START_OVER] = True
-    print(f"""
-
-
-    {context.user_data[FEATURES]}
-
-
-    """)
+    user_data = context.user_data[FEATURES]
+    user_data[TELEGRAM_ID] = update.effective_user.id
+    comment = user_data[SOCIAL_COMMENT]
+    session_generator = get_async_session()
+    session = await session_generator.asend(None)
+    await create_new_user(user_data[TELEGRAM_ID], session)
+    await create_new_social(user_data, session)
+    city = await crud_assistance_disabled.get_full_address_by_telegram_id(user_data[TELEGRAM_ID], session)
+    client.issues.create(
+        queue=SOCIAL, summary=city, description=comment,
+    )
+    await save_tracker_id_assistance_disabled(city, user_data[TELEGRAM_ID], session)
     await start(update, context)
     return END
 

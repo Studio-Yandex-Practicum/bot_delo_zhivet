@@ -12,6 +12,8 @@ services:
       timeout: 10s
       interval: 1s
       retries: 10
+    ports: # для локального доступа
+      - "127.0.0.1:5432:5432"
   web:
     build:
       context: ../
