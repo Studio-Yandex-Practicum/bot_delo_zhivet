@@ -10,7 +10,6 @@ from sqlalchemy.orm import (declarative_base, declared_attr, sessionmaker,
 from src.core.config import settings
 
 
-
 class PreBase_admin:
     """Абстрактная модель для наследования моделей админ"""
 
