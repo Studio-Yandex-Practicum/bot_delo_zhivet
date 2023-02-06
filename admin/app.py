@@ -17,7 +17,7 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from werkzeug.security import check_password_hash, generate_password_hash
 from wtforms import form, fields, validators
 
-from src.core.db.db import Base
+from src.core.db.db import Base_admin
 from src.core.db.model import (Assistance_disabled, Pollution,
                                Volunteer, Role, Staff, User)
 
@@ -52,9 +52,9 @@ engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'], pool_size=10000,
 db_session = scoped_session(sessionmaker(autocommit=False,
                                          autoflush=False,
                                          bind=engine))
-Base.query = db_session.query_property()
-Base.metadata.create_all(engine)
-Session = sessionmaker(binds={Base: engine})
+Base_admin.query = db_session.query_property()
+Base_admin.metadata.create_all(engine)
+Session = sessionmaker(binds={Base_admin: engine})
 # Session = sessionmaker(bind=engine)
 session = Session()
 

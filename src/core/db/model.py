@@ -11,7 +11,7 @@ from sqlalchemy.orm import relationship, backref
 from sqlalchemy.dialects.postgresql import UUID
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from src.core.db.db import Base
+from src.core.db.db import Base, Base_admin
 
 
 class User(Base):
@@ -65,7 +65,7 @@ class Assistance_disabled(Base):
 # Define models
 roles_users = Table(
     'roles_users',
-    Base.metadata,
+    Base_admin.metadata,
     Column('staff_id', Integer, ForeignKey('staff.id')),
     Column('role_id', Integer, ForeignKey('role.id'))
     # Column('staff_id', UUID(), ForeignKey('staff.id')),
@@ -73,7 +73,7 @@ roles_users = Table(
 )
 
 
-class Role(Base, RoleMixin):
+class Role(Base_admin, RoleMixin):
     name = Column(String, unique=True)
     description = Column(String(255))
 
@@ -81,7 +81,7 @@ class Role(Base, RoleMixin):
         return self.name
 
 
-class Staff(Base, UserMixin):
+class Staff(Base_admin, UserMixin):
     # def createSession(self):
     #     Session = sessionmaker()
     #     self.session = Session.configure(bind=self.engine)
