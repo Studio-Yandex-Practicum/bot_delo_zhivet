@@ -1,7 +1,7 @@
 import flask_admin
-import psycopg2
-from flask import abort, Flask, render_template, redirect, url_for, request
-from flask_admin import Admin, expose, helpers, AdminIndexView
+# import psycopg2
+from flask import Flask, render_template, redirect, url_for, request
+from flask_admin import expose, helpers, AdminIndexView
 from flask_admin.contrib import sqla
 from flask_admin.contrib.sqla import ModelView
 from flask_migrate import Migrate

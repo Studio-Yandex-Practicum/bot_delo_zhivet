@@ -1,14 +1,10 @@
-from sqlalchemy import Column, Date, DateTime, ForeignKey, Integer, String, \
-    Text, BigInteger, Float, Table, Boolean
-from flask_security import (Security, SQLAlchemyUserDatastore,
-                            RoleMixin, login_required, current_user,
-                            RegisterForm
-                            )
+from sqlalchemy import (BigInteger, Boolean, Column, Date, DateTime, Float,
+                        Table, ForeignKey, Integer, String, Text)
+
+from flask_security import RoleMixin
 from flask_login import UserMixin
 
-from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import relationship, backref
-from sqlalchemy.dialects.postgresql import UUID
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from src.core.db.db import Base, Base_admin
