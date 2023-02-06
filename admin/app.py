@@ -107,10 +107,10 @@ class MyModelView(sqla.ModelView):
     def is_accessible(self):
         # return login.current_user.is_authenticated
         return (
-                current_user.is_active and
-                current_user.is_authenticated and
-                current_user.has_role('admin')
-                )
+                current_user.is_active
+                and current_user.is_authenticated
+                and current_user.has_role('admin')
+        )
 
 
 # Create customized index view class that handles login & registration
