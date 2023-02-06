@@ -8,6 +8,14 @@ python3 -m pip install psycopg2-binary
 
 
 Запуск:
-poetry run python admin/run.py
+poetry run python admin/app.py
+
+После запуска:
+1. Создать через форму регистрации пользователя admin (важно должен быть
+именно с таким именем)
+2. Зайди в Staff и присвоить пользователю admin роль admin,
+обязательно постваить галочку в поле Active
+3. Перезагрузить сервер
+4. Пройти Аутификацию
 
 
