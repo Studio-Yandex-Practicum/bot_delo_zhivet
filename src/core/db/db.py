@@ -1,11 +1,29 @@
 import uuid
+from datetime import datetime
 
-from sqlalchemy import TIMESTAMP, Column, func
+from sqlalchemy import TIMESTAMP, Column, func, Integer, DateTime
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import declarative_base, declared_attr, sessionmaker
+from sqlalchemy.orm import (declarative_base, declared_attr, sessionmaker,
+                            scoped_session)
 
 from src.core.config import settings
+
+
+class PreBase_admin:
+    """Абстрактная модель для наследования моделей админ"""
+
+    @declared_attr
+    def __tablename__(cls):  # noqa
+        return cls.__name__.lower()
+
+    id = Column(Integer, primary_key=True)
+    created_at = Column(DateTime(timezone=True), default=datetime.utcnow)
+    updated_at = Column(DateTime(timezone=True), default=datetime.utcnow,
+                        onupdate=datetime.utcnow)
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}, id = {self.id}."
 
 
 class PreBase:
@@ -29,12 +47,16 @@ class PreBase:
 
 
 Base = declarative_base(cls=PreBase)
+Base_admin = declarative_base(cls=PreBase_admin)
 database_url = (
     f"postgresql+asyncpg://{settings.POSTGRES_USER}:"
     f"{settings.POSTGRES_PASSWORD}@{settings.DB_HOST}:"
     f"{settings.DB_PORT}/{settings.POSTGRES_DB}"
 )
 engine = create_async_engine(database_url)
+db_session = scoped_session(sessionmaker(autocommit=False,
+                                         autoflush=False, ))
+Base_admin.query = db_session.query_property()
 AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession)
 
 
