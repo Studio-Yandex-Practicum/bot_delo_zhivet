@@ -1,17 +1,16 @@
+import os
+
 import flask_admin
-# import psycopg2
+import flask_login as login
+from dotenv import load_dotenv
+
 from flask import Flask, render_template, redirect, url_for, request
 from flask_admin import expose, helpers, AdminIndexView
 from flask_admin.contrib import sqla
 from flask_admin.contrib.sqla import ModelView
 from flask_migrate import Migrate
-from flask_sqlalchemy import SQLAlchemy
 from flask_security import current_user
-import flask_login as login
-
-from dotenv import load_dotenv
-import os
-
+from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -34,13 +33,6 @@ app.config['SQLALCHEMY_DATABASE_URI'] = (
     f"{os.getenv('POSTGRES_PASSWORD')}@"
     f"{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('POSTGRES_DB')}")
 
-# conn_string = "host='localhost' dbname='delo_zhivet' user='postgres' password='postgres'"
-# conn = psycopg2.connect(conn_string)
-# app.config['SQLALCHEMY_DATABASE_URI'] = (
-#     f"postgresql+psycopg2://{os.getenv('POSTGRES_USER')}:"
-#     f"{os.getenv('POSTGRES_PASSWORD')}@"
-#     f"{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('POSTGRES_DB')}")
-
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 
@@ -55,12 +47,11 @@ db_session = scoped_session(sessionmaker(autocommit=False,
 Base_admin.query = db_session.query_property()
 Base_admin.metadata.create_all(engine)
 Session = sessionmaker(binds={Base_admin: engine})
-# Session = sessionmaker(bind=engine)
 session = Session()
 
 
-# Define login and registration forms (for flask-login)
 class LoginForm(form.Form):
+    """Форма входа в админку"""
     login = fields.StringField(validators=[validators.InputRequired()])
     password = fields.PasswordField(validators=[validators.InputRequired()])
 
@@ -70,10 +61,7 @@ class LoginForm(form.Form):
         if user is None:
             raise validators.ValidationError('Invalid user')
 
-        # we're comparing the plaintext pw with the the hash from the db
         if not check_password_hash(user.password, self.password.data):
-            # to compare plain text passwords use
-            # if user.password != self.password.data:
             raise validators.ValidationError('Invalid password')
 
     def get_user(self):
@@ -81,6 +69,7 @@ class LoginForm(form.Form):
 
 
 class RegistrationForm(form.Form):
+    """Форма регистрации"""
     login = fields.StringField(validators=[validators.InputRequired()])
     email = fields.StringField()
     password = fields.PasswordField(validators=[validators.InputRequired()])
@@ -90,28 +79,23 @@ class RegistrationForm(form.Form):
             raise validators.ValidationError('Duplicate username')
 
 
-# Initialize flask-login
 def init_login():
     login_manager = login.LoginManager()
     login_manager.init_app(app)
 
-    # Create user loader function
     @login_manager.user_loader
     def load_user(staff_id):
         return db.session.query(Staff).get(staff_id)
 
 
-# Create customized model view class
 class MyModelView(sqla.ModelView):
 
     def is_accessible(self):
-        # return login.current_user.is_authenticated
         return (current_user.is_active
                 and current_user.is_authenticated
                 and current_user.has_role('admin'))
 
 
-# Create customized index view class that handles login & registration
 class MyAdminIndexView(AdminIndexView):
 
     @expose('/')
@@ -122,7 +106,6 @@ class MyAdminIndexView(AdminIndexView):
 
     @expose('/login/', methods=('GET', 'POST'))
     def login_view(self):
-        # handle user login
         form = LoginForm(request.form)
         if helpers.validate_form_on_submit(form):
             user = form.get_user()
@@ -143,8 +126,6 @@ class MyAdminIndexView(AdminIndexView):
             user = Staff()
 
             form.populate_obj(user)
-            # we hash the users password to avoid saving it as plaintext in the db,
-            # remove to use plain text:
             user.password = generate_password_hash(form.password.data)
 
             db.session.add(user)
@@ -164,16 +145,14 @@ class MyAdminIndexView(AdminIndexView):
         return redirect(url_for('.index'))
 
 
-# Flask views
 @app.route('/')
 def index():
     return render_template('index.html')
 
 
-# Initialize flask-login
 init_login()
 
-# Create admin
+
 admin = flask_admin.Admin(app, 'Example: Auth', index_view=MyAdminIndexView(),
                           base_template='my_master.html',
                           template_mode='bootstrap4')
@@ -194,15 +173,7 @@ admin.add_view(
 
 def build_sample_db():
     admin_role = Role(name='admin', description='admin')
-    # test_user = User(first_name='admin',
-    #                  last_name='admin',
-    #                  login='admin',
-    #                  email='admin@bot_delo_zhivet.ru',
-    #                  password=generate_password_hash('admin'),
-    #                  active=True,
-    #                  )
     db.session.add(admin_role)
-    # db.session.add(test_user)
     db.session.commit()
 
 
@@ -210,5 +181,4 @@ if __name__ == '__main__':
     if not Role.query.filter_by(name='admin').all():
         with app.app_context():
             build_sample_db()
-    # app.secret_key = os.urandom(24)
     app.run(debug=True)

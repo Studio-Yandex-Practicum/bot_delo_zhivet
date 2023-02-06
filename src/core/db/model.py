@@ -61,7 +61,6 @@ class Assistance_disabled(Base):
     longitude = Column(Float, nullable=True)
 
 
-# Define models
 roles_users = Table(
     'roles_users',
     Base_admin.metadata,
@@ -71,6 +70,8 @@ roles_users = Table(
 
 
 class Role(Base_admin, RoleMixin):
+    """Модель роли для персонала"""
+
     name = Column(String, unique=True)
     description = Column(String(255))
 
@@ -79,6 +80,8 @@ class Role(Base_admin, RoleMixin):
 
 
 class Staff(Base_admin, UserMixin):
+    """Модель персонала"""
+
     first_name = Column(String(255))
     last_name = Column(String(255))
     login = Column(String(255), unique=True)
@@ -88,7 +91,6 @@ class Staff(Base_admin, UserMixin):
     roles = relationship('Role', secondary=roles_users,
                          backref=backref('users', lazy='dynamic'))
 
-    # Flask - Login
     @property
     def is_authenticated(self):
         return True
@@ -101,18 +103,15 @@ class Staff(Base_admin, UserMixin):
     def is_anonymous(self):
         return False
 
-    # Flask-Security
     def has_role(self, *args):
         return set(args).issubset({role.name for role in self.roles})
 
     def get_id(self):
         return self.id
 
-    # Required for administrative interface
     def __unicode__(self):
         return self.login
 
-    #
     def set_password(self, password):
         self.password = generate_password_hash(password)
 
