@@ -15,7 +15,6 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from werkzeug.security import check_password_hash, generate_password_hash
 from wtforms import form, fields, validators
-from wtforms.validators import DataRequired, Email
 
 from src.core.db.db import Base_admin
 from src.core.db.model import (Assistance_disabled, Pollution,
@@ -73,7 +72,7 @@ class RegistrationForm(form.Form):
     """Форма регистрации"""
 
     login = fields.StringField(validators=[validators.InputRequired()])
-    email = fields.StringField(validators=[DataRequired(), Email()])
+    email = fields.StringField(validators=[validators.DataRequired(), validators.Email()])
     password = fields.PasswordField(validators=[validators.InputRequired()])
 
     def validate_login(self, field):
