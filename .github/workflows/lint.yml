@@ -14,12 +14,12 @@ jobs:
     steps:
       - name: Check out repo
         uses: actions/checkout@v3
+
       - name: formatter
         uses: psf/black@stable
         with:
           src: "."
           options: "--diff"
-
 
   lint-flake:
     name: Check PEP8 codestyle
@@ -28,16 +28,20 @@ jobs:
     steps:
       - name: Check out repo
         uses: actions/checkout@v3
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.x"
 
+      - name: Install poetry
+        run: curl -sSL https://install.python-poetry.org | python3 -
+
+      - name: Verify that poetry.lock is consistent with pyproject.toml
+        run: poetry lock --check
+
       - name: Install dependencies
-        run: |
-          python3 -m pip install --upgrade pip
-          pip3 install flake8 pep8-naming flake8-broken-line flake8-return
+        run: poetry install --with test
 
       - name: Test with flake8
-        run: |
-          python -m flake8
+        run: poetry run python -m flake8
