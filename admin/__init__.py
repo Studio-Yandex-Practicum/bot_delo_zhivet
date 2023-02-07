@@ -37,6 +37,16 @@ Base_admin.metadata.create_all(engine)
 Session = sessionmaker(binds={Base_admin: engine})
 session = Session()
 
+if len(Staff.query.all()) < 1:
+    staff = Staff(login='admin', email='admin@gmail.com',
+                  password='pbkdf2:sha256:260000$UCyUKhCOz5sRuvUI$1772bcd9c97724ab4994d228ca77df5fd4ca341a6fba014074db39926c842f7b',
+                  active=True)
+    role = Role(name='admin', description='admin')
+    staff.roles.append(role)
+    db_session.add(staff)
+    db_session.add(role)
+    db_session.commit()
+
 
 def init_login():
     login_manager = login.LoginManager()
