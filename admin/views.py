@@ -86,3 +86,12 @@ admin.add_view(MyModelView(Pollution, db.session, name='Pollution'))
 admin.add_view(
     MyModelView(Assistance_disabled, db.session, name='Assistance_disabled')
 )
+
+
+def build_sample_db():
+    admin_role = Role(name='admin', description='admin')
+    db.session.add(admin_role)
+    db.session.commit()
+    if not Role.query.filter_by(name='admin').all():
+        with app.app_context():
+            build_sample_db()

@@ -57,14 +57,5 @@ init_login()
 from . import views
 
 
-def build_sample_db():
-    admin_role = Role(name='admin', description='admin')
-    db.session.add(admin_role)
-    db.session.commit()
-
-
 if __name__ == '__main__':
-    if not Role.query.filter_by(name='admin').all():
-        with app.app_context():
-            build_sample_db()
     app.run(debug=True)
