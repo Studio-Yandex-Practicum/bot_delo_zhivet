@@ -14,19 +14,22 @@ from .handlers.participation import make_donation
 from .handlers.pollution import (input, save_and_exit_pollution, save_comment,
                                  save_foto, save_location,
                                  select_option_to_report_about_pollution)
-from .handlers.social import (input_social_data, report_about_social_problem,
+from .handlers.social import (address_confirmation, ask_for_input_address,
+                              input_social_data, report_about_social_problem,
                               save_and_exit_from_social_problem,
+                              save_social_address_input,
                               save_social_problem_data)
 from .handlers.start import start
 from .handlers.state_constants import (ADDING_SOCIAL_TASK, ADDING_VOLUNTEER,
-                                       CAR_COMMAND, CITY_COMMAND,
-                                       POLLUTION_COMMENT,
+                                       CAR_COMMAND, CITY_COMMAND, CITY_INPUT,
+                                       CITY_SOCIAL, POLLUTION_COMMENT,
                                        POLLUTION_COORDINATES, POLLUTION_FOTO,
                                        RADIUS_COMMAND, SAVE, SELECTING_ACTION,
                                        SELECTING_FEATURE, SELECTING_OVER,
                                        SOCIAL_ADDRESS, SOCIAL_COMMENT,
+                                       SOCIAL_PROBLEM_ADDRESS,
                                        SOCIAL_PROBLEM_TYPING, TYPING,
-                                       TYPING_CITY)
+                                       TYPING_CITY, TYPING_SOCIAL_CITY)
 from .handlers.volunteer import (add_volunteer, ask_for_input_city,
                                  handle_car_input, handle_city_input,
                                  handle_radius_input, save_and_exit_volunteer,
@@ -66,6 +69,7 @@ def start_bot() -> None:
         fallbacks=[
             CallbackQueryHandler(end_describing, pattern=END_CMD),
             CommandHandler("stop", stop_nested),
+            CallbackQueryHandler(ask_for_input_city, pattern=CITY_INPUT)
         ],
     )
 
@@ -95,7 +99,6 @@ def start_bot() -> None:
     )
 
     add_social_conv = ConversationHandler(
-        # OK
         entry_points=[
             CallbackQueryHandler(
                 report_about_social_problem,
@@ -105,7 +108,7 @@ def start_bot() -> None:
         states={
             SELECTING_FEATURE: [
                 CallbackQueryHandler(
-                    input_social_data, pattern="^" + SOCIAL_ADDRESS + "$"
+                    ask_for_input_address, pattern="^" + SOCIAL_ADDRESS + "$"
                 ),
                 CallbackQueryHandler(
                     input_social_data, pattern="^" + SOCIAL_COMMENT + "$"
@@ -117,13 +120,19 @@ def start_bot() -> None:
             SOCIAL_PROBLEM_TYPING: [
                 MessageHandler(
                     filters.TEXT & ~filters.COMMAND, save_social_problem_data
-                )
+                ),
             ],
+            SOCIAL_PROBLEM_ADDRESS: [
+                CallbackQueryHandler(save_social_address_input, pattern="^" + CITY_SOCIAL)
+            ],
+            TYPING_SOCIAL_CITY: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, address_confirmation),
+            ]
         },
-        # OK
         fallbacks=[
             CallbackQueryHandler(end_describing, pattern=END_CMD),
             CommandHandler("stop", stop_nested),
+            CallbackQueryHandler(ask_for_input_address, pattern=CITY_INPUT)
         ],
     )
     conv_handler = ConversationHandler(
