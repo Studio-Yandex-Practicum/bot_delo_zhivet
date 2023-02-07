@@ -39,6 +39,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     keyboard = InlineKeyboardMarkup(buttons)
 
     # Если пользователь в первый раз обращается к боту, то покажем ему приветственное сообщение
+    context.user_data.get(START_OVER)
     if not context.user_data.get(START_OVER):
         user = update.message.from_user
         username = user["username"]

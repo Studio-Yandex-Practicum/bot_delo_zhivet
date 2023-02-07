@@ -3,18 +3,29 @@ from telegram.ext import ContextTypes
 
 from src.api.tracker import client
 from src.bot.handlers.start import start
-from src.bot.handlers.state_constants import (ACTIVITY_RADIUS,
-                                              ADDING_VOLUNTEER, CAR_COMMAND,
-                                              CITY_COMMAND, CURRENT_FEATURE,
-                                              CURRENT_LEVEL, END, FEATURES,
-                                              FIRST_NAME, LAST_NAME,
-                                              RADIUS_COMMAND, SAVE,
-                                              SELECTING_OVER,
-                                              SPECIFY_ACTIVITY_RADIUS,
-                                              SPECIFY_CAR_AVAILABILITY,
-                                              SPECIFY_CITY, START_OVER,
-                                              TELEGRAM_ID, TELEGRAM_USERNAME,
-                                              TYPING_CITY, VOLUNTEER)
+from src.bot.handlers.state_constants import (
+    ACTIVITY_RADIUS,
+    ADDING_VOLUNTEER,
+    CAR_COMMAND,
+    CITY_COMMAND,
+    CURRENT_FEATURE,
+    CURRENT_LEVEL,
+    END,
+    FEATURES,
+    FIRST_NAME,
+    LAST_NAME,
+    RADIUS_COMMAND,
+    SAVE,
+    SELECTING_OVER,
+    SPECIFY_ACTIVITY_RADIUS,
+    SPECIFY_CAR_AVAILABILITY,
+    SPECIFY_CITY,
+    START_OVER,
+    TELEGRAM_ID,
+    TELEGRAM_USERNAME,
+    TYPING_CITY,
+    VOLUNTEER,
+)
 from src.bot.service.save_new_user import create_new_user
 from src.bot.service.save_tracker_id import save_tracker_id_volunteer
 from src.bot.service.volunteer import create_new_volunteer
@@ -55,11 +66,7 @@ async def add_volunteer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> s
         await update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
     else:
         if check_data(context.user_data[FEATURES]) is True:
-            buttons.append(
-                [InlineKeyboardButton(
-                    text="Сохранить и выйти", callback_data=SAVE
-                )]
-            )
+            buttons.append([InlineKeyboardButton(text="Сохранить и выйти", callback_data=SAVE)])
             keyboard = InlineKeyboardMarkup(buttons)
         text = "Понял-принял!. Выбери следующую опцию"
         if update.message is not None:
@@ -162,9 +169,7 @@ async def save_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     return await add_volunteer(update, context)
 
 
-async def save_and_exit_volunteer(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
-) -> str:
+async def save_and_exit_volunteer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     """Сохранение данных в базу и отправка в трекер"""
     context.user_data[START_OVER] = True
     user_data = context.user_data[FEATURES]
@@ -177,6 +182,10 @@ async def save_and_exit_volunteer(
     user_data[TELEGRAM_ID] = update.effective_user.id
     user_data[TELEGRAM_USERNAME] = update.effective_user.username
     user_data[FIRST_NAME] = update.effective_user.first_name
+    some = update.effective_user.id
+    print(some)
+    print("===")
+    print(user_data[TELEGRAM_ID])
     user_data[LAST_NAME] = update.effective_user.last_name
     session_generator = get_async_session()
     session = await session_generator.asend(None)
@@ -190,7 +199,9 @@ async def save_and_exit_volunteer(
     радиус выезда{radius}
     """
     client.issues.create(
-        queue=VOLUNTEER, summary=summary, description=description,
+        queue=VOLUNTEER,
+        summary=summary,
+        description=description,
     )
     await save_tracker_id_volunteer(summary, user_data[TELEGRAM_ID], session)
     await start(update, context)
@@ -198,8 +209,7 @@ async def save_and_exit_volunteer(
 
 
 def check_data(user_data):
-    if (SPECIFY_CITY in user_data
-            and SPECIFY_ACTIVITY_RADIUS in user_data) and SPECIFY_CAR_AVAILABILITY in user_data:
+    if (SPECIFY_CITY in user_data and SPECIFY_ACTIVITY_RADIUS in user_data) and SPECIFY_CAR_AVAILABILITY in user_data:
         return True
     else:
         return False
