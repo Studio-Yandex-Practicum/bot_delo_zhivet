@@ -3,7 +3,6 @@ import os
 import flask_admin
 import flask_login as login
 from dotenv import load_dotenv
-
 from flask import Flask, render_template, redirect, url_for, request
 from flask_admin import expose, helpers, AdminIndexView
 from flask_admin.contrib import sqla
@@ -32,7 +31,6 @@ app.config['SQLALCHEMY_DATABASE_URI'] = (
     f"postgresql://{os.getenv('POSTGRES_USER')}:"
     f"{os.getenv('POSTGRES_PASSWORD')}@"
     f"{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('POSTGRES_DB')}")
-
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 
@@ -71,13 +69,20 @@ class LoginForm(form.Form):
 class RegistrationForm(form.Form):
     """Форма регистрации"""
 
-    login = fields.StringField(validators=[validators.InputRequired()])
-    email = fields.StringField(validators=[validators.DataRequired(), validators.Email()])
-    password = fields.PasswordField(validators=[validators.InputRequired()])
+    login = fields.StringField('Login', validators=[validators.InputRequired()])
+    email = fields.StringField('Email', validators=[validators.DataRequired(), validators.Email()])
+    password = fields.PasswordField('Password', validators=[validators.InputRequired(), validators.Length(min=8)])
+    password2 = fields.PasswordField('Repeat password', validators=[
+        validators.DataRequired(), validators.EqualTo('password')])
 
     def validate_login(self, field):
         if db.session.query(Staff).filter_by(login=self.login.data).count() > 0:
-            raise validators.ValidationError('Duplicate username')
+            raise validators.ValidationError('User with this login is already registered')
+
+    def validate_email(self, field):
+        if db.session.query(Staff).filter_by(email=self.email.data).count() > 0:
+            raise validators.ValidationError(
+                'User with this email is already registered')
 
 
 def init_login():
@@ -152,7 +157,6 @@ def index():
 
 
 init_login()
-
 
 admin = flask_admin.Admin(app, 'Example: Auth', index_view=MyAdminIndexView(),
                           base_template='my_master.html',
