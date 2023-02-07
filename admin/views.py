@@ -3,7 +3,6 @@ import flask_login as login
 from flask import redirect, url_for, request
 from flask_admin import expose, helpers, AdminIndexView
 from flask_admin.contrib import sqla
-from flask_admin.contrib.sqla import ModelView
 from flask_security import current_user
 from werkzeug.security import generate_password_hash
 
