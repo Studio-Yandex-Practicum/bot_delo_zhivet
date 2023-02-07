@@ -5,16 +5,17 @@ from src.api.tracker import client
 from src.bot.handlers.start import start
 from src.bot.handlers.state_constants import (ACTIVITY_RADIUS,
                                               ADDING_VOLUNTEER, CAR_COMMAND,
-                                              CITY_COMMAND, CURRENT_FEATURE,
-                                              CURRENT_LEVEL, END, FEATURES,
-                                              FIRST_NAME, LAST_NAME,
-                                              RADIUS_COMMAND, SAVE,
+                                              CITY_COMMAND, CITY_INPUT,
+                                              CURRENT_FEATURE, CURRENT_LEVEL,
+                                              END, FEATURES, FIRST_NAME,
+                                              LAST_NAME, RADIUS_COMMAND, SAVE,
                                               SELECTING_OVER,
                                               SPECIFY_ACTIVITY_RADIUS,
                                               SPECIFY_CAR_AVAILABILITY,
                                               SPECIFY_CITY, START_OVER,
                                               TELEGRAM_ID, TELEGRAM_USERNAME,
                                               TYPING_CITY, VOLUNTEER)
+from src.bot.service.dadata import get_fields_from_dadata
 from src.bot.service.save_new_user import create_new_user
 from src.bot.service.save_tracker_id import save_tracker_id_volunteer
 from src.bot.service.volunteer import create_new_volunteer
@@ -34,7 +35,7 @@ async def add_volunteer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> s
 
     buttons = [
         [
-            InlineKeyboardButton(text="Указать город", callback_data=SPECIFY_CITY),
+            InlineKeyboardButton(text="Укажите свой адрес", callback_data=SPECIFY_CITY),
         ],
         [
             InlineKeyboardButton(text="Указать радиус активности", callback_data=SPECIFY_ACTIVITY_RADIUS),
@@ -93,15 +94,19 @@ async def ask_for_input_city(update: Update, context: ContextTypes.DEFAULT_TYPE)
 async def handle_city_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     """Обработчик данных о населенном пункте с выводом возможных вариантов."""
     user_input = update.message.text
-    text = "Пожалуйста, выбери город из представленных"
-    buttons = []
+    address = get_fields_from_dadata(user_input)
+    text = (f"Это правильный адрес: {address['full_address']}? "
+            'Если адрес не правильный, то выберите "Нет" и укажите более подробный вариант адреса, '
+            "а мы постараемся определить его правильно!")
+    context.user_data[FEATURES] = address
 
     data = CITY_COMMAND + user_input
-    buttons.append(
+    buttons = [
         [
-            InlineKeyboardButton(text=user_input, callback_data=data),
+            InlineKeyboardButton(text="Да", callback_data=data),
+            InlineKeyboardButton(text="Нет", callback_data=CITY_INPUT),
         ]
-    )
+    ]
 
     keyboard = InlineKeyboardMarkup(buttons)
 
@@ -168,26 +173,29 @@ async def save_and_exit_volunteer(
     """Сохранение данных в базу и отправка в трекер"""
     context.user_data[START_OVER] = True
     user_data = context.user_data[FEATURES]
-    city = user_data[SPECIFY_CITY][5:]
     radius = user_data[SPECIFY_ACTIVITY_RADIUS][7:]
     car = user_data[SPECIFY_CAR_AVAILABILITY][4:]
-    user_data[SPECIFY_CITY] = city
     user_data[SPECIFY_ACTIVITY_RADIUS] = int(radius)
     user_data[SPECIFY_CAR_AVAILABILITY] = car
     user_data[TELEGRAM_ID] = update.effective_user.id
     user_data[TELEGRAM_USERNAME] = update.effective_user.username
     user_data[FIRST_NAME] = update.effective_user.first_name
     user_data[LAST_NAME] = update.effective_user.last_name
+    del user_data[SPECIFY_CITY]
+    if user_data[SPECIFY_CAR_AVAILABILITY] == 'Yes':
+        user_data[SPECIFY_CAR_AVAILABILITY] = True
+    else:
+        user_data[SPECIFY_CAR_AVAILABILITY] = False
     session_generator = get_async_session()
     session = await session_generator.asend(None)
     await create_new_user(user_data[TELEGRAM_ID], session)
     await create_new_volunteer(user_data, session)
-    summary = f"{user_data[TELEGRAM_USERNAME]} - {city}"
+    summary = f"{user_data[TELEGRAM_USERNAME]} - {user_data['full_address']}"
     description = f"""
     Ник в телеграмме: {user_data[TELEGRAM_USERNAME]}
-    город: {city}
+    город: {user_data['full_address']}
     наличие машины: {car}
-    радиус выезда{radius}
+    радиус выезда: {radius}
     """
     client.issues.create(
         queue=VOLUNTEER, summary=summary, description=description,
@@ -198,8 +206,7 @@ async def save_and_exit_volunteer(
 
 
 def check_data(user_data):
-    if (SPECIFY_CITY in user_data
-            and SPECIFY_ACTIVITY_RADIUS in user_data) and SPECIFY_CAR_AVAILABILITY in user_data:
+    if (SPECIFY_ACTIVITY_RADIUS in user_data) and SPECIFY_CAR_AVAILABILITY in user_data:
         return True
     else:
         return False
