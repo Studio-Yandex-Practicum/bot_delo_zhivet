@@ -127,7 +127,7 @@ your@device:~/your_project_pwd/bot_delo_zhivet/$ poetry run runbot
 ```
 ## Запуск admin:
 ```bash
-poetry run python admin/app.py
+flask run
 ```
 
 После запуска:
