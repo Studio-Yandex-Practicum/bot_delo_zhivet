@@ -15,12 +15,14 @@ SELECTING_FEATURE = "selecting_feature"
 
 # Обозначим состояния второго диалога второго уровня
 SPECIFY_CITY = "specify_city"
-SPECIFY_ACTIVITY_RADIUS = "specify_activity_radius"
-SPECIFY_CAR_AVAILABILITY = "specify_car_availability"
+SPECIFY_ACTIVITY_RADIUS = "radius"
+SPECIFY_CAR_AVAILABILITY = "has_car"
 TYPING_CITY = "typing_city"
+TYPING_SOCIAL_CITY = "typing_social_city"
 TYPING_RADIUS = "typing_radius"
 TYPING = "TYPING"
 SOCIAL_PROBLEM_TYPING = "social_problem_typing"
+SOCIAL_PROBLEM_ADDRESS = "social_problem_address"
 SELECTING_OVER = "selecting_city"
 
 # Meta состояния
@@ -39,13 +41,14 @@ FEATURES = "features"
 CURRENT_FEATURE = "current_feature"
 CURRENT_LEVEL = "current_level"
 CITY_COMMAND = "CITY="
+CITY_SOCIAL = "SOCIAL_CITY="
 RADIUS_COMMAND = "RADIUS="
 CAR_COMMAND = "CAR="
 POLLUTION_FOTO = "photo"
 POLLUTION_COORDINATES = "pollution_coordinates"
 POLLUTION_COMMENT = "comment"
 SOCIAL_ADDRESS = "social_address"
-SOCIAL_COMMENT = "social_comment"
+SOCIAL_COMMENT = "comment"
 SAVE = "save"
 ACTIVITY_RADIUS = [
     list(range(5, 30, 5)),
@@ -57,6 +60,8 @@ TELEGRAM_USERNAME = "telegram_username"
 FIRST_NAME = "first_name"
 LAST_NAME = "last_name"
 SLEEP_TIME = 3
+CITY_INPUT = "city_input"
+BACK = "back"
 
 # Различные сообщения пользователю
 
