@@ -10,7 +10,7 @@ from src.bot.service.save_tracker_id import save_tracker_id_pollution
 from src.core.db.db import get_async_session
 
 from .start import start
-from .state_constants import (CURRENT_FEATURE, END, FEATURES, LATITUDE,
+from .state_constants import (BACK, CURRENT_FEATURE, END, FEATURES, LATITUDE,
                               LONGITUDE, POLLUTION, POLLUTION_COMMENT,
                               POLLUTION_COORDINATES, POLLUTION_FOTO, SAVE,
                               SELECTING_FEATURE, START_OVER, TELEGRAM_ID,
@@ -88,8 +88,15 @@ async def input(
     """Добавление информации"""
     context.user_data[CURRENT_FEATURE] = update.callback_query.data
     text = "Отлично, что ты хочешь добавить?"
+    button = [
+        [
+            InlineKeyboardButton(text="Назад", callback_data=BACK)
+        ]
+    ]
+    keyboard = InlineKeyboardMarkup(button)
+
     await update.callback_query.answer()
-    await update.callback_query.edit_message_text(text=text)
+    await update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
 
     return TYPING
 

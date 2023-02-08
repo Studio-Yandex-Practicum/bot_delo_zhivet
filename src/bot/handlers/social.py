@@ -4,7 +4,7 @@ from telegram.ext import ContextTypes
 
 from api.tracker import client
 from bot.handlers.start import start
-from bot.handlers.state_constants import (CITY_INPUT, CITY_SOCIAL,
+from bot.handlers.state_constants import (BACK, CITY_INPUT, CITY_SOCIAL,
                                           CURRENT_FEATURE, END, FEATURES, SAVE,
                                           SELECTING_FEATURE, SOCIAL,
                                           SOCIAL_ADDRESS, SOCIAL_COMMENT,
@@ -29,8 +29,14 @@ async def input_social_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     context.user_data[CURRENT_FEATURE] = update.callback_query.data
     text = "Отлично, что ты хочешь добавить?"
+    button = [
+        [
+            InlineKeyboardButton(text="Назад", callback_data=BACK)
+        ]
+    ]
+    keyboard = InlineKeyboardMarkup(button)
     await update.callback_query.answer()
-    await update.callback_query.edit_message_text(text=text)
+    await update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
 
     return SOCIAL_PROBLEM_TYPING
 
@@ -39,9 +45,15 @@ async def ask_for_input_address(update: Update, context: ContextTypes.DEFAULT_TY
     """Предложить пользователю ввести данные о населенном пункте."""
     context.user_data[CURRENT_FEATURE] = update.callback_query.data
     text = "Укажите адрес где необходима помощь."
+    button = [
+        [
+            InlineKeyboardButton(text="Назад", callback_data=BACK)
+        ]
+    ]
+    keyboard = InlineKeyboardMarkup(button)
 
     await update.callback_query.answer()
-    await update.callback_query.edit_message_text(text=text)
+    await update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
 
     return TYPING_SOCIAL_CITY
 

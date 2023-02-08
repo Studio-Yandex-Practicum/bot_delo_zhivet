@@ -61,6 +61,7 @@ FIRST_NAME = "first_name"
 LAST_NAME = "last_name"
 SLEEP_TIME = 3
 CITY_INPUT = "city_input"
+BACK = "back"
 
 # Различные сообщения пользователю
 
