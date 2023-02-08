@@ -2,9 +2,10 @@ import logging
 
 from telegram.ext import Application, CallbackQueryHandler, CommandHandler, ConversationHandler, MessageHandler, filters
 
-from bot.const import (  # MAKE_DONATION_CMD,
+from bot.const import (
     BECOME_VOLUNTEER_CMD,
     END_CMD,
+    MAKE_DONATION_CMD,
     REPORT_ECO_PROBLEM_CMD,
     SPECIFY_ACTIVITY_RADIUS_CMD,
     SPECIFY_CAR_AVAILABILITY_CMD,
@@ -34,6 +35,7 @@ from .handlers.state_constants import (
     ADDING_VOLUNTEER,
     CAR_COMMAND,
     CITY_COMMAND,
+    MAKING_DONATION,
     POLLUTION_COMMENT,
     POLLUTION_COORDINATES,
     POLLUTION_FOTO,
@@ -132,15 +134,18 @@ def start_bot() -> None:
             CommandHandler("stop", stop_nested),
         ],
     )
-    # add_donation_conv = ConversationHandler(
-    #     entry_points=[
-    #         CallbackQueryHandler(add_volunteer, pattern=BECOME_VOLUNTEER_CMD)
-    #     ],
-    #     fallbacks=[
-    #         CallbackQueryHandler(end_describing, pattern=END_CMD),
-    #         CommandHandler("stop", stop_nested),
-    #     ],
-    # )
+    add_donation_conv = ConversationHandler(
+        entry_points=[CallbackQueryHandler(make_donation, pattern=MAKE_DONATION_CMD)],
+        states={
+            # MAKING_DONATION: [
+            #     CallbackQueryHandler(ask_for_input_city, pattern=SPECIFY_CITY_CMD),
+            #     ]
+        },
+        fallbacks=[
+            CallbackQueryHandler(end_describing, pattern=END_CMD),
+            CommandHandler("stop", stop_nested),
+        ],
+    )
 
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler("start", start)],
@@ -149,6 +154,7 @@ def start_bot() -> None:
                 add_volunteer_conv,
                 add_pollution_conv,
                 add_social_conv,
+                add_donation_conv,
             ],
         },
         fallbacks=[CommandHandler("stop", stop)],
