@@ -4,20 +4,29 @@ from telegram.ext import ContextTypes
 
 from api.tracker import client
 from bot.handlers.start import start
-from bot.handlers.state_constants import (CITY_INPUT, CITY_SOCIAL,
-                                          CURRENT_FEATURE, END, FEATURES, SAVE,
-                                          SELECTING_FEATURE, SOCIAL,
-                                          SOCIAL_ADDRESS, SOCIAL_COMMENT,
-                                          SOCIAL_PROBLEM_ADDRESS,
-                                          SOCIAL_PROBLEM_TYPING, START_OVER,
-                                          TELEGRAM_ID, TYPING_SOCIAL_CITY)
+from bot.handlers.state_constants import (
+    CITY_INPUT,
+    CITY_SOCIAL,
+    CURRENT_FEATURE,
+    END,
+    FEATURES,
+    SAVE,
+    SELECTING_FEATURE,
+    SOCIAL,
+    SOCIAL_ADDRESS,
+    SOCIAL_COMMENT,
+    SOCIAL_PROBLEM_ADDRESS,
+    SOCIAL_PROBLEM_TYPING,
+    START_OVER,
+    TELEGRAM_ID,
+    TYPING_SOCIAL_CITY,
+)
 from bot.service.dadata import get_fields_from_dadata
 from src.bot.service.assistance_disabled import create_new_social
 from src.bot.service.save_new_user import create_new_user
 from src.bot.service.save_tracker_id import save_tracker_id_assistance_disabled
 from src.core.db.db import get_async_session
-from src.core.db.repository.assistance_disabled_repository import \
-    crud_assistance_disabled
+from src.core.db.repository.assistance_disabled_repository import crud_assistance_disabled
 
 load_dotenv(".env")
 
@@ -28,7 +37,7 @@ async def input_social_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # TODO: Если вбиваем адрес, нужна проверка корректности(или отдельная функция инпута адреса с проверкой)
 
     context.user_data[CURRENT_FEATURE] = update.callback_query.data
-    text = "Отлично, что ты хочешь добавить?"
+    text = "Укажите контакты адресата помощи для связи и уточните, с чем нужна помощь:"
     await update.callback_query.answer()
     await update.callback_query.edit_message_text(text=text)
 
@@ -38,7 +47,7 @@ async def input_social_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def ask_for_input_address(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     """Предложить пользователю ввести данные о населенном пункте."""
     context.user_data[CURRENT_FEATURE] = update.callback_query.data
-    text = "Укажите адрес где необходима помощь."
+    text = "Укажите адрес, по которому нужно оказать помощь:"
 
     await update.callback_query.answer()
     await update.callback_query.edit_message_text(text=text)
@@ -50,9 +59,11 @@ async def address_confirmation(update: Update, context: ContextTypes.DEFAULT_TYP
     """Обработчик данных о населенном пункте с выводом возможных вариантов."""
     user_input = update.message.text
     address = get_fields_from_dadata(user_input)
-    text = (f"Это правильный адрес: {address['full_address']}? "
-            'Если адрес не правильный, то выберите "Нет" и укажите более подробный вариант адреса, '
-            "а мы постараемся определить его правильно!")
+    text = (
+        f"Это правильный адрес: {address['full_address']}? "
+        'Если адрес не правильный, то выберите "Нет" и укажите более подробный вариант адреса, '
+        "а мы постараемся определить его правильно!"
+    )
     context.user_data[FEATURES] = address
 
     data = CITY_SOCIAL + user_input
@@ -91,19 +102,13 @@ async def save_social_address_input(update: Update, context: ContextTypes.DEFAUL
     return await report_about_social_problem(update, context)
 
 
-async def report_about_social_problem(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
-) -> str:
+async def report_about_social_problem(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     text = "Заполните данные об обращении"
     buttons = [
         [
             InlineKeyboardButton(text="Указать адрес", callback_data=SOCIAL_ADDRESS),
         ],
-        [
-            InlineKeyboardButton(
-                text="Напишите комментарий", callback_data=SOCIAL_COMMENT
-            )
-        ],
+        [InlineKeyboardButton(text="Оставить контакты и комментарий", callback_data=SOCIAL_COMMENT)],
         [
             InlineKeyboardButton(text="Назад", callback_data=str(END)),
         ],
@@ -113,31 +118,28 @@ async def report_about_social_problem(
 
     if not context.user_data.get(START_OVER):
         context.user_data[FEATURES] = {}
-        text = "Пожалуйста, выберите функцию для добавления."
+        text = (
+            "Пожалуйста, укажите адрес, по которому нужна помощь и оставьте контакты и комментарий – это "
+            "обязательно нужно для того, чтобы мы взяли заявку в работу:"
+        )
         await update.callback_query.answer()
         await update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
     else:
         if check_data(context.user_data[FEATURES]) is True:
-            buttons.append(
-                [InlineKeyboardButton(text="Сохранить и выйти", callback_data=SAVE)]
-            )
+            buttons.append([InlineKeyboardButton(text="Отправить заявку на помощь", callback_data=SAVE)])
             keyboard = InlineKeyboardMarkup(buttons)
 
         text = "Готово! Пожалуйста, выберите функцию для добавления."
         if update.message is not None:
             await update.message.reply_text(text=text, reply_markup=keyboard)
         else:
-            await update.callback_query.edit_message_text(
-                text, reply_markup=keyboard
-            )
+            await update.callback_query.edit_message_text(text, reply_markup=keyboard)
 
     context.user_data[START_OVER] = False
     return SELECTING_FEATURE
 
 
-async def save_and_exit_from_social_problem(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
-) -> int:
+async def save_and_exit_from_social_problem(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Сохранение данных в базу и отправка в трекер"""
     context.user_data[START_OVER] = True
     user_data = context.user_data[FEATURES]
@@ -150,7 +152,9 @@ async def save_and_exit_from_social_problem(
     await create_new_social(user_data, session)
     city = await crud_assistance_disabled.get_full_address_by_telegram_id(user_data[TELEGRAM_ID], session)
     client.issues.create(
-        queue=SOCIAL, summary=city, description=comment,
+        queue=SOCIAL,
+        summary=city,
+        description=comment,
     )
     await save_tracker_id_assistance_disabled(city, user_data[TELEGRAM_ID], session)
     await start(update, context)
