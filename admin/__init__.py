@@ -64,7 +64,7 @@ def index():
 
 init_login()
 
-from . import views
+from . import views  # noqa
 
 
 if __name__ == '__main__':
