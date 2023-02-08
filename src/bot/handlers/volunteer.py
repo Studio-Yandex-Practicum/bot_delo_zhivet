@@ -4,11 +4,12 @@ from telegram.ext import ContextTypes
 from src.api.tracker import client
 from src.bot.handlers.start import start
 from src.bot.handlers.state_constants import (ACTIVITY_RADIUS,
-                                              ADDING_VOLUNTEER, CAR_COMMAND,
-                                              CITY_COMMAND, CITY_INPUT,
-                                              CURRENT_FEATURE, CURRENT_LEVEL,
-                                              END, FEATURES, FIRST_NAME,
-                                              LAST_NAME, RADIUS_COMMAND, SAVE,
+                                              ADDING_VOLUNTEER, BACK,
+                                              CAR_COMMAND, CITY_COMMAND,
+                                              CITY_INPUT, CURRENT_FEATURE,
+                                              CURRENT_LEVEL, END, FEATURES,
+                                              FIRST_NAME, LAST_NAME,
+                                              RADIUS_COMMAND, SAVE,
                                               SELECTING_OVER,
                                               SPECIFY_ACTIVITY_RADIUS,
                                               SPECIFY_CAR_AVAILABILITY,
@@ -84,9 +85,15 @@ async def ask_for_input_city(update: Update, context: ContextTypes.DEFAULT_TYPE)
     """Предложить пользователю ввести данные о населенном пункте."""
     context.user_data[CURRENT_FEATURE] = update.callback_query.data
     text = "Укажите свой адрес."
+    button = [
+        [
+            InlineKeyboardButton(text="Назад", callback_data=BACK)
+        ]
+    ]
+    keyboard = InlineKeyboardMarkup(button)
 
     await update.callback_query.answer()
-    await update.callback_query.edit_message_text(text=text)
+    await update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
 
     return TYPING_CITY
 
