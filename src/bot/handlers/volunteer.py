@@ -182,10 +182,6 @@ async def save_and_exit_volunteer(update: Update, context: ContextTypes.DEFAULT_
     user_data[TELEGRAM_ID] = update.effective_user.id
     user_data[TELEGRAM_USERNAME] = update.effective_user.username
     user_data[FIRST_NAME] = update.effective_user.first_name
-    some = update.effective_user.id
-    print(some)
-    print("===")
-    print(user_data[TELEGRAM_ID])
     user_data[LAST_NAME] = update.effective_user.last_name
     session_generator = get_async_session()
     session = await session_generator.asend(None)
