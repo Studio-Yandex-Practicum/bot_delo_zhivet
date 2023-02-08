@@ -81,3 +81,4 @@ admin.add_view(MyModelView(Pollution, db.session, name='Pollution'))
 admin.add_view(
     MyModelView(Assistance_disabled, db.session, name='Assistance_disabled')
 )
+admin.add_view(MyModelView(Staff, db.session, name='Staff'))

@@ -64,13 +64,15 @@ docker-compose -f postgres-local.yaml up -d --build
 ```
 Если есть чьи-то миграции в проекте, до применяем их
 ```bash
-alembic stamp head
+alembic upgrade head
 ```
-Cоздаём новую миграцию
+Если производятся изменения в моделях:
+1.
 ```bash
-alembic revision --autogenerate -m "First migration"
+alembic revision --autogenerate -m "you_migration_name"
 ```
-Дальше применяем
+2.
+Дальше применяем:
 ```bash
 alembic upgrade head
 ```
@@ -130,6 +132,7 @@ your@device:~/your_project_pwd/bot_delo_zhivet/$ poetry run runbot
 flask run
 ```
 После запуска:
+
 Перейти по ссылке в терминала, ввести логин(admin) и пароль(admin123)
 ___
 [:arrow_up:Оглавление](#Оглавление)

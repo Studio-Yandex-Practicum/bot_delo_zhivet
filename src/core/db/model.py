@@ -7,7 +7,7 @@ from flask_login import UserMixin
 from sqlalchemy.orm import relationship, backref
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from src.core.db.db import Base, Base_admin
+from src.core.db.db import Base
 
 
 class User(Base):
@@ -62,15 +62,16 @@ class Assistance_disabled(Base):
 
 roles_users = Table(
     'roles_users',
-    Base_admin.metadata,
+    Base.metadata,
     Column('staff_id', Integer, ForeignKey('staff.id')),
     Column('role_id', Integer, ForeignKey('role.id'))
 )
 
 
-class Role(Base_admin, RoleMixin):
+class Role(Base, RoleMixin):
     """Модель роли для персонала"""
 
+    id = Column(Integer, primary_key=True)
     name = Column(String, unique=True)
     description = Column(String(255))
 
@@ -78,9 +79,10 @@ class Role(Base_admin, RoleMixin):
         return self.name
 
 
-class Staff(Base_admin, UserMixin):
+class Staff(Base, UserMixin):
     """Модель персонала"""
 
+    id = Column(Integer, primary_key=True)
     first_name = Column(String(255))
     last_name = Column(String(255))
     login = Column(String(255), unique=True)
