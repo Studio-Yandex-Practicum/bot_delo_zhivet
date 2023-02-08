@@ -1,8 +1,4 @@
-from telegram import (
-    InlineKeyboardButton,
-    InlineKeyboardMarkup,
-    Update,
-)
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
 
 from src.bot.handlers.start import start
@@ -20,9 +16,11 @@ async def make_donation(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     session_generator = get_async_session()
     session = await session_generator.asend(None)
     await create_new_user(telegram_id, session)
-    text = ("Счастье - это то, чего человек желает для себя одного;\n"
-            "благо - это то, что человек желает для себя вместе со всеми.\n"
-            "Л.Н. Толстой")
+    text = (
+        "Счастье - это то, чего человек желает для себя одного;\n"
+        "благо - это то, что человек желает для себя вместе со всеми.\n"
+        "Л.Н. Толстой"
+    )
     level = update.callback_query.data
     context.user_data[CURRENT_LEVEL] = level
     buttons = [
