@@ -6,8 +6,7 @@ from flask_admin.contrib import sqla
 from flask_security import current_user
 from werkzeug.security import generate_password_hash
 
-from src.core.db.model import (Assistance_disabled, Pollution,
-                               Volunteer, Role, Staff, User)
+from src.core.db.model import Staff, User, Role, roles_users
 from . import app, db
 from .forms import LoginForm, RegistrationForm
 
@@ -17,7 +16,7 @@ class MyModelView(sqla.ModelView):
     def is_accessible(self):
         return (current_user.is_active
                 and current_user.is_authenticated
-                and current_user.has_role('admin'))
+                and (current_user.has_role('admin') or current_user.has_role('superuser')))
 
 
 class MyAdminIndexView(AdminIndexView):
@@ -73,12 +72,7 @@ admin = flask_admin.Admin(app, 'Example: Auth', index_view=MyAdminIndexView(),
                           base_template='my_master.html',
                           template_mode='bootstrap4')
 
-
-admin.add_view(MyModelView(Role, db.session, name='Role'))
-admin.add_view(MyModelView(User, db.session, name='User'))
-admin.add_view(MyModelView(Volunteer, db.session, name='Volunteer'))
-admin.add_view(MyModelView(Pollution, db.session, name='Pollution'))
-admin.add_view(
-    MyModelView(Assistance_disabled, db.session, name='Assistance_disabled')
-)
-admin.add_view(MyModelView(Staff, db.session, name='Staff'))
+if Staff.query.join(Staff.roles).filter(Role.id == 2).all():
+    admin.add_view(MyModelView(User, db.session, name='User'))
+else:
+    admin.add_view(MyModelView(Staff, db.session, name='Staff'))

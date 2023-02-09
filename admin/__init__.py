@@ -41,10 +41,12 @@ if len(Staff.query.all()) < 1:
     staff = Staff(login='admin', email='admin@gmail.com',
                   password='pbkdf2:sha256:260000$UCyUKhCOz5sRuvUI$1772bcd9c97724ab4994d228ca77df5fd4ca341a6fba014074db39926c842f7b',
                   active=True)
-    role = Role(name='admin', description='admin')
+    role = Role(name='superuser', description='superuser')
+    role_admin = Role(name='admin', description='admin')
     staff.roles.append(role)
     db_session.add(staff)
     db_session.add(role)
+    db_session.add(role_admin)
     db_session.commit()
 
 
