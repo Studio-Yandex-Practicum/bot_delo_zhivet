@@ -82,8 +82,16 @@ async def input(update: Update, context: ContextTypes.DEFAULT_TYPE):
         text = "Напишите, если что-то важно знать об обнаруженной проблеме:"
     elif POLLUTION_COORDINATES == update.callback_query.data:
         text = "Отправьте геометку"
+    context.user_data[CURRENT_FEATURE] = update.callback_query.data
+    button = [
+        [
+            InlineKeyboardButton(text="Назад", callback_data=BACK)
+        ]
+    ]
+    keyboard = InlineKeyboardMarkup(button)
+
     await update.callback_query.answer()
-    await update.callback_query.edit_message_text(text=text)
+    await update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
 
     return TYPING
 

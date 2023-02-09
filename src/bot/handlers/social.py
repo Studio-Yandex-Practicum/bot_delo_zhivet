@@ -38,8 +38,14 @@ async def input_social_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     context.user_data[CURRENT_FEATURE] = update.callback_query.data
     text = "Укажите контакты адресата помощи для связи и уточните, с чем нужна помощь:"
+    button = [
+        [
+            InlineKeyboardButton(text="Назад", callback_data=BACK)
+        ]
+    ]
+    keyboard = InlineKeyboardMarkup(button)
     await update.callback_query.answer()
-    await update.callback_query.edit_message_text(text=text)
+    await update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
 
     return SOCIAL_PROBLEM_TYPING
 
@@ -48,9 +54,15 @@ async def ask_for_input_address(update: Update, context: ContextTypes.DEFAULT_TY
     """Предложить пользователю ввести данные о населенном пункте."""
     context.user_data[CURRENT_FEATURE] = update.callback_query.data
     text = "Укажите адрес, по которому нужно оказать помощь:"
+    button = [
+        [
+            InlineKeyboardButton(text="Назад", callback_data=BACK)
+        ]
+    ]
+    keyboard = InlineKeyboardMarkup(button)
 
     await update.callback_query.answer()
-    await update.callback_query.edit_message_text(text=text)
+    await update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
 
     return TYPING_SOCIAL_CITY
 
