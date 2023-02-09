@@ -2,7 +2,7 @@ from werkzeug.security import check_password_hash
 from wtforms import form, fields, validators
 
 from src.core.db.model import Staff
-from . import db
+from .database import db
 
 
 class LoginForm(form.Form):

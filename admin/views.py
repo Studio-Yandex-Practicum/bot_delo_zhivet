@@ -6,24 +6,10 @@ from flask_admin.contrib import sqla
 from flask_security import current_user
 from werkzeug.security import generate_password_hash
 
-from src.core.db.model import Staff, User, Role
-from . import app, db, db_session
+from src.core.db.model import Staff, User
+from . import app
+from .database import db
 from .forms import LoginForm, RegistrationForm
-
-
-def create_roles_and_superuser():
-    if len(Staff.query.all()) < 1:
-        staff = Staff(login='admin', email='admin@gmail.com',
-                      password='pbkdf2:sha256:260000$UCyUKhCOz5sRuvUI$1772bcd9c97724ab4994d228ca77df5fd4ca341a6fba014074db39926c842f7b',
-                      active=True)
-        role = Role(name='superuser', description='superuser')
-        role_admin = Role(name='admin', description='admin')
-        staff.roles.append(role)
-        db_session.add(staff)
-        db_session.add(role)
-        db_session.add(role_admin)
-        db_session.commit()
-
 
 
 def init_login():
@@ -33,6 +19,9 @@ def init_login():
     @login_manager.user_loader
     def load_user(staff_id):
         return db.session.query(Staff).get(staff_id)
+
+
+init_login()
 
 
 class MyModelView(sqla.ModelView):
@@ -104,7 +93,5 @@ admin = flask_admin.Admin(app, 'Bot delo zhivet : Admin console', index_view=MyA
                           base_template='my_master.html',
                           template_mode='bootstrap4')
 
-
 admin.add_view(MyModelView(User, db.session, name='User'))
-
 admin.add_view(SuperuserModelView(Staff, db.session, name='Staff'))
