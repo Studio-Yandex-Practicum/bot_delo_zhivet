@@ -5,9 +5,9 @@ from flask_security import RoleMixin
 from flask_login import UserMixin
 
 from sqlalchemy.orm import relationship, backref
-from werkzeug.security import check_password_hash, generate_password_hash
 
-from src.core.db.db import Base, Base_admin
+from core.mixins import ExtraUserMixin
+from src.core.db.db import Base
 
 
 class User(Base):
@@ -62,15 +62,16 @@ class Assistance_disabled(Base):
 
 roles_users = Table(
     'roles_users',
-    Base_admin.metadata,
+    Base.metadata,
     Column('staff_id', Integer, ForeignKey('staff.id')),
     Column('role_id', Integer, ForeignKey('role.id'))
 )
 
 
-class Role(Base_admin, RoleMixin):
+class Role(Base, RoleMixin):
     """Модель роли для персонала"""
 
+    id = Column(Integer, primary_key=True)
     name = Column(String, unique=True)
     description = Column(String(255))
 
@@ -78,9 +79,10 @@ class Role(Base_admin, RoleMixin):
         return self.name
 
 
-class Staff(Base_admin, UserMixin):
+class Staff(Base, UserMixin, ExtraUserMixin):
     """Модель персонала"""
 
+    id = Column(Integer, primary_key=True)
     first_name = Column(String(255))
     last_name = Column(String(255))
     login = Column(String(255), unique=True)
@@ -89,30 +91,3 @@ class Staff(Base_admin, UserMixin):
     active = Column(Boolean())
     roles = relationship('Role', secondary=roles_users,
                          backref=backref('users', lazy='dynamic'))
-
-    @property
-    def is_authenticated(self):
-        return True
-
-    @property
-    def is_active(self):
-        return self.active
-
-    @property
-    def is_anonymous(self):
-        return False
-
-    def has_role(self, *args):
-        return set(args).issubset({role.name for role in self.roles})
-
-    def get_id(self):
-        return self.id
-
-    def __unicode__(self):
-        return self.login
-
-    def set_password(self, password):
-        self.password = generate_password_hash(password)
-
-    def check_password(self, password):
-        return check_password_hash(self.password, password)

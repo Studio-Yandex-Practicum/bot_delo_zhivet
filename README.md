@@ -64,13 +64,18 @@ docker-compose -f postgres-local.yaml up -d --build
 ```
 Если есть чьи-то миграции в проекте, до применяем их
 ```bash
+alembic upgrade head
+```
+Если производятся изменения в моделях:
+```bash
 alembic stamp head
 ```
-Cоздаём новую миграцию
+1.
 ```bash
-alembic revision --autogenerate -m "First migration"
+alembic revision --autogenerate -m "you_migration_name"
 ```
-Дальше применяем
+2.
+Дальше применяем:
 ```bash
 alembic upgrade head
 ```
@@ -127,16 +132,11 @@ your@device:~/your_project_pwd/bot_delo_zhivet/$ poetry run runbot
 ```
 ## Запуск admin:
 ```bash
-poetry run python admin/app.py
+flask run
 ```
-
 После запуска:
-1. Создать через форму регистрации пользователя admin (важно должен быть
-именно с таким именем)
-2. Зайди в Staff и присвоить пользователю admin роль admin,
-обязательно постваить галочку в поле Active
-3. Перезагрузить сервер
-4. Пройти Аутификацию
+
+Перейти по ссылке в терминала, ввести логин(admin) и пароль(admin123)
 ___
 [:arrow_up:Оглавление](#Оглавление)
 

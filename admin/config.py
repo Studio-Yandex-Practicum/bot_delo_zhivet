@@ -1,26 +1,12 @@
-# Flask-Security config
-SECURITY_URL_PREFIX = "/admin"
-SECURITY_PASSWORD_HASH = "pbkdf2_sha512"
-SECURITY_PASSWORD_SALT = "ATGUOHAELKiubahiughaerGOJAEGj"
+import os
 
-# URLs
-SECURITY_LOGIN_URL = "/login/"
-SECURITY_LOGOUT_URL = "/logout/"
-SECURITY_POST_LOGIN_VIEW = "/admin/"
-SECURITY_POST_LOGOUT_VIEW = "/admin/"
-SECURITY_POST_REGISTER_VIEW = "/admin/"
 
-# Включает регистрацию
-SECURITY_REGISTERABLE = True
-SECURITY_REGISTER_URL = "/register/"
-SECURITY_SEND_REGISTER_EMAIL = False
-
-# Включет сброс пароля
-SECURITY_RECOVERABLE = True
-SECURITY_RESET_URL = "/reset/"
-SECURITY_SEND_PASSWORD_RESET_EMAIL = True
-
-# Включает изменение пароля
-SECURITY_CHANGEABLE = True
-SECURITY_CHANGE_URL = "/change/"
-SECURITY_SEND_PASSWORD_CHANGE_EMAIL = False
+class Config(object):
+    SECRET_KEY = os.getenv('ADMIN_SECRET_KEY', default='SECRET_KEY')
+    DEBUG = True
+    SQLALCHEMY_DATABASE_URI = (
+        f"postgresql://{os.getenv('POSTGRES_USER')}:"
+        f"{os.getenv('POSTGRES_PASSWORD')}@"
+        f"{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('POSTGRES_DB')}")
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    FLASK_ENV = 'development'
