@@ -5,7 +5,6 @@ from bot.handlers.state_constants import (
     ADDING_ECO_TASK,
     ADDING_SOCIAL_TASK,
     ADDING_VOLUNTEER,
-    MAKING_DONATION,
     SELECTING_ACTION,
     START_OVER,
     TOP_LEVEL_MENU_TEXT,
@@ -33,7 +32,9 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
         ],
         [
             InlineKeyboardButton(text="Стать волонтером", callback_data=ADDING_VOLUNTEER),
-            InlineKeyboardButton(text="Сделать пожертвование", callback_data=MAKING_DONATION),
+            InlineKeyboardButton(
+                text="Сделать пожертвование", url="https://delozhivet.ru/campaign/pomoch-delo-zhivet/"
+            ),
         ],
     ]
     keyboard = InlineKeyboardMarkup(buttons)
