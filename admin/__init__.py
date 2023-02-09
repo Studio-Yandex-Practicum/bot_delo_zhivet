@@ -1,14 +1,13 @@
 import os
 
-import flask_login as login
 from dotenv import load_dotenv
 from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 
+from admin.views import create_roles_and_superuser, init_login
 from src.core.db.db import Base
-from src.core.db.model import Role, Staff
 
 load_dotenv()
 
@@ -26,7 +25,6 @@ app.config['SQLALCHEMY_DATABASE_URI'] = (
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 
 db = SQLAlchemy(app)
-
 engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'], pool_size=10000,
                        max_overflow=100)
 db_session = scoped_session(sessionmaker(autocommit=False,
@@ -34,29 +32,8 @@ db_session = scoped_session(sessionmaker(autocommit=False,
                                          bind=engine))
 Base.query = db_session.query_property()
 Base.metadata.create_all(engine)
-Session = sessionmaker(binds={Base: engine})
-session = Session()
 
-if len(Staff.query.all()) < 1:
-    staff = Staff(login='admin', email='admin@gmail.com',
-                  password='pbkdf2:sha256:260000$UCyUKhCOz5sRuvUI$1772bcd9c97724ab4994d228ca77df5fd4ca341a6fba014074db39926c842f7b',
-                  active=True)
-    role = Role(name='superuser', description='superuser')
-    role_admin = Role(name='admin', description='admin')
-    staff.roles.append(role)
-    db_session.add(staff)
-    db_session.add(role)
-    db_session.add(role_admin)
-    db_session.commit()
-
-
-def init_login():
-    login_manager = login.LoginManager()
-    login_manager.init_app(app)
-
-    @login_manager.user_loader
-    def load_user(staff_id):
-        return db.session.query(Staff).get(staff_id)
+create_roles_and_superuser()
 
 
 @app.route('/')

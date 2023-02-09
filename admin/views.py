@@ -6,9 +6,33 @@ from flask_admin.contrib import sqla
 from flask_security import current_user
 from werkzeug.security import generate_password_hash
 
-from src.core.db.model import Staff, User, Role, roles_users
-from . import app, db
+from src.core.db.model import Staff, User, Role
+from . import app, db, db_session
 from .forms import LoginForm, RegistrationForm
+
+
+def create_roles_and_superuser():
+    if len(Staff.query.all()) < 1:
+        staff = Staff(login='admin', email='admin@gmail.com',
+                      password='pbkdf2:sha256:260000$UCyUKhCOz5sRuvUI$1772bcd9c97724ab4994d228ca77df5fd4ca341a6fba014074db39926c842f7b',
+                      active=True)
+        role = Role(name='superuser', description='superuser')
+        role_admin = Role(name='admin', description='admin')
+        staff.roles.append(role)
+        db_session.add(staff)
+        db_session.add(role)
+        db_session.add(role_admin)
+        db_session.commit()
+
+
+
+def init_login():
+    login_manager = login.LoginManager()
+    login_manager.init_app(app)
+
+    @login_manager.user_loader
+    def load_user(staff_id):
+        return db.session.query(Staff).get(staff_id)
 
 
 class MyModelView(sqla.ModelView):
@@ -16,7 +40,15 @@ class MyModelView(sqla.ModelView):
     def is_accessible(self):
         return (current_user.is_active
                 and current_user.is_authenticated
-                and (current_user.has_role('admin') or current_user.has_role('superuser')))
+                and current_user.has_role('admin'))
+
+
+class SuperuserModelView(sqla.ModelView):
+
+    def is_accessible(self):
+        return (current_user.is_active
+                and current_user.is_authenticated
+                and current_user.has_role('superuser'))
 
 
 class MyAdminIndexView(AdminIndexView):
@@ -68,11 +100,11 @@ class MyAdminIndexView(AdminIndexView):
         return redirect(url_for('.index'))
 
 
-admin = flask_admin.Admin(app, 'Example: Auth', index_view=MyAdminIndexView(),
+admin = flask_admin.Admin(app, 'Bot delo zhivet : Admin console', index_view=MyAdminIndexView(),
                           base_template='my_master.html',
                           template_mode='bootstrap4')
 
-if Staff.query.join(Staff.roles).filter(Role.id == 2).all():
-    admin.add_view(MyModelView(User, db.session, name='User'))
-else:
-    admin.add_view(MyModelView(Staff, db.session, name='Staff'))
+
+admin.add_view(MyModelView(User, db.session, name='User'))
+
+admin.add_view(SuperuserModelView(Staff, db.session, name='Staff'))
