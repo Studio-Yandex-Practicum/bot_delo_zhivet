@@ -67,6 +67,9 @@ docker-compose -f postgres-local.yaml up -d --build
 alembic upgrade head
 ```
 Если производятся изменения в моделях:
+```bash
+alembic stamp head
+```
 1.
 ```bash
 alembic revision --autogenerate -m "you_migration_name"
