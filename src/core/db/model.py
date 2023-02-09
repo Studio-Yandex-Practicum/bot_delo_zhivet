@@ -1,5 +1,6 @@
 from sqlalchemy import (BigInteger, Boolean, Column, Date, DateTime, Float,
                         Table, ForeignKey, Integer, String, Text)
+from sqlalchemy.dialects.postgresql import UUID
 
 from flask_security import RoleMixin
 from flask_login import UserMixin
@@ -63,15 +64,14 @@ class Assistance_disabled(Base):
 roles_users = Table(
     'roles_users',
     Base.metadata,
-    Column('staff_id', Integer, ForeignKey('staff.id')),
-    Column('role_id', Integer, ForeignKey('role.id'))
+    Column('staff_id', UUID(as_uuid=True), ForeignKey('staff.id')),
+    Column('role_id', UUID(as_uuid=True), ForeignKey('role.id'))
 )
 
 
 class Role(Base, RoleMixin):
     """Модель роли для персонала"""
 
-    id = Column(Integer, primary_key=True)
     name = Column(String, unique=True)
     description = Column(String(255))
 
@@ -82,7 +82,6 @@ class Role(Base, RoleMixin):
 class Staff(Base, UserMixin, ExtraUserMixin):
     """Модель персонала"""
 
-    id = Column(Integer, primary_key=True)
     first_name = Column(String(255))
     last_name = Column(String(255))
     login = Column(String(255), unique=True)
