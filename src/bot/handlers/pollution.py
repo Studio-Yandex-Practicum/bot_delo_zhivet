@@ -24,6 +24,7 @@ from .state_constants import (
     SELECTING_FEATURE,
     START_OVER,
     TELEGRAM_ID,
+    TELEGRAM_USERNAME,
     TYPING,
 )
 
@@ -135,14 +136,18 @@ async def save_and_exit_pollution(update: Update, context: ContextTypes.DEFAULT_
         comment = user_data[POLLUTION_COMMENT]
     else:
         comment = "Комментариев не оставили"
+    user = {}
+    user[TELEGRAM_ID] = user_data[TELEGRAM_ID]
+    user[TELEGRAM_USERNAME] = update.effective_user.username
     session_generator = get_async_session()
     session = await session_generator.asend(None)
-    await create_new_user(user_data[TELEGRAM_ID], session)
+    await create_new_user(user, session)
     await create_new_pollution(user_data, session)
-    summary = f"{latitude}, {longitude}"
+    summary = f"{user[TELEGRAM_USERNAME]} - {latitude}, {longitude}"
     description = f"""
-    Координаты: {latitude}, {longitude}
-    Комментарий: {comment}
+    Ник в телеграмме оставившего заявку: {user[TELEGRAM_USERNAME]}
+    Координаты загрязнения: {latitude}, {longitude}
+    Комментарий к заявке: {comment}
     """
     client.issues.create(
         queue=POLLUTION,

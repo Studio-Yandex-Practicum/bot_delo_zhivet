@@ -197,16 +197,19 @@ async def save_and_exit_volunteer(update: Update, context: ContextTypes.DEFAULT_
         user_data[SPECIFY_CAR_AVAILABILITY] = True
     else:
         user_data[SPECIFY_CAR_AVAILABILITY] = False
+    user = {}
+    user[TELEGRAM_ID] = user_data[TELEGRAM_ID]
+    user[TELEGRAM_USERNAME] = user_data[TELEGRAM_USERNAME]
     session_generator = get_async_session()
     session = await session_generator.asend(None)
-    await create_new_user(user_data[TELEGRAM_ID], session)
+    await create_new_user(user, session)
     await create_new_volunteer(user_data, session)
     summary = f"{user_data[TELEGRAM_USERNAME]} - {user_data['full_address']}"
     description = f"""
     Ник в телеграмме: {user_data[TELEGRAM_USERNAME]}
-    город: {user_data['full_address']}
-    наличие машины: {car}
-    радиус выезда: {radius}
+    Адрес: {user_data['full_address']}
+    Наличие машины: {car}
+    Радиус выезда: {radius}
     """
     client.issues.create(
         queue=VOLUNTEER,

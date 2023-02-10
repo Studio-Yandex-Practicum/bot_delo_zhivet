@@ -1,11 +1,8 @@
-from sqlalchemy import (BigInteger, Boolean, Column, Date, DateTime, Float,
-                        Table, ForeignKey, Integer, String, Text)
-from sqlalchemy.dialects.postgresql import UUID
-
-from flask_security import RoleMixin
 from flask_login import UserMixin
-
-from sqlalchemy.orm import relationship, backref
+from flask_security import RoleMixin
+from sqlalchemy import BigInteger, Boolean, Column, Date, DateTime, Float, ForeignKey, Integer, String, Table, Text
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import backref, relationship
 
 from core.mixins import ExtraUserMixin
 from src.core.db.db import Base
@@ -14,6 +11,7 @@ from src.core.db.db import Base
 class User(Base):
     """Модель пользователя"""
 
+    telegram_username = Column(String(100), nullable=True)
     telegram_id = Column(BigInteger, unique=True, nullable=False)
     is_banned = Column(Boolean, default=False)
 
@@ -62,10 +60,10 @@ class Assistance_disabled(Base):
 
 
 roles_users = Table(
-    'roles_users',
+    "roles_users",
     Base.metadata,
-    Column('staff_id', UUID(as_uuid=True), ForeignKey('staff.id')),
-    Column('role_id', UUID(as_uuid=True), ForeignKey('role.id'))
+    Column("staff_id", UUID(as_uuid=True), ForeignKey("staff.id")),
+    Column("role_id", UUID(as_uuid=True), ForeignKey("role.id")),
 )
 
 
@@ -88,5 +86,4 @@ class Staff(Base, UserMixin, ExtraUserMixin):
     email = Column(String(255), unique=True)
     password = Column(String(255))
     active = Column(Boolean())
-    roles = relationship('Role', secondary=roles_users,
-                         backref=backref('users', lazy='dynamic'))
+    roles = relationship("Role", secondary=roles_users, backref=backref("users", lazy="dynamic"))
