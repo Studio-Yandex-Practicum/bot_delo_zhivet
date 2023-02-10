@@ -10,36 +10,35 @@ from src.bot.service.save_tracker_id import save_tracker_id_pollution
 from src.core.db.db import get_async_session
 
 from .start import start
-from .state_constants import (BACK, CURRENT_FEATURE, END, FEATURES, LATITUDE,
-                              LONGITUDE, POLLUTION, POLLUTION_COMMENT,
-                              POLLUTION_COORDINATES, POLLUTION_FOTO, SAVE,
-                              SELECTING_FEATURE, START_OVER, TELEGRAM_ID,
-                              TYPING)
+from .state_constants import (
+    BACK,
+    CURRENT_FEATURE,
+    END,
+    FEATURES,
+    LATITUDE,
+    LONGITUDE,
+    POLLUTION,
+    POLLUTION_COMMENT,
+    POLLUTION_COORDINATES,
+    POLLUTION_FOTO,
+    SAVE,
+    SELECTING_FEATURE,
+    START_OVER,
+    TELEGRAM_ID,
+    TYPING,
+)
 
 
-async def select_option_to_report_about_pollution(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
-) -> str:
+async def select_option_to_report_about_pollution(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     text = "Заполните данные о загрязнении"
     buttons = [
         [
-            InlineKeyboardButton(
-                text="Загрузите фото",
-                callback_data=POLLUTION_FOTO
-            ),
-            InlineKeyboardButton(
-                text="Добавьте координаты",
-                callback_data=POLLUTION_COORDINATES
-            ),
+            InlineKeyboardButton(text="Загрузите фото", callback_data=POLLUTION_FOTO),
+            InlineKeyboardButton(text="Отправить координаты", callback_data=POLLUTION_COORDINATES),
         ],
         [
-            InlineKeyboardButton(
-                text="Напишите комментарий",
-                callback_data=POLLUTION_COMMENT
-            ),
-            InlineKeyboardButton(
-                text="Выйти", callback_data=str(END)
-            ),
+            InlineKeyboardButton(text="Написать комментарий", callback_data=POLLUTION_COMMENT),
+            InlineKeyboardButton(text="Выйти", callback_data=str(END)),
         ],
     ]
 
@@ -47,34 +46,28 @@ async def select_option_to_report_about_pollution(
 
     if not context.user_data.get(START_OVER):
         context.user_data[FEATURES] = {}
-        text = "Пожалуйста, выберите функцию для добавления."
-        await update.callback_query.answer()
-        await update.callback_query.edit_message_text(
-            text=text, reply_markup=keyboard
+        text = (
+            "Пожалуйста, добавьте фотографию и отправьте геометку места, где обнаружена проблема – это обязательно "
+            "нужно для того, чтобы мы взяли заявку в работу. Если что-то нужно добавить, оставьте комментарий:"
         )
+        await update.callback_query.answer()
+        await update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
     else:
         if check_data(context.user_data[FEATURES]) is True:
-            buttons.append(
-                [InlineKeyboardButton(
-                    text="Сохранить и выйти", callback_data=SAVE
-                )]
-            )
+            buttons.append([InlineKeyboardButton(text="Отправить заявку на помощь", callback_data=SAVE)])
             keyboard = InlineKeyboardMarkup(buttons)
 
         text = "Готово! Пожалуйста, выберите функцию для добавления."
         if update.message is not None:
             await update.message.reply_text(text=text, reply_markup=keyboard)
         else:
-            await update.callback_query.edit_message_caption(
-                text=text, reply_markup=keyboard)
+            await update.callback_query.edit_message_caption(text=text, reply_markup=keyboard)
 
     context.user_data[START_OVER] = False
     return SELECTING_FEATURE
 
 
-async def end_second_level(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
-) -> int:
+async def end_second_level(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Возврат к верхнему диалогу"""
     context.user_data[START_OVER] = True
     await start(update, context)
@@ -82,17 +75,15 @@ async def end_second_level(
     return END
 
 
-async def input(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
-):
+async def input(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Добавление информации"""
-    context.user_data[CURRENT_FEATURE] = update.callback_query.data
-    text = "Отлично, что ты хочешь добавить?"
-    button = [
-        [
-            InlineKeyboardButton(text="Назад", callback_data=BACK)
-        ]
-    ]
+    if POLLUTION_FOTO == update.callback_query.data:
+        text = "Загрузите фотографию"
+    elif POLLUTION_COMMENT == update.callback_query.data:
+        text = "Напишите, если что-то важно знать об обнаруженной проблеме:"
+    elif POLLUTION_COORDINATES == update.callback_query.data:
+        text = "Отправьте геометку"
+    button = [[InlineKeyboardButton(text="Назад", callback_data=BACK)]]
     keyboard = InlineKeyboardMarkup(button)
 
     await update.callback_query.answer()
@@ -101,9 +92,7 @@ async def input(
     return TYPING
 
 
-async def save_comment(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
-) -> str:
+async def save_comment(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     """Сохранение комментария"""
     user_data = context.user_data
     user_data[FEATURES][user_data[CURRENT_FEATURE]] = update.message.text
@@ -112,9 +101,7 @@ async def save_comment(
     return await select_option_to_report_about_pollution(update, context)
 
 
-async def save_foto(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
-) -> str:
+async def save_foto(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     """Сохранение фотографии"""
     user_data = context.user_data
     photo_file = await update.message.photo[-1].get_file()
@@ -127,9 +114,7 @@ async def save_foto(
     return await select_option_to_report_about_pollution(update, context)
 
 
-async def save_location(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
-) -> str:
+async def save_location(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     """Сохранение локации"""
     user_data = context.user_data
     user_data[FEATURES][LONGITUDE] = update.message.location.longitude
@@ -139,9 +124,7 @@ async def save_location(
     return await select_option_to_report_about_pollution(update, context)
 
 
-async def save_and_exit_pollution(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
-) -> str:
+async def save_and_exit_pollution(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     """Сохранение данных в базу"""
     context.user_data[START_OVER] = True
     user_data = context.user_data[FEATURES]
@@ -163,7 +146,9 @@ async def save_and_exit_pollution(
     Комментарий: {comment}
     """
     client.issues.create(
-        queue=POLLUTION, summary=summary, description=description,
+        queue=POLLUTION,
+        summary=summary,
+        description=description,
     )
     await save_tracker_id_pollution(summary, user_data[TELEGRAM_ID], file_path, session)
     await start(update, context)
