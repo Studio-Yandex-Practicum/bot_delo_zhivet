@@ -20,6 +20,7 @@ from bot.handlers.state_constants import (
     SOCIAL_PROBLEM_TYPING,
     START_OVER,
     TELEGRAM_ID,
+    TELEGRAM_USERNAME,
     TYPING_SOCIAL_CITY,
 )
 from bot.service.dadata import get_fields_from_dadata
@@ -149,17 +150,23 @@ async def save_and_exit_from_social_problem(update: Update, context: ContextType
     context.user_data[START_OVER] = True
     user_data = context.user_data[FEATURES]
     user_data[TELEGRAM_ID] = update.effective_user.id
-    comment = user_data[SOCIAL_COMMENT]
     del user_data[SOCIAL_ADDRESS]
+    user = {}
+    user[TELEGRAM_ID] = user_data[TELEGRAM_ID]
+    user[TELEGRAM_USERNAME] = update.effective_user.username
     session_generator = get_async_session()
     session = await session_generator.asend(None)
-    await create_new_user(user_data[TELEGRAM_ID], session)
+    await create_new_user(user, session)
     await create_new_social(user_data, session)
     city = await crud_assistance_disabled.get_full_address_by_telegram_id(user_data[TELEGRAM_ID], session)
+    description = f"""
+    Ник в телеграмме оставившего заявку: {user[TELEGRAM_USERNAME]}
+    Комментарий к заявке: {user_data[SOCIAL_COMMENT]}
+    """
     client.issues.create(
         queue=SOCIAL,
         summary=city,
-        description=comment,
+        description=description,
     )
     await save_tracker_id_assistance_disabled(city, user_data[TELEGRAM_ID], session)
     await start(update, context)
