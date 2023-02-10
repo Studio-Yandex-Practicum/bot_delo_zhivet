@@ -3,19 +3,31 @@ from telegram.ext import ContextTypes
 
 from src.api.tracker import client
 from src.bot.handlers.start import start
-from src.bot.handlers.state_constants import (ACTIVITY_RADIUS,
-                                              ADDING_VOLUNTEER, BACK,
-                                              CAR_COMMAND, CITY_COMMAND,
-                                              CITY_INPUT, CURRENT_FEATURE,
-                                              CURRENT_LEVEL, END, FEATURES,
-                                              FIRST_NAME, LAST_NAME,
-                                              RADIUS_COMMAND, SAVE,
-                                              SELECTING_OVER,
-                                              SPECIFY_ACTIVITY_RADIUS,
-                                              SPECIFY_CAR_AVAILABILITY,
-                                              SPECIFY_CITY, START_OVER,
-                                              TELEGRAM_ID, TELEGRAM_USERNAME,
-                                              TYPING_CITY, VOLUNTEER)
+from src.bot.handlers.state_constants import (
+    ACTIVITY_RADIUS,
+    ADDING_VOLUNTEER,
+    BACK,
+    CAR_COMMAND,
+    CITY_COMMAND,
+    CITY_INPUT,
+    CURRENT_FEATURE,
+    CURRENT_LEVEL,
+    END,
+    FEATURES,
+    FIRST_NAME,
+    LAST_NAME,
+    RADIUS_COMMAND,
+    SAVE,
+    SELECTING_OVER,
+    SPECIFY_ACTIVITY_RADIUS,
+    SPECIFY_CAR_AVAILABILITY,
+    SPECIFY_CITY,
+    START_OVER,
+    TELEGRAM_ID,
+    TELEGRAM_USERNAME,
+    TYPING_CITY,
+    VOLUNTEER,
+)
 from src.bot.service.dadata import get_fields_from_dadata
 from src.bot.service.save_new_user import create_new_user
 from src.bot.service.save_tracker_id import save_tracker_id_volunteer
@@ -26,10 +38,10 @@ from src.core.db.db import get_async_session
 async def add_volunteer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     """Меню регистрации волонтёра."""
     text = (
-        "Для регистрации волонтером тебе надо указать:"
-        "\t- свой населенный пункт;"
-        "\t- Расстояние, на которое ты готов выезжать;"
-        "\t- Наличие автомобиля, и готовность задействовать его."
+        "Для регистрации волонтером тебе надо указать:\n"
+        "- Свой адрес, можно без квартиры, для удобства расчетов расстояния;\n"
+        "- Расстояние, на которое ты готов выезжать;\n"
+        "- Наличие автомобиля, и готовность задействовать его."
     )
     level = update.callback_query.data
     context.user_data[CURRENT_LEVEL] = level
@@ -57,11 +69,7 @@ async def add_volunteer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> s
         await update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
     else:
         if check_data(context.user_data[FEATURES]) is True:
-            buttons.append(
-                [InlineKeyboardButton(
-                    text="Сохранить и выйти", callback_data=SAVE
-                )]
-            )
+            buttons.append([InlineKeyboardButton(text="Сохранить и выйти", callback_data=SAVE)])
             keyboard = InlineKeyboardMarkup(buttons)
         text = "Понял-принял!. Выбери следующую опцию"
         if update.message is not None:
@@ -85,11 +93,7 @@ async def ask_for_input_city(update: Update, context: ContextTypes.DEFAULT_TYPE)
     """Предложить пользователю ввести данные о населенном пункте."""
     context.user_data[CURRENT_FEATURE] = update.callback_query.data
     text = "Укажите свой адрес."
-    button = [
-        [
-            InlineKeyboardButton(text="Назад", callback_data=BACK)
-        ]
-    ]
+    button = [[InlineKeyboardButton(text="Назад", callback_data=BACK)]]
     keyboard = InlineKeyboardMarkup(button)
 
     await update.callback_query.answer()
@@ -102,9 +106,11 @@ async def handle_city_input(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     """Обработчик данных о населенном пункте с выводом возможных вариантов."""
     user_input = update.message.text
     address = get_fields_from_dadata(user_input)
-    text = (f"Это правильный адрес: {address['full_address']}? "
-            'Если адрес не правильный, то выберите "Нет" и укажите более подробный вариант адреса, '
-            "а мы постараемся определить его правильно!")
+    text = (
+        f"Это правильный адрес: {address['full_address']}? "
+        'Если адрес не правильный, то выберите "Нет" и укажите более подробный вариант адреса, '
+        "а мы постараемся определить его правильно!"
+    )
     context.user_data[FEATURES] = address
 
     data = CITY_COMMAND + user_input
@@ -174,9 +180,7 @@ async def save_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     return await add_volunteer(update, context)
 
 
-async def save_and_exit_volunteer(
-    update: Update, context: ContextTypes.DEFAULT_TYPE
-) -> str:
+async def save_and_exit_volunteer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     """Сохранение данных в базу и отправка в трекер"""
     context.user_data[START_OVER] = True
     user_data = context.user_data[FEATURES]
@@ -189,7 +193,7 @@ async def save_and_exit_volunteer(
     user_data[FIRST_NAME] = update.effective_user.first_name
     user_data[LAST_NAME] = update.effective_user.last_name
     del user_data[SPECIFY_CITY]
-    if user_data[SPECIFY_CAR_AVAILABILITY] == 'Yes':
+    if user_data[SPECIFY_CAR_AVAILABILITY] == "Yes":
         user_data[SPECIFY_CAR_AVAILABILITY] = True
     else:
         user_data[SPECIFY_CAR_AVAILABILITY] = False
@@ -205,7 +209,9 @@ async def save_and_exit_volunteer(
     радиус выезда: {radius}
     """
     client.issues.create(
-        queue=VOLUNTEER, summary=summary, description=description,
+        queue=VOLUNTEER,
+        summary=summary,
+        description=description,
     )
     await save_tracker_id_volunteer(summary, user_data[TELEGRAM_ID], session)
     await start(update, context)
