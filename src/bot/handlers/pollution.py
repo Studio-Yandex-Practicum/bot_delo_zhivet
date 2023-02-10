@@ -12,7 +12,6 @@ from src.core.db.db import get_async_session
 from .start import start
 from .state_constants import (
     BACK,
-    CURRENT_FEATURE,
     END,
     FEATURES,
     LATITUDE,
@@ -53,6 +52,15 @@ async def select_option_to_report_about_pollution(update: Update, context: Conte
         await update.callback_query.answer()
         await update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
     else:
+        print(
+            f"""
+
+
+        {context.user_data}
+
+
+        """
+        )
         if check_data(context.user_data[FEATURES]) is True:
             buttons.append([InlineKeyboardButton(text="Отправить заявку на помощь", callback_data=SAVE)])
             keyboard = InlineKeyboardMarkup(buttons)
@@ -95,7 +103,7 @@ async def input(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def save_comment(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     """Сохранение комментария"""
     user_data = context.user_data
-    user_data[FEATURES][user_data[CURRENT_FEATURE]] = update.message.text
+    user_data[FEATURES][POLLUTION_COMMENT] = update.message.text
     user_data[START_OVER] = True
 
     return await select_option_to_report_about_pollution(update, context)
@@ -108,7 +116,7 @@ async def save_foto(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     date = datetime.now().strftime("%m_%d_%Y_%H_%M_%S")
     file_path = f"media\\{date}.jpg"
     await photo_file.download_to_drive(custom_path=file_path)
-    user_data[FEATURES][user_data[CURRENT_FEATURE]] = str(file_path)
+    user_data[FEATURES][POLLUTION_FOTO] = str(file_path)
     user_data[START_OVER] = True
 
     return await select_option_to_report_about_pollution(update, context)
