@@ -5,7 +5,6 @@ from bot.handlers.start import start
 from bot.handlers.state_constants import (
     END,
     START_OVER,
-    STOPPING, TOP_LEVEL_MENU_TEXT,
 )
 
 
