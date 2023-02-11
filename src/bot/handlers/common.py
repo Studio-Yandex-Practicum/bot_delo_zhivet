@@ -5,7 +5,7 @@ from bot.handlers.start import start
 from bot.handlers.state_constants import (
     END,
     START_OVER,
-    STOPPING,
+    STOPPING, TOP_LEVEL_MENU_TEXT,
 )
 
 
@@ -35,9 +35,9 @@ async def end_describing(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
 
 async def stop_nested(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     """Завершить беседу из вложенного разговора"""
-    await update.message.reply_text("Ок, пока!")
+    await start(update, context)
 
-    return STOPPING
+    return END
 
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
