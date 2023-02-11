@@ -19,3 +19,10 @@ services:
       retries: 10
     ports:
       - "5432:5432"
+#    networks:
+#      - mynetwork
+#
+#networks:
+#  mynetwork:
+#    name: bot_delo_zhivet_mynetwork_1
+#    driver: bridge
