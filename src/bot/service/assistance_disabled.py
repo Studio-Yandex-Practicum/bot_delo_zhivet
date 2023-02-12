@@ -14,8 +14,9 @@ class SocialProblemCreate(BaseModel):
     comment = Optional[str]
     telegram_id = Optional[int]
     ticketID = Optional[int]
-    latitude = Optional[float]
-    longitude = Optional[float]
+    lat = float
+    lon = float
+    geom = str
 
     class Config:
         arbitrary_types_allowed = True

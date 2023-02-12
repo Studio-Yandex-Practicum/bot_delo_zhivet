@@ -8,8 +8,9 @@ from src.core.db.repository.pollution_repository import crud_pollution
 
 class PollutionCreate(BaseModel):
     photo = str
-    latitude = float
-    longitude = float
+    lat = float
+    lon = float
+    geom = str
     comment = Optional[str]
     telegram_id = int
     ticketID = Optional[str]

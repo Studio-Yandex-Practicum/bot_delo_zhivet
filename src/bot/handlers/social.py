@@ -10,7 +10,10 @@ from bot.handlers.state_constants import (
     CITY_SOCIAL,
     CURRENT_FEATURE,
     END,
+    GEOM,
     FEATURES,
+    LATITUDE,
+    LONGITUDE,
     SAVE,
     SELECTING_FEATURE,
     SOCIAL,
@@ -29,6 +32,7 @@ from src.bot.service.save_new_user import create_new_user
 from src.bot.service.save_tracker_id import save_tracker_id_assistance_disabled
 from src.core.db.db import get_async_session
 from src.core.db.repository.assistance_disabled_repository import crud_assistance_disabled
+from src.core.db.repository.volunteer_repository import crud_volunteer
 
 load_dotenv(".env")
 
@@ -149,6 +153,7 @@ async def save_and_exit_from_social_problem(update: Update, context: ContextType
     """Сохранение данных в базу и отправка в трекер"""
     context.user_data[START_OVER] = True
     user_data = context.user_data[FEATURES]
+    user_data[GEOM] = f"POINT({user_data[LATITUDE]} {user_data[LONGITUDE]})"
     user_data[TELEGRAM_ID] = update.effective_user.id
     del user_data[SOCIAL_ADDRESS]
     user = {}
@@ -158,11 +163,32 @@ async def save_and_exit_from_social_problem(update: Update, context: ContextType
     session = await session_generator.asend(None)
     await create_new_user(user, session)
     await create_new_social(user_data, session)
+    volunteers = await crud_volunteer.get_volunteers_by_point(user_data[LATITUDE], user_data[LONGITUDE], session)
     city = await crud_assistance_disabled.get_full_address_by_telegram_id(user_data[TELEGRAM_ID], session)
     description = f"""
     Ник в телеграмме оставившего заявку: {user[TELEGRAM_USERNAME]}
     Комментарий к заявке: {user_data[SOCIAL_COMMENT]}
     """
+    description_add_hascar = ""
+    description_add_nocar = ""
+    volunteer_counter = 0
+    for volunteer in volunteers:
+        volunteer_counter += 1
+        volunteer_description = f"https://t.me/{volunteer.telegram_username}, {volunteer.city}\n{volunteer.ticketID}\n\n"
+        if volunteer.has_car:
+            description_add_hascar += volunteer_description
+        else:
+            description_add_nocar += volunteer_description
+    
+    if not volunteer_counter:
+        description += "\n---- \n\nВолонтёров поблизости не нашлось"
+    else:
+        description += "\n---- \n\nВолонтёры поблизости\n\n"
+        if description_add_hascar:
+            description += "* с авто:\n\n" + description_add_hascar
+        if description_add_nocar:
+            description += "* без авто:\n\n" + description_add_nocar
+        
     client.issues.create(
         queue=SOCIAL,
         summary=city,

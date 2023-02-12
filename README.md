@@ -79,6 +79,9 @@ alembic revision --autogenerate -m "you_migration_name"
 ```bash
 alembic upgrade head
 ```
+Если в модели появляется новое поле типа geoalchemy2.types.Geography,
+необходимо проверить autogenerate-миграцию перед применением по доке:
+https://geoalchemy-2.readthedocs.io/en/latest/alembic.html#interactions-between-alembic-and-geoalchemy-2
 
 [:arrow_up:Оглавление](#Оглавление)
 ___

@@ -14,6 +14,7 @@ from .state_constants import (
     BACK,
     END,
     FEATURES,
+    GEOM,
     LATITUDE,
     LONGITUDE,
     POLLUTION,
@@ -117,8 +118,8 @@ async def save_foto(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
 async def save_location(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     """Сохранение локации"""
     user_data = context.user_data
-    user_data[FEATURES][LONGITUDE] = update.message.location.longitude
-    user_data[FEATURES][LATITUDE] = update.message.location.latitude
+    user_data[FEATURES][LONGITUDE] = update.message.location.lon
+    user_data[FEATURES][LATITUDE] = update.message.location.lat
     user_data[START_OVER] = True
 
     return await select_option_to_report_about_pollution(update, context)
@@ -129,9 +130,10 @@ async def save_and_exit_pollution(update: Update, context: ContextTypes.DEFAULT_
     context.user_data[START_OVER] = True
     user_data = context.user_data[FEATURES]
     user_data[TELEGRAM_ID] = update.effective_user.id
+    user_data[GEOM] = f"POINT({user_data[LATITUDE]} {user_data[LONGITUDE]})"
     file_path = user_data[POLLUTION_FOTO]
-    latitude = user_data[LATITUDE]
-    longitude = user_data[LONGITUDE]
+    lat = user_data[LATITUDE]
+    lon = user_data[LONGITUDE]
     if POLLUTION_COMMENT in user_data:
         comment = user_data[POLLUTION_COMMENT]
     else:
@@ -143,10 +145,10 @@ async def save_and_exit_pollution(update: Update, context: ContextTypes.DEFAULT_
     session = await session_generator.asend(None)
     await create_new_user(user, session)
     await create_new_pollution(user_data, session)
-    summary = f"{user[TELEGRAM_USERNAME]} - {latitude}, {longitude}"
+    summary = f"{user[TELEGRAM_USERNAME]} - {lat}, {lon}"
     description = f"""
     Ник в телеграмме оставившего заявку: {user[TELEGRAM_USERNAME]}
-    Координаты загрязнения: {latitude}, {longitude}
+    Координаты загрязнения: {lat}, {lon}
     Комментарий к заявке: {comment}
     """
     client.issues.create(

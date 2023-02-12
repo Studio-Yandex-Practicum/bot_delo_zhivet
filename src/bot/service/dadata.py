@@ -14,11 +14,11 @@ def get_fields_from_dadata(data):
     else:
         city = result['data']['city_with_type']
     full_address = result['unrestricted_value']
-    latitude = float(result['data']['geo_lat'])
-    longitude = float(result['data']['geo_lon'])
+    lat = float(result['data']['geo_lat'])
+    lon = float(result['data']['geo_lon'])
     return dict(
         city=city,
         full_address=full_address,
-        latitude=latitude,
-        longitude=longitude,
+        lat=lat,
+        lon=lon,
     )

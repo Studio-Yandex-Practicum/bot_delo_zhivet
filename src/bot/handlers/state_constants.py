@@ -33,8 +33,9 @@ SHOWING = "showing"
 END = ConversationHandler.END
 
 # Различные константы для проекта
-LONGITUDE = "longitude"
-LATITUDE = 'latitude'
+LONGITUDE = "lon"
+LATITUDE = "lat"
+GEOM = "geom"
 FILE_PATH = "file_path"
 START_OVER = "start_over"
 FEATURES = "features"

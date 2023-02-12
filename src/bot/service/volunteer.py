@@ -19,8 +19,9 @@ class VolunteerCreate(BaseModel):
     full_address = str
     radius = int
     has_car = str
-    latitude = Optional[float]
-    longitude = Optional[float]
+    lat = float
+    lon = float
+    geom = str
     telegram_username = Optional[str]
     first_name = Optional[str]
     last_name = Optional[str]
