@@ -20,6 +20,6 @@ class VolunteerCRUD(CRUDBase):
         ).order_by(desc(Volunteer.created_at))
         volunteers = await session.execute(stmt)
         return volunteers
-    
+
 
 crud_volunteer = VolunteerCRUD(Volunteer)

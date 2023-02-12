@@ -179,7 +179,7 @@ async def save_and_exit_from_social_problem(update: Update, context: ContextType
             description_add_hascar += volunteer_description
         else:
             description_add_nocar += volunteer_description
-    
+
     if not volunteer_counter:
         description += "\n---- \n\nВолонтёров поблизости не нашлось"
     else:
@@ -188,7 +188,7 @@ async def save_and_exit_from_social_problem(update: Update, context: ContextType
             description += "* с авто:\n\n" + description_add_hascar
         if description_add_nocar:
             description += "* без авто:\n\n" + description_add_nocar
-        
+
     client.issues.create(
         queue=SOCIAL,
         summary=city,

@@ -36,11 +36,6 @@ class CRUDBase:
     ):
         """create new record."""
         db_obj = self.model(**obj_in)
-        print(f"""
-    
-        {db_obj.geom}
-        
-        """)
         session.add(db_obj)
         await session.commit()
         await session.refresh(db_obj)
