@@ -86,8 +86,6 @@ async def address_confirmation(update: Update, context: ContextTypes.DEFAULT_TYP
 
         await update.message.reply_text(text=text, reply_markup=keyboard)
 
-        return SOCIAL_PROBLEM_ADDRESS
-
     else:
         chat_text = "Не нашли такой адрес. Пожалуйста, укажи адрес подробнее:"
         context.user_data[FEATURES] = address
@@ -103,7 +101,7 @@ async def address_confirmation(update: Update, context: ContextTypes.DEFAULT_TYP
 
         await update.message.reply_text(text=chat_text, reply_markup=keyboard)
 
-        return SOCIAL_PROBLEM_ADDRESS
+    return SOCIAL_PROBLEM_ADDRESS
 
 
 async def save_social_problem_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -150,14 +148,6 @@ async def report_about_social_problem(update: Update, context: ContextTypes.DEFA
         await update.callback_query.answer()
         await update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
     else:
-        print(
-            f"""
-
-
-        {context.user_data}
-
-        """
-        )
         if check_data(context.user_data[FEATURES]) is True:
             buttons.append([InlineKeyboardButton(text="Отправить заявку на помощь", callback_data=SAVE)])
             keyboard = InlineKeyboardMarkup(buttons)
