@@ -106,26 +106,42 @@ async def handle_city_input(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     """Обработчик данных о населенном пункте с выводом возможных вариантов."""
     user_input = update.message.text
     address = get_fields_from_dadata(user_input)
-    text = (
-        f"Это правильный адрес: {address['full_address']}? "
-        'Если адрес не правильный, то выберите "Нет" и укажите более подробный вариант адреса, '
-        "а мы постараемся определить его правильно!"
-    )
-    context.user_data[FEATURES] = address
+    if address is not None:
+        text = (
+            f"Это правильный адрес: {address['full_address']}? "
+            'Если адрес не правильный, то выберите "Нет" и укажите более подробный вариант адреса, '
+            "а мы постараемся определить его правильно!"
+        )
+        context.user_data[FEATURES] = address
 
-    data = CITY_COMMAND + user_input
-    buttons = [
-        [
-            InlineKeyboardButton(text="Да", callback_data=data),
-            InlineKeyboardButton(text="Нет", callback_data=CITY_INPUT),
+        data = CITY_COMMAND + user_input
+        buttons = [
+            [
+                InlineKeyboardButton(text="Да", callback_data=data),
+                InlineKeyboardButton(text="Нет", callback_data=CITY_INPUT),
+            ]
         ]
-    ]
 
-    keyboard = InlineKeyboardMarkup(buttons)
+        keyboard = InlineKeyboardMarkup(buttons)
 
-    await update.message.reply_text(text=text, reply_markup=keyboard)
+        await update.message.reply_text(text=text, reply_markup=keyboard)
 
-    return SELECTING_OVER
+        return SELECTING_OVER
+    else:
+        chat_text = "Не нашли такой адрес. Пожалуйста, укажи адрес подробнее:"
+        context.user_data[FEATURES] = address
+
+        buttons = [
+            [
+                InlineKeyboardButton(text="Указать адрес заново", callback_data=CITY_INPUT),
+            ]
+        ]
+
+        keyboard = InlineKeyboardMarkup(buttons)
+
+        await update.message.reply_text(text=chat_text, reply_markup=keyboard)
+
+        return SELECTING_OVER
 
 
 async def handle_radius_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:

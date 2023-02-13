@@ -90,7 +90,6 @@ async def address_confirmation(update: Update, context: ContextTypes.DEFAULT_TYP
         chat_text = "Не нашли такой адрес. Пожалуйста, укажи адрес подробнее:"
         context.user_data[FEATURES] = address
 
-        data = CITY_SOCIAL + user_input
         buttons = [
             [
                 InlineKeyboardButton(text="Указать адрес заново", callback_data=CITY_INPUT),
