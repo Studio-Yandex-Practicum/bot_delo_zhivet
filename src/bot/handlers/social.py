@@ -65,26 +65,43 @@ async def address_confirmation(update: Update, context: ContextTypes.DEFAULT_TYP
     """Обработчик данных о населенном пункте с выводом возможных вариантов."""
     user_input = update.message.text
     address = get_fields_from_dadata(user_input)
-    text = (
-        f"Это правильный адрес: {address['full_address']}? "
-        'Если адрес не правильный, то выберите "Нет" и укажите более подробный вариант адреса, '
-        "а мы постараемся определить его правильно!"
-    )
-    context.user_data[FEATURES] = address
+    if address is not None:
+        text = (
+            f"Это правильный адрес: {address['full_address']}? "
+            'Если адрес не правильный, то выберите "Нет" и укажите более подробный вариант адреса, '
+            "а мы постараемся определить его правильно!"
+        )
+        context.user_data[FEATURES] = address
 
-    data = CITY_SOCIAL + user_input
-    buttons = [
-        [
-            InlineKeyboardButton(text="Да", callback_data=data),
-            InlineKeyboardButton(text="Нет", callback_data=CITY_INPUT),
+        data = CITY_SOCIAL + user_input
+        buttons = [
+            [
+                InlineKeyboardButton(text="Да", callback_data=data),
+                InlineKeyboardButton(text="Нет", callback_data=CITY_INPUT),
+            ]
         ]
-    ]
 
-    keyboard = InlineKeyboardMarkup(buttons)
+        keyboard = InlineKeyboardMarkup(buttons)
 
-    await update.message.reply_text(text=text, reply_markup=keyboard)
+        await update.message.reply_text(text=text, reply_markup=keyboard)
 
-    return SOCIAL_PROBLEM_ADDRESS
+        return SOCIAL_PROBLEM_ADDRESS
+    else:
+        chat_text = "Не нашли такой адрес. Пожалуйста, укажи адрес подробнее:"
+        context.user_data[FEATURES] = address
+
+        data = CITY_SOCIAL + user_input
+        buttons = [
+            [
+                InlineKeyboardButton(text="Указать адрес заново", callback_data=CITY_INPUT),
+            ]
+        ]
+
+        keyboard = InlineKeyboardMarkup(buttons)
+
+        await update.message.reply_text(text=chat_text, reply_markup=keyboard)
+
+        return SOCIAL_PROBLEM_ADDRESS
 
 
 async def save_social_problem_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
