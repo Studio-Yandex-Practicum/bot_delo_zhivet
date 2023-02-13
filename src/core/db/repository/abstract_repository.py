@@ -89,15 +89,7 @@ class CRUDBase:
         logger.info("Retrieved record from database with " f"{attr_name} = {attr_value}: {db_obj}.")
         return db_obj
 
-    async def get_id_by_telegram_id(
-        self,
-        telegram_id: int,
-        session: AsyncSession
-    ):
-        db_id = await session.execute(
-            select(self.model.id).where(
-                self.model.telegram_id == telegram_id
-            )
-        )
-        id = db_id.scalars().all()[-1]
+    async def get_id_by_telegram_id(self, telegram_id: int, session: AsyncSession):
+        db_id = await session.execute(select(self.model.id).where(self.model.telegram_id == telegram_id))
+        id = db_id.scalars().first()
         return id
