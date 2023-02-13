@@ -34,7 +34,7 @@ END = ConversationHandler.END
 
 # Различные константы для проекта
 LONGITUDE = "longitude"
-LATITUDE = 'latitude'
+LATITUDE = "latitude"
 FILE_PATH = "file_path"
 START_OVER = "start_over"
 FEATURES = "features"
@@ -62,6 +62,7 @@ LAST_NAME = "last_name"
 SLEEP_TIME = 3
 CITY_INPUT = "city_input"
 BACK = "back"
+CITY = "city"
 
 # Различные сообщения пользователю
 

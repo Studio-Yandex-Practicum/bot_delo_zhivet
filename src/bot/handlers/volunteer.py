@@ -126,7 +126,6 @@ async def handle_city_input(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 
         await update.message.reply_text(text=text, reply_markup=keyboard)
 
-        return SELECTING_OVER
     else:
         chat_text = "Не нашли такой адрес. Пожалуйста, укажи адрес подробнее:"
         context.user_data[FEATURES] = address
@@ -142,7 +141,7 @@ async def handle_city_input(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 
         await update.message.reply_text(text=chat_text, reply_markup=keyboard)
 
-        return SELECTING_OVER
+    return SELECTING_OVER
 
 
 async def handle_radius_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:

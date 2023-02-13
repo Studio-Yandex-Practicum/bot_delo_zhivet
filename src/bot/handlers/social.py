@@ -6,6 +6,7 @@ from api.tracker import client
 from bot.handlers.start import start
 from bot.handlers.state_constants import (
     BACK,
+    CITY,
     CITY_INPUT,
     CITY_SOCIAL,
     CURRENT_FEATURE,
@@ -86,6 +87,7 @@ async def address_confirmation(update: Update, context: ContextTypes.DEFAULT_TYP
         await update.message.reply_text(text=text, reply_markup=keyboard)
 
         return SOCIAL_PROBLEM_ADDRESS
+
     else:
         chat_text = "Не нашли такой адрес. Пожалуйста, укажи адрес подробнее:"
         context.user_data[FEATURES] = address
@@ -148,6 +150,14 @@ async def report_about_social_problem(update: Update, context: ContextTypes.DEFA
         await update.callback_query.answer()
         await update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
     else:
+        print(
+            f"""
+
+
+        {context.user_data}
+
+        """
+        )
         if check_data(context.user_data[FEATURES]) is True:
             buttons.append([InlineKeyboardButton(text="Отправить заявку на помощь", callback_data=SAVE)])
             keyboard = InlineKeyboardMarkup(buttons)
@@ -191,7 +201,7 @@ async def save_and_exit_from_social_problem(update: Update, context: ContextType
 
 
 def check_data(user_data):
-    if SOCIAL_ADDRESS in user_data and SOCIAL_COMMENT in user_data:
+    if CITY in user_data and SOCIAL_COMMENT in user_data:
         return True
     else:
         return False
