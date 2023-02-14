@@ -10,12 +10,13 @@ from src.core.db.repository.volunteer_repository import crud_volunteer
 
 class VolunteerCreate(BaseModel):
     telegram_id = int
-    city = Optional[str]
-    full_address = Optional[str]
-    radius = Optional[int]
-    has_car = Optional[str]
-    latitude = Optional[float]
-    longitude = Optional[float]
+    city = str
+    full_address = str
+    radius = int
+    has_car = str
+    latitude = float
+    longitude = float
+    geometry = str
     telegram_username = Optional[str]
     first_name = Optional[str]
     last_name = Optional[str]

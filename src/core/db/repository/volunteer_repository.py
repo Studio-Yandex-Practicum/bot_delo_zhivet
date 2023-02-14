@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import desc, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.db.model import Volunteer
@@ -13,6 +13,27 @@ class VolunteerCRUD(CRUDBase):
     ):
         user_id = await session.execute(select(Volunteer).where(Volunteer.telegram_id == telegram_id))
         return user_id.scalars().first()
+
+    async def get_volunteers_by_point(
+        self,
+        latitude: float,
+        longitude: float,
+        session: AsyncSession,
+    ):
+        stmt = (
+            select(Volunteer.telegram_username, Volunteer.has_car, Volunteer.city, Volunteer.ticketID)
+            .where(
+                func.ST_DWithin(
+                    Volunteer.geometry,
+                    func.ST_GeomFromText(f"SRID=4326;POINT({latitude} {longitude})"),
+                    Volunteer.radius,
+                    use_spheroid=False,
+                )
+            )
+            .order_by(desc(Volunteer.created_at))
+        )
+        volunteers = await session.execute(stmt)
+        return volunteers
 
 
 crud_volunteer = VolunteerCRUD(Volunteer)

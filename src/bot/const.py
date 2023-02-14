@@ -1,7 +1,11 @@
-from bot.handlers.state_constants import (ADDING_ECO_TASK, ADDING_VOLUNTEER,
-                                          END, SPECIFY_ACTIVITY_RADIUS,
-                                          SPECIFY_CAR_AVAILABILITY,
-                                          SPECIFY_CITY)
+from bot.handlers.state_constants import (
+    ADDING_ECO_TASK,
+    ADDING_VOLUNTEER,
+    END,
+    SPECIFY_ACTIVITY_RADIUS,
+    SPECIFY_CAR_AVAILABILITY,
+    SPECIFY_CITY,
+)
 
 BASE_PATTERN = "^({command})$"
 
