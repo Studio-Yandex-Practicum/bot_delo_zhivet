@@ -14,7 +14,23 @@ logger = get_logger()
 
 def backoff_hdlr(details):
     # print("Backing off {wait:0.1f} seconds after {tries} tries ")
+    tries = details.get("tries")
+    wait = float('{:.3f}'.format(details.get("wait")))
+    elapsed = float('{:.3f}'.format(details.get("elapsed")))
     logger.error("Error detected, %s attempt to connect to base", details.get("tries"))
+    # logger.error(f'Error detected:\n'
+    #              f'{tries} attempt to connect to base\n'
+    #              f'Wait time {wait}\n'
+    #              f'Total waiting time {elapsed} seconds'
+    #              )
+    print(f'Error detected:\n'
+          f'Connection attempt number: {tries}\n'
+          f'Wait time: {wait}\n'
+          f'Total waiting time: {elapsed} seconds'
+          )
+    # logger.error("Error time, %s ", details.get("wait"))
+    # logger.error("Error, %s ", details.get("elapsed"))
+    # logger.error(f'Error, %s ", details.get("elapsed")')
 
 
 # def save_dict_to_json(path, data):
@@ -24,13 +40,17 @@ def backoff_hdlr(details):
 
 
 class UserCRUD(CRUDBase):
-    @backoff.on_exception(
-        backoff.expo, on_backoff=backoff_hdlr, on_giveup=print("ALERT"), max_tries=10, max_time=20, exception=Exception
-    )
+    @backoff.on_exception(backoff.expo,
+                          on_backoff=backoff_hdlr,
+                          # on_giveup=print("ALERT!!!!!!!!"),
+                          max_tries=10,
+                          max_time=60,
+                          exception=Exception
+                          )
     async def get_user_id_by_telegram_id(
-        self,
-        telegram_id: int,
-        session: AsyncSession,
+            self,
+            telegram_id: int,
+            session: AsyncSession,
     ):
         user_id = await session.execute(select(User.id).where(User.telegram_id == telegram_id))
         return user_id.scalars().first()
