@@ -8,9 +8,9 @@ from src.core.db.repository.pollution_repository import crud_pollution
 
 class PollutionCreate(BaseModel):
     photo = str
-    lat = float
-    lon = float
-    geom = str
+    latitude = float
+    longitude = float
+    geometry = str
     comment = Optional[str]
     telegram_id = int
     ticketID = Optional[str]
@@ -20,8 +20,8 @@ class PollutionCreate(BaseModel):
 
 
 async def create_new_pollution(
-        data: PollutionCreate,
-        session: AsyncSession,
+    data: PollutionCreate,
+    session: AsyncSession,
 ):
     new_social_problem = await crud_pollution.create(data, session)
     return new_social_problem

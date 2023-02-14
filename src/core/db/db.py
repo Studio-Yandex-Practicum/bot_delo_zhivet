@@ -3,8 +3,7 @@ import uuid
 from sqlalchemy import TIMESTAMP, Column, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import (declarative_base, declared_attr, sessionmaker,
-                            scoped_session)
+from sqlalchemy.orm import declarative_base, declared_attr, scoped_session, sessionmaker
 
 from src.core.config import settings
 
@@ -36,8 +35,12 @@ database_url = (
     f"{settings.DB_PORT}/{settings.POSTGRES_DB}"
 )
 engine = create_async_engine(database_url)
-db_session = scoped_session(sessionmaker(autocommit=False,
-                                         autoflush=False, ))
+db_session = scoped_session(
+    sessionmaker(
+        autocommit=False,
+        autoflush=False,
+    )
+)
 AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession)
 
 

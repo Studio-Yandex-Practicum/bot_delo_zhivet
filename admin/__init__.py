@@ -1,7 +1,8 @@
-from flask import Flask, render_template, current_app
+from flask import Flask, current_app, render_template
 
 from admin.config import Config
-from .database import db, create_roles_and_superuser
+
+from .database import create_roles_and_superuser, db
 
 
 def create_app():
@@ -18,12 +19,12 @@ app = create_app()
 create_roles_and_superuser()
 
 
-@app.route('/')
+@app.route("/")
 def index():
-    return render_template('index.html')
+    return render_template("index.html")
 
 
 from . import views  # noqa
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run(debug=True)

@@ -1,8 +1,8 @@
-"""first migration
+"""First migration
 
-Revision ID: 3328aa85b124
+Revision ID: 345200deafa6
 Revises: 
-Create Date: 2023-02-11 16:27:33.587626
+Create Date: 2023-02-14 10:33:30.573658
 
 """
 from alembic import op
@@ -11,7 +11,7 @@ from geoalchemy2 import Geography
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = '3328aa85b124'
+revision = '345200deafa6'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -28,6 +28,7 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('name')
     )
+
     op.create_table('staff',
     sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
     sa.Column('created_at', sa.TIMESTAMP(), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=False),
@@ -42,6 +43,7 @@ def upgrade() -> None:
     sa.UniqueConstraint('email'),
     sa.UniqueConstraint('login')
     )
+
     op.create_table('user',
     sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
     sa.Column('created_at', sa.TIMESTAMP(), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=False),
@@ -52,6 +54,7 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('telegram_id')
     )
+
     op.create_geospatial_table('assistance_disabled',
     sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
     sa.Column('created_at', sa.TIMESTAMP(), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=False),
@@ -61,9 +64,9 @@ def upgrade() -> None:
     sa.Column('comment', sa.Text(), nullable=False),
     sa.Column('telegram_id', sa.BigInteger(), nullable=True),
     sa.Column('ticketID', sa.Text(), nullable=True),
-    sa.Column('lat', sa.Float(), nullable=False),
-    sa.Column('lon', sa.Float(), nullable=False),
-    sa.Column('geom', Geography(geometry_type='POINT', srid=4326, spatial_index=False, from_text='ST_GeogFromText', name='geography'), nullable=True),
+    sa.Column('latitude', sa.Float(), nullable=False),
+    sa.Column('longitude', sa.Float(), nullable=False),
+    sa.Column('geometry', Geography(geometry_type='POINT', srid=4326, spatial_index=False, from_text='ST_GeogFromText', name='geography'), nullable=True),
     sa.ForeignKeyConstraint(['telegram_id'], ['user.telegram_id'], ),
     sa.PrimaryKeyConstraint('id')
     )
@@ -73,9 +76,9 @@ def upgrade() -> None:
     sa.Column('created_at', sa.TIMESTAMP(), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=False),
     sa.Column('updated_at', sa.TIMESTAMP(), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=False),
     sa.Column('photo', sa.String(length=100), nullable=False),
-    sa.Column('lat', sa.Float(), nullable=False),
-    sa.Column('lon', sa.Float(), nullable=False),
-    sa.Column('geom', Geography(geometry_type='POINT', srid=4326, spatial_index=False, from_text='ST_GeogFromText', name='geography'), nullable=True),
+    sa.Column('latitude', sa.Float(), nullable=False),
+    sa.Column('longitude', sa.Float(), nullable=False),
+    sa.Column('geometry', Geography(geometry_type='POINT', srid=4326, spatial_index=False, from_text='ST_GeogFromText', name='geography'), nullable=True),
     sa.Column('comment', sa.Text(), nullable=True),
     sa.Column('telegram_id', sa.BigInteger(), nullable=True),
     sa.Column('ticketID', sa.Text(), nullable=True),
@@ -89,6 +92,7 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['role_id'], ['role.id'], ),
     sa.ForeignKeyConstraint(['staff_id'], ['staff.id'], )
     )
+
     op.create_geospatial_table('volunteer',
     sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
     sa.Column('created_at', sa.TIMESTAMP(), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=False),
@@ -98,9 +102,9 @@ def upgrade() -> None:
     sa.Column('full_address', sa.Text(), nullable=False),
     sa.Column('radius', sa.Integer(), nullable=False),
     sa.Column('has_car', sa.Boolean(), nullable=False),
-    sa.Column('lat', sa.Float(), nullable=False),
-    sa.Column('lon', sa.Float(), nullable=False),
-    sa.Column('geom', Geography(geometry_type='POINT', srid=4326, spatial_index=False, from_text='ST_GeogFromText', name='geography'), nullable=True),
+    sa.Column('latitude', sa.Float(), nullable=False),
+    sa.Column('longitude', sa.Float(), nullable=False),
+    sa.Column('geometry', Geography(geometry_type='POINT', srid=4326, spatial_index=False, from_text='ST_GeogFromText', name='geography'), nullable=True),
     sa.Column('telegram_username', sa.String(length=100), nullable=True),
     sa.Column('first_name', sa.String(length=100), nullable=True),
     sa.Column('last_name', sa.String(length=100), nullable=True),
@@ -122,9 +126,7 @@ def downgrade() -> None:
 
     op.drop_geospatial_table('volunteer')
     op.drop_table('roles_users')
-
     op.drop_geospatial_table('pollution')
-
     op.drop_geospatial_table('assistance_disabled')
     op.drop_table('user')
     op.drop_table('staff')

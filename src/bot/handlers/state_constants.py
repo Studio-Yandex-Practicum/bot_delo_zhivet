@@ -33,9 +33,9 @@ SHOWING = "showing"
 END = ConversationHandler.END
 
 # Различные константы для проекта
-LONGITUDE = "lon"
-LATITUDE = "lat"
-GEOM = "geom"
+LONGITUDE = "longitude"
+LATITUDE = "latitude"
+GEOM = "geometry"
 FILE_PATH = "file_path"
 START_OVER = "start_over"
 FEATURES = "features"
@@ -63,6 +63,7 @@ LAST_NAME = "last_name"
 SLEEP_TIME = 3
 CITY_INPUT = "city_input"
 BACK = "back"
+CITY = "city"
 
 # Различные сообщения пользователю
 
