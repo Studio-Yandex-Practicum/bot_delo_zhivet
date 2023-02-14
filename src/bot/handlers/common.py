@@ -2,7 +2,7 @@ from telegram import Update
 from telegram.ext import ContextTypes
 
 from bot.handlers.start import start
-from bot.handlers.state_constants import END, START_OVER
+from bot.handlers.state_constants import END, START_OVER, STOPPING
 
 
 async def stop(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -33,7 +33,7 @@ async def stop_nested(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str
     """Завершить беседу из вложенного разговора"""
     await update.message.reply_text("До свидания!")
 
-    return END
+    return STOPPING
 
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
