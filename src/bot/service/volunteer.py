@@ -28,23 +28,21 @@ class VolunteerCreate(BaseModel):
         arbitrary_types_allowed = True
 
 
-async def check_volunteer_in_db(telegram_id, session: AsyncSession) -> bool:
-    volunteer_id = await crud_volunteer.get_volunteer_id_by_telegram_id(telegram_id, session)
-    if volunteer_id is not None:
-        return True
-    else:
-        return False
+async def check_volunteer_in_db(telegram_id, session: AsyncSession):
+    volunteer = await crud_volunteer.get_volunteer_by_telegram_id(telegram_id, session)
+    if not volunteer:
+        return None
+    return volunteer
 
 
-async def create_or_update_volunteer(
+async def create_update_volunteer(
     data: VolunteerCreate,
     session: AsyncSession,
 ):
-    if await check_volunteer_in_db(data[TELEGRAM_ID], session) is False:
+    db_obj = await check_volunteer_in_db(data[TELEGRAM_ID], session)
+    if db_obj is None:
         await crud_volunteer.create(obj_in=data, session=session)
         return None
     else:
-        db_id = await crud_volunteer.get_id_by_telegram_id(data[TELEGRAM_ID], session)
-        db_obj = await crud_volunteer.get(db_id, session)
         await crud_volunteer.update(db_obj, data, session)
         return db_obj.ticketID
