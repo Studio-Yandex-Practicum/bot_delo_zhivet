@@ -172,7 +172,8 @@ async def save_and_exit_from_social_problem(update: Update, context: ContextType
     user_data = context.user_data[FEATURES]
     user_data[GEOM] = f"POINT({user_data[LATITUDE]} {user_data[LONGITUDE]})"
     user_data[TELEGRAM_ID] = update.effective_user.id
-    del user_data[SOCIAL_ADDRESS]
+    if SOCIAL_ADDRESS in user_data:
+        del user_data[SOCIAL_ADDRESS]
     user = {}
     user[TELEGRAM_ID] = user_data[TELEGRAM_ID]
     user[TELEGRAM_USERNAME] = update.effective_user.username
