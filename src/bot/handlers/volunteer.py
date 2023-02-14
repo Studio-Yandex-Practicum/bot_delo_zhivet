@@ -15,7 +15,10 @@ from src.bot.handlers.state_constants import (
     END,
     FEATURES,
     FIRST_NAME,
+    GEOM,
     LAST_NAME,
+    LATITUDE,
+    LONGITUDE,
     RADIUS_COMMAND,
     SAVE,
     SELECTING_OVER,
@@ -202,7 +205,8 @@ async def save_and_exit_volunteer(update: Update, context: ContextTypes.DEFAULT_
     user_data = context.user_data[FEATURES]
     radius = user_data[SPECIFY_ACTIVITY_RADIUS][7:]
     car = user_data[SPECIFY_CAR_AVAILABILITY][4:]
-    user_data[SPECIFY_ACTIVITY_RADIUS] = int(radius)
+    user_data[GEOM] = f"POINT({user_data[LATITUDE]} {user_data[LONGITUDE]})"
+    user_data[SPECIFY_ACTIVITY_RADIUS] = int(radius) * 1000
     user_data[SPECIFY_CAR_AVAILABILITY] = car
     user_data[TELEGRAM_ID] = update.effective_user.id
     user_data[TELEGRAM_USERNAME] = update.effective_user.username
