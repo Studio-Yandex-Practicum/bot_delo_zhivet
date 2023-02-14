@@ -206,7 +206,7 @@ async def save_and_exit_volunteer(update: Update, context: ContextTypes.DEFAULT_
     session = await session_generator.asend(None)
     await create_new_user(user, session)
     old_ticket_id = await create_update_volunteer(user_data, session)
-    summary = f"{user_data[TELEGRAM_USERNAME]} - {user_data['full_address']}"
+    summary = f"{user_data[TELEGRAM_USERNAME]}({user[TELEGRAM_ID]}) - {user_data['full_address']}"
     description = f"""
     Ник в телеграмме: {user_data[TELEGRAM_USERNAME]}
     Адрес: {user_data['full_address']}
