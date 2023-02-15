@@ -2,6 +2,16 @@ import backoff
 from bot.handlers.loggers import get_logger
 
 logger = get_logger()
+"""
+Base_method - арифметическая прогрессия
+RandomJitter_method - арифметическая прогрессия с добавлением случайного числа милисекунд
+FullJitter_method - алгоритм «Full Jitter», определенный в публикации «Экспоненциальное отставание и джиттер» в блоге об архитектуре AWS.
+"""
+JITTER = {
+        "Base_method": None,
+        "RandomJitter_method": backoff.random_jitter,
+        "FullJitter_method": backoff.full_jitter
+}
 
 
 def backoff_hdlr(details):
