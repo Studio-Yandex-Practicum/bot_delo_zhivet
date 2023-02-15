@@ -15,18 +15,18 @@ db_session = scoped_session(sessionmaker(autocommit=False,
                                          autoflush=False,
                                          bind=engine))
 Base.query = db_session.query_property()
-Base.metadata.create_all(engine)
+# Base.metadata.create_all(engine)
 
 
-def create_roles_and_superuser():
-    if len(Staff.query.all()) < 1:
-        staff = Staff(login=os.getenv('SUPER_USER_LOGIN'), email=os.getenv('SUPER_USER_EMAIL'),
-                      password=os.getenv('SUPER_USER_PASSWORD'),
-                      active=True)
-        role = Role(name='superuser', description='superuser')
-        role_admin = Role(name='admin', description='admin')
-        staff.roles.append(role)
-        db_session.add(staff)
-        db_session.add(role)
-        db_session.add(role_admin)
-        db_session.commit()
+# def create_roles_and_superuser():
+#     if len(Staff.query.all()) < 1:
+#         staff = Staff(login=os.getenv('SUPER_USER_LOGIN'), email=os.getenv('SUPER_USER_EMAIL'),
+#                       password=os.getenv('SUPER_USER_PASSWORD'),
+#                       active=True)
+#         role = Role(name='superuser', description='superuser')
+#         role_admin = Role(name='admin', description='admin')
+#         staff.roles.append(role)
+#         db_session.add(staff)
+#         db_session.add(role)
+#         db_session.add(role_admin)
+#         db_session.commit()
