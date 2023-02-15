@@ -12,7 +12,6 @@ db = SQLAlchemy()
 engine = create_engine(Config.SQLALCHEMY_DATABASE_URI, pool_size=10000, max_overflow=100)
 db_session = scoped_session(sessionmaker(autocommit=False, autoflush=False, bind=engine))
 Base.query = db_session.query_property()
-Base.metadata.create_all(engine)
 
 
 def create_roles_and_superuser():
