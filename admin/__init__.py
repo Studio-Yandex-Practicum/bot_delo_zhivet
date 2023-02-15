@@ -1,4 +1,4 @@
-from flask import Flask, current_app, render_template
+from flask import Flask, current_app, redirect, url_for
 
 from admin.config import Config
 
@@ -19,7 +19,7 @@ app = create_app()
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    return redirect(url_for('admin.index'))
 
 
 from . import views  # noqa
