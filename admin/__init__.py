@@ -1,8 +1,17 @@
+import os
+
+import sentry_sdk
+from dotenv import load_dotenv
 from flask import Flask, current_app, render_template
+from sentry_sdk.integrations.flask import FlaskIntegration
 
 from admin.config import Config
 
 from .database import create_roles_and_superuser, db
+
+load_dotenv(".env")
+
+SENTRY_DSN_URL = os.getenv("SENTRY_DSN_URL", default="None")
 
 
 def create_app():
@@ -13,6 +22,14 @@ def create_app():
         print(current_app.name)
     return app
 
+
+sentry_sdk.init(
+    dsn=SENTRY_DSN_URL,
+    integrations=[
+        FlaskIntegration(),
+    ],
+    traces_sample_rate=1.0,
+)
 
 app = create_app()
 
