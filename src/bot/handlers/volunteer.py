@@ -8,6 +8,7 @@ from src.bot.handlers.state_constants import (
     ADDING_VOLUNTEER,
     BACK,
     CAR_COMMAND,
+    CITY,
     CITY_COMMAND,
     CITY_INPUT,
     CURRENT_FEATURE,
@@ -34,7 +35,7 @@ from src.bot.handlers.state_constants import (
 from src.bot.service.dadata import get_fields_from_dadata
 from src.bot.service.save_new_user import create_new_user
 from src.bot.service.save_tracker_id import save_tracker_id_volunteer
-from src.bot.service.volunteer import create_new_volunteer
+from src.bot.service.volunteer import check_volunteer_in_db, create_volunteer, update_volunteer
 from src.core.db.db import get_async_session
 
 
@@ -212,7 +213,8 @@ async def save_and_exit_volunteer(update: Update, context: ContextTypes.DEFAULT_
     user_data[TELEGRAM_USERNAME] = update.effective_user.username
     user_data[FIRST_NAME] = update.effective_user.first_name
     user_data[LAST_NAME] = update.effective_user.last_name
-    del user_data[SPECIFY_CITY]
+    if SPECIFY_CITY in user_data:
+        del user_data[SPECIFY_CITY]
     if user_data[SPECIFY_CAR_AVAILABILITY] == "Yes":
         user_data[SPECIFY_CAR_AVAILABILITY] = True
     else:
@@ -223,13 +225,19 @@ async def save_and_exit_volunteer(update: Update, context: ContextTypes.DEFAULT_
     session_generator = get_async_session()
     session = await session_generator.asend(None)
     await create_new_user(user, session)
-    await create_new_volunteer(user_data, session)
-    summary = f"{user_data[TELEGRAM_USERNAME]} - {user_data['full_address']}"
+    old_volunteer = await check_volunteer_in_db(user_data[TELEGRAM_ID], session)
+    if old_volunteer:
+        old_ticket_id = old_volunteer.ticketID
+        await update_volunteer(old_volunteer, user_data, session)
+    else:
+        await create_volunteer(user_data, session)
+    summary = f"{user_data[TELEGRAM_USERNAME]}({user[TELEGRAM_ID]}) - {user_data['full_address']}"
     description = f"""
     Ник в телеграмме: {user_data[TELEGRAM_USERNAME]}
     Адрес: {user_data['full_address']}
     Наличие машины: {car}
     Радиус выезда: {radius}
+    Старый тикет: {old_ticket_id}
     """
     client.issues.create(
         queue=VOLUNTEER,
@@ -242,7 +250,7 @@ async def save_and_exit_volunteer(update: Update, context: ContextTypes.DEFAULT_
 
 
 def check_data(user_data):
-    if (SPECIFY_ACTIVITY_RADIUS in user_data) and SPECIFY_CAR_AVAILABILITY in user_data:
+    if (CITY in user_data and SPECIFY_ACTIVITY_RADIUS in user_data) and SPECIFY_CAR_AVAILABILITY in user_data:
         return True
     else:
         return False

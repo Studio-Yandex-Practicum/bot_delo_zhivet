@@ -51,7 +51,6 @@ class CRUDBase:
         """Update record."""
         db_obj_keys = [column.key for column in db_obj.__table__.columns]
         update_obj = obj_in
-        # update_obj.pop("_sa_instance_state", None)
         obj_in_keys = update_obj.keys()
         for db_key in db_obj_keys:
             if db_key != "id" and db_key in obj_in_keys:
@@ -91,5 +90,5 @@ class CRUDBase:
 
     async def get_id_by_telegram_id(self, telegram_id: int, session: AsyncSession):
         db_id = await session.execute(select(self.model.id).where(self.model.telegram_id == telegram_id))
-        id = db_id.scalars().all()[-1]
+        id = db_id.scalars().first()
         return id
