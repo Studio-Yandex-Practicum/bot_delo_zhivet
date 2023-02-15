@@ -35,7 +35,7 @@ from src.bot.handlers.state_constants import (
 from src.bot.service.dadata import get_fields_from_dadata
 from src.bot.service.save_new_user import create_new_user
 from src.bot.service.save_tracker_id import save_tracker_id_volunteer
-from src.bot.service.volunteer import create_update_volunteer
+from src.bot.service.volunteer import check_volunteer_in_db, create_volunteer, update_volunteer
 from src.core.db.db import get_async_session
 
 
@@ -225,7 +225,12 @@ async def save_and_exit_volunteer(update: Update, context: ContextTypes.DEFAULT_
     session_generator = get_async_session()
     session = await session_generator.asend(None)
     await create_new_user(user, session)
-    old_ticket_id = await create_update_volunteer(user_data, session)
+    old_volunteer = await check_volunteer_in_db(user_data[TELEGRAM_ID], session)
+    if old_volunteer:
+        old_ticket_id = old_volunteer.ticketID
+        await update_volunteer(old_volunteer, user_data, session)
+    else:
+        await create_volunteer(user_data, session)
     summary = f"{user_data[TELEGRAM_USERNAME]}({user[TELEGRAM_ID]}) - {user_data['full_address']}"
     description = f"""
     Ник в телеграмме: {user_data[TELEGRAM_USERNAME]}

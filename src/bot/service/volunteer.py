@@ -4,7 +4,7 @@ from typing import Optional
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.bot.handlers.state_constants import TELEGRAM_ID
+from src.core.db.model import Volunteer
 from src.core.db.repository.volunteer_repository import crud_volunteer
 
 
@@ -36,14 +36,9 @@ async def check_volunteer_in_db(telegram_id, session: AsyncSession):
     return volunteer
 
 
-async def create_update_volunteer(
-    data: VolunteerCreate,
-    session: AsyncSession,
-):
-    db_obj = await check_volunteer_in_db(data[TELEGRAM_ID], session)
-    if db_obj is None:
-        await crud_volunteer.create(obj_in=data, session=session)
-        return None
-    else:
-        await crud_volunteer.update(db_obj, data, session)
-        return db_obj.ticketID
+async def create_volunteer(data: VolunteerCreate, session: AsyncSession):
+    return await crud_volunteer.create(data, session)
+
+
+async def update_volunteer(db_obj: Volunteer, data: VolunteerCreate, session: AsyncSession):
+    return await crud_volunteer.update(db_obj, data, session)
