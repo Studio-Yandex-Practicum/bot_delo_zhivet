@@ -565,6 +565,22 @@ WTForms = "*"
 email = ["email-validator"]
 
 [[package]]
+name = "geoalchemy2"
+version = "0.13.1"
+description = "Using SQLAlchemy with Spatial Databases"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "GeoAlchemy2-0.13.1-py3-none-any.whl", hash = "sha256:7ffd577d6b032cce4ea12dbd3e4f85940b958867b166845a9d6b62f18b0ea2ee"},
+    {file = "GeoAlchemy2-0.13.1.tar.gz", hash = "sha256:57246d44aea90b4c52f84c006f6758d0e1951eb9018f10409a87141f02159b13"},
+]
+
+[package.dependencies]
+packaging = "*"
+SQLAlchemy = ">=1.4"
+
+[[package]]
 name = "greenlet"
 version = "2.0.2"
 description = "Lightweight in-process concurrent programming"
@@ -881,6 +897,18 @@ files = [
 setuptools = "*"
 
 [[package]]
+name = "packaging"
+version = "23.0"
+description = "Core utilities for Python packages"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "packaging-23.0-py3-none-any.whl", hash = "sha256:714ac14496c3e68c99c29b00845f7a2b85f3bb6f1078fd9f72fd20f0570002b2"},
+    {file = "packaging-23.0.tar.gz", hash = "sha256:b6ad297f8907de0fa2fe1ccbd26fdaf387f5f47c7275fedf8cce89f99446cf97"},
+]
+
+[[package]]
 name = "passlib"
 version = "1.7.4"
 description = "comprehensive password hashing framework supporting over 30 schemes"
@@ -940,6 +968,22 @@ files = [
 [package.extras]
 docs = ["furo (>=2022.12.7)", "proselint (>=0.13)", "sphinx (>=5.3)", "sphinx-autodoc-typehints (>=1.19.5)"]
 test = ["appdirs (==1.4.4)", "covdefaults (>=2.2.2)", "pytest (>=7.2)", "pytest-cov (>=4)", "pytest-mock (>=3.10)"]
+
+[[package]]
+name = "postgis"
+version = "1.0.4"
+description = "Pyscopg and asyncpg helpers to work with PostGIS."
+category = "main"
+optional = false
+python-versions = "*"
+files = [
+    {file = "postgis-1.0.4-py3-none-any.whl", hash = "sha256:1dfa62d33c585d68a54bdd47c21bdcb9302f9cbb0ef5aec360e64d2c3e0e1a93"},
+    {file = "postgis-1.0.4.tar.gz", hash = "sha256:3d41f087e249a2a8b6720931e6f8f22b7747801f250265a8b8ac5f9d48221e63"},
+]
+
+[package.extras]
+docs = ["mkdocs"]
+test = ["pytest"]
 
 [[package]]
 name = "pre-commit"
@@ -1565,4 +1609,4 @@ six = ">=1.9"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "e3c732ed10595e48c780edc298bbdc7df0284e4baf02fc05437751b105d9e4ee"
+content-hash = "f66e7fbca0d0c733e18c04e5f4d3911d257308a1e2cabf104f997a7ea907b466"
