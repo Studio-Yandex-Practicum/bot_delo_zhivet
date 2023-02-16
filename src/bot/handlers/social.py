@@ -209,12 +209,12 @@ async def save_and_exit_from_social_problem(update: Update, context: ContextType
         if description_add_nocar:
             description += "* без авто:\n\n" + description_add_nocar
 
-    client.issues.create(
+    tracker = client.issues.create(
         queue=SOCIAL,
         summary=city,
         description=description,
     )
-    await save_tracker_id_assistance_disabled(city, user_data[TELEGRAM_ID], session)
+    await save_tracker_id_assistance_disabled(tracker.key, user_data[TELEGRAM_ID], session)
     await start(update, context)
     return END
 

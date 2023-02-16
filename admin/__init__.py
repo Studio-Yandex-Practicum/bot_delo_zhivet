@@ -7,7 +7,7 @@ from flask import Blueprint, Flask, current_app, render_template
 
 from admin.config import Config
 
-from .database import create_roles_and_superuser, db
+from .database import db
 
 
 def create_app():
@@ -22,8 +22,6 @@ def create_app():
 
 
 app = create_app()
-
-create_roles_and_superuser()
 
 
 @app.route("/")

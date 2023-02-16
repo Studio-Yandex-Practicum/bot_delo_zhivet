@@ -1,5 +1,5 @@
 admin/static/
-admin/templates/
+# admin/templates/
 
 ### Python template
 # Byte-compiled / optimized / DLL files

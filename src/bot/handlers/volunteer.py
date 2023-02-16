@@ -239,12 +239,12 @@ async def save_and_exit_volunteer(update: Update, context: ContextTypes.DEFAULT_
     Радиус выезда: {radius}
     Старый тикет: {old_ticket_id}
     """
-    client.issues.create(
+    tracker = client.issues.create(
         queue=VOLUNTEER,
         summary=summary,
         description=description,
     )
-    await save_tracker_id_volunteer(summary, user_data[TELEGRAM_ID], session)
+    await save_tracker_id_volunteer(tracker.key, user_data[TELEGRAM_ID], session)
     await start(update, context)
     return END
 

@@ -90,5 +90,5 @@ class CRUDBase:
 
     async def get_id_by_telegram_id(self, telegram_id: int, session: AsyncSession):
         db_id = await session.execute(select(self.model.id).where(self.model.telegram_id == telegram_id))
-        id = db_id.scalars().first()
+        id = db_id.scalars().all()[-1]
         return id
