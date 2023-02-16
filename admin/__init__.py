@@ -1,8 +1,8 @@
-from flask import Flask, current_app, render_template
+from flask import Flask, current_app, redirect, url_for
 
 from admin.config import Config
 
-from .database import create_roles_and_superuser, db
+from .database import db
 
 
 def create_app():
@@ -16,12 +16,10 @@ def create_app():
 
 app = create_app()
 
-create_roles_and_superuser()
-
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    return redirect(url_for('admin.index'))
 
 
 from . import views  # noqa
