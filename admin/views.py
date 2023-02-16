@@ -1,8 +1,11 @@
+import os.path as op
+
 import flask_admin
 import flask_login as login
 from flask import redirect, request, url_for
 from flask_admin import AdminIndexView, expose, helpers
 from flask_admin.contrib import sqla
+from flask_admin.contrib.fileadmin import FileAdmin
 from flask_security import current_user
 from werkzeug.security import generate_password_hash
 
@@ -36,6 +39,9 @@ class SuperuserModelView(sqla.ModelView):
 
 
 class MyAdminIndexView(AdminIndexView):
+
+    endpoint = "/static"
+
     @expose("/")
     def index(self):
         if not login.current_user.is_authenticated:
@@ -87,7 +93,10 @@ admin = flask_admin.Admin(
     index_view=MyAdminIndexView(),
     base_template="my_master.html",
     template_mode="bootstrap4",
+    # static_url_path='/admin/static/'
 )
 
+path = op.join(op.dirname(__file__), "static")
+admin.add_view(FileAdmin(path, "/static123/", name="Static Files"))
 admin.add_view(MyModelView(User, db.session, name="User"))
 admin.add_view(SuperuserModelView(Staff, db.session, name="Staff"))

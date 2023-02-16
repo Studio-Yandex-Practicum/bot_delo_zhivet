@@ -13,6 +13,8 @@ from .database import create_roles_and_superuser, db
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
+    app.static_folder = "static123"
+    app.template_folder = os.path.join(app.root_path, "templates")
     db.init_app(app)
     with app.app_context():
         print(current_app.name)
@@ -59,7 +61,7 @@ def collectstatic(static_folder, overwrite):
     >>>Собираем статику Flask-Admin в папку 'C:\\Dev\\delo_zhivet\\bot_delo_zhivet\\admin\\static'
     """
     dst = os.path.join(app.root_path, static_folder)
-    src = os.path.join(os.path.dirname(flask_admin.__file__), "static")
+    src = os.path.join(os.path.dirname(flask_admin.__file__), "static_BROKEN")
     try:
         if os.path.exists(dst) and overwrite:
             print(f"Очищаем папку '{dst}'")
@@ -75,6 +77,8 @@ def collectstatic(static_folder, overwrite):
 app.register_blueprint(bp, cli_group=None)
 
 from . import views  # noqa
+
+print(views.admin.index_view.endpoint)
 
 if __name__ == "__main__":
     app.run(debug=True)
