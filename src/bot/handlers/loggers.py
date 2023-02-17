@@ -1,13 +1,18 @@
 import logging
 import sys
+from logging.handlers import RotatingFileHandler
 
 STR_FORMAT = "[%(asctime)s] %(filename)s:%(lineno)d " "[%(levelname)s] %(message)s"
 DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 
+Errors_log_file = 'ERRORS_file.log'
+
 
 def backoff_loger():
     logger = logging.getLogger('backoff')
-    file_handler = logging.FileHandler("ERRORS_file.log")
+    file_handler = RotatingFileHandler(Errors_log_file,
+                                       maxBytes=10 ** 4,
+                                       backupCount=5)
     file_handler.setLevel(logging.ERROR)
     error_formatter = logging.Formatter("%(asctime)s - %(name)s "
                                         "- %(levelname)s %(message)s")
