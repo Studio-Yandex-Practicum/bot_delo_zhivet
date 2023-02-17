@@ -1,3 +1,5 @@
+import os.path as op
+
 import flask_admin
 import flask_login as login
 from flask import redirect, request, url_for
@@ -36,6 +38,9 @@ class SuperuserModelView(sqla.ModelView):
 
 
 class MyAdminIndexView(AdminIndexView):
+
+    endpoint = "/static"
+
     @expose("/")
     def index(self):
         if not login.current_user.is_authenticated:
@@ -89,5 +94,6 @@ admin = flask_admin.Admin(
     template_mode="bootstrap4",
 )
 
+path = op.join(op.dirname(__file__), "static")
 admin.add_view(MyModelView(User, db.session, name="User"))
 admin.add_view(SuperuserModelView(Staff, db.session, name="Staff"))
