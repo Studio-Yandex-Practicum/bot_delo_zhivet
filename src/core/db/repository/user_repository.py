@@ -18,6 +18,7 @@ class UserCRUD(CRUDBase):
         max_tries=12,
         max_time=120,
         jitter=JITTER["FullJitter_method"],
+        # logger=logger
     )
     async def get_user_id_by_telegram_id(
         self,

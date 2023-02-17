@@ -1,7 +1,7 @@
 import backoff
-from bot.handlers.loggers import get_logger
+from bot.handlers.loggers import backoff_loger
 
-logger = get_logger()
+logger = backoff_loger()
 
 """
 Base_method - арифметическая прогрессия 
@@ -21,13 +21,8 @@ def backoff_hdlr(details):
     tries = details.get("tries")
     wait = float('{:.3f}'.format(details.get("wait")))
     elapsed = float('{:.3f}'.format(details.get("elapsed")))
-    logger.error(f'Error detected:\n'
+    logger.error(f'\nDatabase crash:\n'
                  f'{tries} attempt to connect to base\n'
                  f'Wait time {wait}\n'
                  f'Total waiting time {elapsed} seconds'
                  )
-    # print(f'Error detected:\n'
-    #       f'Connection attempt number: {tries}\n'
-    #       f'Wait time: {wait}\n'
-    #       f'Total waiting time: {elapsed} seconds'
-    #       )
