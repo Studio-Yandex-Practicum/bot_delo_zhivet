@@ -31,7 +31,7 @@ from bot.const import (
     SPECIFY_CAR_AVAILABILITY_CMD,
     SPECIFY_CITY_CMD,
 )
-from core.settings import settings
+from core.config import settings
 
 from .handlers.common import end_describing, help_command, stop, stop_nested
 from .handlers.participation import make_donation
@@ -91,7 +91,7 @@ from .handlers.volunteer import (
 def create_bot() -> Application:
     """Создание приложения бота"""
     persistence = PicklePersistence(filepath=DATA_PATH, update_interval=SAVE_PERSISTENCE_INTERVAL)
-    app = Application.builder().token(settings.telegram_bot_token).persistence(persistence).build()
+    app = Application.builder().token(settings.TELEGRAM_BOT_TOKEN).persistence(persistence).build()
 
     add_volunteer_conv = ConversationHandler(
         entry_points=[CallbackQueryHandler(add_volunteer, pattern=BECOME_VOLUNTEER_CMD)],
@@ -201,20 +201,20 @@ def run_bot_polling() -> None:
     bot_app.run_polling()
     aps_logger = logging.getLogger("apscheduler")
     aps_logger.setLevel(logging.DEBUG)
-    aps_logger.debug("Start polling")
+    aps_logger.info("Start polling")
 
 
 async def init_webhook() -> Application:
     """Инициализация вебхука"""
     bot_app = create_bot()
     bot_app.updater = None
-    url = urljoin(settings.webhook_domain, settings.webhook_path)
-    await bot_app.bot.set_webhook(url=url, secret_token=settings.telegram_bot_token.replace(":", ""))
+    url = urljoin(settings.WEBHOOK_DOMAIN, settings.WEBHOOK_PATH)
+    await bot_app.bot.set_webhook(url=url, secret_token=settings.TELEGRAM_BOT_TOKEN.replace(":", ""))
     await bot_app.initialize()
     await bot_app.start()
     aps_logger = logging.getLogger("apscheduler")
-    aps_logger.setLevel(logging.DEBUG)
-    aps_logger.debug(f"Webhook is. Application url: {url}")
+    aps_logger.setLevel(logging.INFO)
+    aps_logger.info(f"Webhook is. Application url: {url}")
     return bot_app
 
 
@@ -226,12 +226,12 @@ def run_bot_webhook():
     async def on_start_bot() -> None:
         bot_app = await init_webhook()
         starlette_app.state.bot_app = bot_app
-        aps_logger.debug("The bot has been started")
+        aps_logger.info("The bot has been started")
 
     async def on_stop_bot() -> None:
         await starlette_app.state.bot_app.stop()
         await starlette_app.state.bot_app.shutdown()
-        aps_logger.debug("The bot has been stopped")
+        aps_logger.info("The bot has been stopped")
 
     async def webhook_api(request: Request) -> Response:
         """Обработка входящих обновлений и помещение их в очередь"""
@@ -249,7 +249,7 @@ def run_bot_webhook():
     def get_routes() -> list[Route]:
         """Список маршрутов"""
         routes = [
-            Route(settings.webhook_path, webhook_api, methods=["POST"]),
+            Route(settings.WEBHOOK_PATH, webhook_api, methods=["POST"]),
         ]
         return routes
 
@@ -259,12 +259,12 @@ def run_bot_webhook():
         on_shutdown=[on_stop_bot],
         debug=True,
     )
-    uvicorn.run(app=starlette_app, host=settings.host, port=settings.webhook_port)
+    uvicorn.run(app=starlette_app, host=settings.HOST, port=settings.WEBHOOK_PORT)
 
 
 def start_bot() -> None:
     # Если в файле .env есть такие настройки, то запустится webhook
-    if settings.webhook_domain and settings.webhook_port:
+    if settings.WEBHOOK_DOMAIN and settings.WEBHOOK_PORT:
         run_bot_webhook()
     else:
         run_bot_polling()
