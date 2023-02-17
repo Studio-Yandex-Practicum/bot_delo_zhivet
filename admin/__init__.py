@@ -13,8 +13,10 @@ from .database import db
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
-    app.static_folder = "static123"
+    # app.static_folder = os.path.join(app.root_path, "static")
+    app.static_folder = None
     app.template_folder = os.path.join(app.root_path, "templates")
+    # app.static_url_path = None
     db.init_app(app)
     with app.app_context():
         print(current_app.name)
