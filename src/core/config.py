@@ -8,6 +8,11 @@ class Settings(BaseSettings):
     DB_HOST: str
     DB_PORT: str
     POSTGRES_DB: str
+    TELEGRAM_BOT_TOKEN: str = None
+    WEBHOOK_DOMAIN: str = None
+    WEBHOOK_PORT: int = None
+    WEBHOOK_PATH: str = None
+    HOST: str = None
 
     class Config:
         env_file = ".env"
