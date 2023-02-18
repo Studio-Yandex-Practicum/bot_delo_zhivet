@@ -37,7 +37,7 @@ services:
       - ./.env
 
   nginx:
-    image: vasilekx/delo_zhivet_bot:latest
+    image: vasilekx/delo_zhivet_nginx:latest
     restart: unless-stopped
     ports:
       - "80:80"
