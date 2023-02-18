@@ -3,8 +3,9 @@ name: Deploy for master bot and developer bot
 on:
   push:
     branches:
-      - master
-      - develop
+#      - master
+#      - develop
+      - testing_environment
 
 jobs:
   tests:
