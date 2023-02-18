@@ -14,6 +14,7 @@ from .state_constants import (
     BACK,
     END,
     FEATURES,
+    GEOM,
     LATITUDE,
     LONGITUDE,
     POLLUTION,
@@ -129,6 +130,7 @@ async def save_and_exit_pollution(update: Update, context: ContextTypes.DEFAULT_
     context.user_data[START_OVER] = True
     user_data = context.user_data[FEATURES]
     user_data[TELEGRAM_ID] = update.effective_user.id
+    user_data[GEOM] = f"POINT({user_data[LATITUDE]} {user_data[LONGITUDE]})"
     file_path = user_data[POLLUTION_FOTO]
     latitude = user_data[LATITUDE]
     longitude = user_data[LONGITUDE]
@@ -149,12 +151,13 @@ async def save_and_exit_pollution(update: Update, context: ContextTypes.DEFAULT_
     Координаты загрязнения: {latitude}, {longitude}
     Комментарий к заявке: {comment}
     """
-    client.issues.create(
+    tracker = client.issues.create(
         queue=POLLUTION,
         summary=summary,
         description=description,
     )
-    await save_tracker_id_pollution(summary, user_data[TELEGRAM_ID], file_path, session)
+    tracker.attachments.create(file_path)
+    await save_tracker_id_pollution(tracker.key, user_data[TELEGRAM_ID], session)
     await start(update, context)
     return END
 

@@ -51,7 +51,6 @@ class CRUDBase:
         """Update record."""
         db_obj_keys = [column.key for column in db_obj.__table__.columns]
         update_obj = obj_in
-        # update_obj.pop("_sa_instance_state", None)
         obj_in_keys = update_obj.keys()
         for db_key in db_obj_keys:
             if db_key != "id" and db_key in obj_in_keys:
@@ -89,15 +88,7 @@ class CRUDBase:
         logger.info("Retrieved record from database with " f"{attr_name} = {attr_value}: {db_obj}.")
         return db_obj
 
-    async def get_id_by_telegram_id(
-        self,
-        telegram_id: int,
-        session: AsyncSession
-    ):
-        db_id = await session.execute(
-            select(self.model.id).where(
-                self.model.telegram_id == telegram_id
-            )
-        )
+    async def get_id_by_telegram_id(self, telegram_id: int, session: AsyncSession):
+        db_id = await session.execute(select(self.model.id).where(self.model.telegram_id == telegram_id))
         id = db_id.scalars().all()[-1]
         return id
