@@ -17,7 +17,7 @@ class UserCRUD(CRUDBase):
         on_backoff=backoff_hdlr,
         max_tries=12,
         max_time=120,
-        jitter=JITTER["FullJitter_method"]
+        jitter=JITTER["RandomJitter_method"],
     )
     async def get_user_id_by_telegram_id(
         self,
