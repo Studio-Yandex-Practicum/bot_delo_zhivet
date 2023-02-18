@@ -2,57 +2,51 @@ version: '3.8'
 
 
 services:
-  db-local:
+  db:
     image: postgres:14.5-alpine  #    image: postgis/postgis:14-3.3-alpine
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     env_file:
       - ./.env
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:?err} -d ${POSTGRES_DB:?err}"]
       timeout: 10s
       interval: 1s
       retries: 10
-    ports:
-      - "127.0.0.1:5432:5432"
 
-  bot-local:
-    build:
-      context: .
-      dockerfile: ./Dockerfile
+  bot:
+    image: vasilekx/delo_zhivet_bot_and_admin:latest
     command: ["poetry", "run", "runbot"]
     restart: always
     depends_on:
-      db-local:
+      db:
         condition: service_healthy
     env_file:
       - ./.env
 
-  web-local:
-    build:
-      context: .
-      dockerfile: ./Dockerfile
+  web:
+    image: vasilekx/delo_zhivet_bot_and_admin:latest
     command: ["gunicorn", "--bind", "0.0.0.0:5000", "--access-logfile=-", "manage:app"]
     restart: always
     depends_on:
-      bot-local:
-        condition: service_started
-      db-local:
+      db:
         condition: service_healthy
+      bot:
+        condition: service_started
     env_file:
       - ./.env
-    expose:
-      - 5000
 
   nginx:
-    image: nginx:1.23.3-alpine
+    image: vasilekx/delo_zhivet_bot:latest
+    restart: unless-stopped
     ports:
       - "80:80"
+      - "443:443"
     volumes:
-      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./nginx/delo.conf:/etc/nginx/servers/delo.conf:rw
+      - ./nginx/letsencrypt/:/etc/letsencrypt/:rw
     depends_on:
-      - web-local
-
+      - web
 
 volumes:
   postgres_data:
