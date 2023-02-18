@@ -34,7 +34,7 @@ else
 #        exit 1
     else
         echo "Successfully received certificate."
-        docker-compose exec nginx nginx -s reload
+        docker-compose -f docker-compose-test.yaml exec nginx nginx -s reload
         echo "Reloaded the nginx configuration."
         export NEED_REBOOT_CONF_TRUE="FALSE"
         echo "Set NEED_REBOOT_CONF_TRUE=FALSE"
