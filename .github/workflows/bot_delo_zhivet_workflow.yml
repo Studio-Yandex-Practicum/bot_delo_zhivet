@@ -158,7 +158,7 @@ jobs:
               docker-compose -f docker-compose-test.yaml up -d
               chmod +x update_certificate.sh
               . ./update_certificate.sh
-              docker-compose -f docker-compose-test.yaml exec web-test alembic upgrade head
+              docker-compose -f docker-compose-test.yaml exec web alembic upgrade head
 
 #      - name: Executing remote ssh commands to deploy developer bot
 #        if: github.ref == 'refs/heads/develop'
