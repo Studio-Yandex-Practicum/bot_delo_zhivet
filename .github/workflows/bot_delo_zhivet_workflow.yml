@@ -98,7 +98,7 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           passphrase: ${{ secrets.SERVER_PASSPHRASE }}
-          source: "infrastructure,!infrastructure/archive,!infrastructure/nginx/delo.conf"
+          source: "infrastructure/*,!infrastructure/archive/*,!infrastructure/nginx/delo.conf"
           target: "~/test"
           overwrite: true
           strip_components: 1
@@ -154,10 +154,10 @@ jobs:
               echo SUPER_USER_PASSWORD=${{ secrets.SUPER_USER_PASSWORD }} >> .env
               echo ADMIN_SECRET_KEY=${{ secrets.ADMIN_SECRET_KEY }} >> .env
               chmod +x updating_nginx_conf.sh
-              ./updating_nginx_conf.sh
+              . ./update_nginx_conf.sh
               docker-compose -f docker-compose-test.yaml up -d
               chmod +x update_certificate.sh
-              ./update_certificate.sh
+              . ./update_certificate.sh
               docker-compose -f docker-compose-test.yaml exec web-test alembic upgrade head
 
 #      - name: Executing remote ssh commands to deploy developer bot

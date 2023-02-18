@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Проверяем, запущен ли контейнер nginx в Docker Compose
-if docker-compose ps | grep -q "nginx"; then
+if docker-compose -f docker-compose-test.yaml ps | grep -q "nginx"; then
     echo "Container nginx is running."
     exit 1 # Выходим из скрипта с кодом ошибки
 else
@@ -28,7 +28,7 @@ if [ -e "$MAIN_FILE" ] && grep -q "$CERTBOT_STR" "$SRC_FILE"; then
         export NEED_REBOOT_CONF_TRUE="FALSE"
   fi
 else
-  echo "Value '$CERTBOT_STR' not found in $MAIN_FILE or file does not exist. Copying $SRC_FILE to $MAIN_FILE."
+  echo -e "Value '$CERTBOT_STR' not found in $MAIN_FILE or file does not exist.\nCopying $SRC_FILE to $MAIN_FILE."
   cp -f "$SRC_FILE" "$MAIN_FILE"
   export NEED_REBOOT_CONF_TRUE="TRUE"
 fi
