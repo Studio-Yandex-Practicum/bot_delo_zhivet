@@ -8,7 +8,7 @@ from bot.handlers.state_constants import END, START_OVER, STOPPING
 
 
 async def stop(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    await update.message.reply_text("До свидания!")
+    await update.message.reply_text("Спасибо! Нажми на /start, когда я снова понадоблюсь.")
 
     return END
 

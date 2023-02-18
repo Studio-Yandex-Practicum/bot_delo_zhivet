@@ -1,4 +1,5 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram.constants import ParseMode
 from telegram.ext import ContextTypes
 
 from src.api.tracker import client
@@ -22,6 +23,7 @@ from src.bot.handlers.state_constants import (
     LONGITUDE,
     RADIUS_COMMAND,
     SAVE,
+    SECOND_LEVEL_TEXT,
     SELECTING_OVER,
     SPECIFY_ACTIVITY_RADIUS,
     SPECIFY_CAR_AVAILABILITY,
@@ -42,7 +44,7 @@ from src.core.db.db import get_async_session
 async def add_volunteer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     """Меню регистрации волонтёра."""
     text = (
-        "Для регистрации волонтером тебе надо указать:\n"
+        "Для регистрации волонтером вам надо указать:\n"
         "- Свой адрес, можно без квартиры, для удобства расчетов расстояния;\n"
         "- Расстояние, на которое ты готов выезжать;\n"
         "- Наличие автомобиля, и готовность задействовать его."
@@ -52,7 +54,7 @@ async def add_volunteer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> s
 
     buttons = [
         [
-            InlineKeyboardButton(text="Укажите свой адрес", callback_data=SPECIFY_CITY),
+            InlineKeyboardButton(text="Указать свой адрес", callback_data=SPECIFY_CITY),
         ],
         [
             InlineKeyboardButton(text="Указать радиус активности", callback_data=SPECIFY_ACTIVITY_RADIUS),
@@ -75,11 +77,12 @@ async def add_volunteer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> s
         if check_data(context.user_data[FEATURES]) is True:
             buttons.append([InlineKeyboardButton(text="Сохранить и выйти", callback_data=SAVE)])
             keyboard = InlineKeyboardMarkup(buttons)
-        text = "Понял-принял!. Выбери следующую опцию"
         if update.message is not None:
-            await update.message.reply_text(text=text, reply_markup=keyboard)
+            await update.message.reply_text(text=SECOND_LEVEL_TEXT, reply_markup=keyboard, parse_mode=ParseMode.HTML)
         else:
-            await update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
+            await update.callback_query.edit_message_text(
+                text=SECOND_LEVEL_TEXT, reply_markup=keyboard, parse_mode=ParseMode.HTML
+            )
 
     context.user_data[START_OVER] = False
     return ADDING_VOLUNTEER
@@ -96,7 +99,7 @@ async def end_second_level(update: Update, context: ContextTypes.DEFAULT_TYPE) -
 async def ask_for_input_city(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     """Предложить пользователю ввести данные о населенном пункте."""
     context.user_data[CURRENT_FEATURE] = update.callback_query.data
-    text = "Укажите свой адрес."
+    text = "Укажите свой адрес:"
     button = [[InlineKeyboardButton(text="Назад", callback_data=BACK)]]
     keyboard = InlineKeyboardMarkup(button)
 
@@ -151,7 +154,10 @@ async def handle_city_input(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 async def handle_radius_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     """Обработчик данных о радиусе действия."""
     context.user_data[CURRENT_FEATURE] = update.callback_query.data
-    text = "Пожалуйста, выбери радиус из представленных"
+    text = (
+        "Выберите из представленных вариантов расстояние, на которое вы готовы "
+        "выезжать. Радиусы выезда указаны в километрах:"
+    )
 
     buttons = []
 
@@ -162,6 +168,9 @@ async def handle_radius_input(update: Update, context: ContextTypes.DEFAULT_TYPE
             button_row.append(InlineKeyboardButton(text=radius, callback_data=data))
         buttons.append(button_row)
 
+    button = [InlineKeyboardButton(text="Назад", callback_data=BACK)]
+    buttons.append(button)
+
     keyboard = InlineKeyboardMarkup(buttons)
 
     await update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
@@ -171,13 +180,14 @@ async def handle_radius_input(update: Update, context: ContextTypes.DEFAULT_TYPE
 
 async def handle_car_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     """Обработчик данных о наличии автомобиля."""
-    text = "Пожалуйста, укажи наличие автомобиля и готовность задействовать его"
+    text = "Пожалуйста, укажите наличие автомобиля и готовность задействовать его"
     context.user_data[CURRENT_FEATURE] = update.callback_query.data
     buttons = [
         [
             InlineKeyboardButton(text="Да", callback_data=CAR_COMMAND + "Yes"),
             InlineKeyboardButton(text="Нет", callback_data=CAR_COMMAND + "No"),
         ],
+        [InlineKeyboardButton(text="Назад", callback_data=BACK)],
     ]
 
     keyboard = InlineKeyboardMarkup(buttons)

@@ -32,6 +32,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
         ],
         [
             InlineKeyboardButton(text="Стать волонтером", callback_data=ADDING_VOLUNTEER),
+        ],
+        [
             InlineKeyboardButton(
                 text="Сделать пожертвование", url="https://delozhivet.ru/campaign/pomoch-delo-zhivet/"
             ),
