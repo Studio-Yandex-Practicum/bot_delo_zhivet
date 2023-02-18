@@ -73,8 +73,8 @@ jobs:
         if: github.ref == env.BRANCH
         uses: docker/build-push-action@v3
         with:
-          context: .infrastructure/nginx/
-          file: Dockerfile
+          context: .
+          file: /infrastructure/nginx/Dockerfile
           push: true
           no-cache: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/delo_zhivet_nginx:latest
