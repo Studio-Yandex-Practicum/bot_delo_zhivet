@@ -147,8 +147,8 @@ jobs:
               echo FLASK_DEBUG=${{ secrets.FLASK_DEBUG }} >> .env
               echo SUPER_USER_LOGIN=${{ secrets.SUPER_USER_LOGIN }} >> .env
               echo SUPER_USER_EMAIL=${{ secrets.SUPER_USER_EMAIL }} >> .env
-              echo SUPER_USER_PASSWORD=${{ secrets.SUPER_USER_PASSWORD }§} >> .env
-              echo ADMIN_SECRET_KEY=${{ secrets.ADMIN_SECRET_KEY }§} >> .env
+              echo SUPER_USER_PASSWORD=${{ secrets.SUPER_USER_PASSWORD }} >> .env
+              echo ADMIN_SECRET_KEY=${{ secrets.ADMIN_SECRET_KEY }} >> .env
               ./updating_nginx_conf.sh
               docker-compose -f docker-compose-test.yaml up -d
               ./update_certificate.sh
