@@ -153,8 +153,10 @@ jobs:
               echo SUPER_USER_EMAIL=${{ secrets.SUPER_USER_EMAIL }} >> .env
               echo SUPER_USER_PASSWORD=${{ secrets.SUPER_USER_PASSWORD }} >> .env
               echo ADMIN_SECRET_KEY=${{ secrets.ADMIN_SECRET_KEY }} >> .env
+              chmod +x updating_nginx_conf.sh
               ./updating_nginx_conf.sh
               docker-compose -f docker-compose-test.yaml up -d
+              chmod +x update_certificate.sh
               ./update_certificate.sh
               docker-compose -f docker-compose-test.yaml exec web-test alembic upgrade head
 
