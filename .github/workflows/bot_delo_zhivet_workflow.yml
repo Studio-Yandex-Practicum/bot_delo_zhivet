@@ -33,14 +33,7 @@ jobs:
           poetry install --with test
 
       - name: Test with flake8 - bot
-        run: |
-          cd src/
-          poetry run python -m flake8
-
-      - name: Test with flake8 - admin
-        run: |
-          cd ../admin/
-          poetry run python -m flake8
+        run: poetry run python -m flake8
 
   build_and_push_to_docker_hub:
     name: Build and push Docker image to Docker Hub
