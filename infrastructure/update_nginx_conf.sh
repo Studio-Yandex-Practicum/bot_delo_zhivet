@@ -16,14 +16,14 @@ readonly SRC_FILE=~/test/infrastructure/nginx/delo.conf
 # Путь до копии файла
 readonly MAIN_FILE=~/test/nginx/delo.conf
 
-if [ -e "$MAIN_FILE" ] && grep -q "$CERTBOT_STR" "$SRC_FILE"; then
+if [ -e "$MAIN_FILE" ] && grep -q "$CERTBOT_STR" "$MAIN_FILE"; then
   echo "The value '$CERTBOT_STR' is found in $MAIN_FILE."
   if grep -q "$REBOOT_CONF_TRUE" "$SRC_FILE"; then
-        echo "The value '$REBOOT_CONF_TRUE' is found in $MAIN_FILE."
+        echo "The value '$REBOOT_CONF_TRUE' is found in $SRC_FILE."
         echo "The certificate must be reloaded."
         export NEED_REBOOT_CONF_TRUE="TRUE"
     else
-        echo "The value '$REBOOT_CONF_TRUE' is not found in $MAIN_FILE."
+        echo "The value '$REBOOT_CONF_TRUE' is not found in $SRC_FILE."
         echo "The certificate must not be reloaded."
         export NEED_REBOOT_CONF_TRUE="FALSE"
   fi
