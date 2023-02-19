@@ -11,3 +11,6 @@ class Config(object):
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     FLASK_ENV = "development"
+
+    # Дополнительные параметры, не участвующие в ините приложения
+    BOOTSTRAP_VERSION = "bootstrap4"

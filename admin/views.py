@@ -1,5 +1,3 @@
-import os.path as op
-
 import flask_admin
 import flask_login as login
 from flask import redirect, request, url_for
@@ -11,6 +9,7 @@ from werkzeug.security import generate_password_hash
 from src.core.db.model import Staff, User
 
 from . import app
+from .config import Config
 from .database import db
 from .forms import LoginForm, RegistrationForm
 
@@ -32,15 +31,12 @@ class MyModelView(sqla.ModelView):
         return current_user.is_active and current_user.is_authenticated and current_user.has_role("admin")
 
 
-class SuperuserModelView(sqla.ModelView):
+class SuperuserModelView(MyModelView):
     def is_accessible(self):
         return current_user.is_active and current_user.is_authenticated and current_user.has_role("superuser")
 
 
 class MyAdminIndexView(AdminIndexView):
-
-    endpoint = "/static"
-
     @expose("/")
     def index(self):
         if not login.current_user.is_authenticated:
@@ -91,9 +87,8 @@ admin = flask_admin.Admin(
     "Bot delo zhivet : Admin console",
     index_view=MyAdminIndexView(),
     base_template="my_master.html",
-    template_mode="bootstrap4",
+    template_mode=Config.BOOTSTRAP_VERSION,
 )
 
-path = op.join(op.dirname(__file__), "static")
 admin.add_view(MyModelView(User, db.session, name="User"))
 admin.add_view(SuperuserModelView(Staff, db.session, name="Staff"))
