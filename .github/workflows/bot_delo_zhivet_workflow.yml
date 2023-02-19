@@ -152,7 +152,7 @@ jobs:
               echo SUPER_USER_EMAIL=${{ secrets.SUPER_USER_EMAIL }} >> .env
               echo SUPER_USER_PASSWORD=${{ secrets.SUPER_USER_PASSWORD }} >> .env
               echo ADMIN_SECRET_KEY=${{ secrets.ADMIN_SECRET_KEY }} >> .env
-              chmod +x updating_nginx_conf.sh
+              chmod +x update_nginx_conf.sh
               . ./update_nginx_conf.sh
               docker-compose -f docker-compose-test.yaml up -d
               chmod +x update_certificate.sh
