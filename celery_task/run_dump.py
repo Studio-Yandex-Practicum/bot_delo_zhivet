@@ -1,4 +1,5 @@
 import os
+
 from celery_task import dump_postgres_database
 
 if __name__ == '__main__':

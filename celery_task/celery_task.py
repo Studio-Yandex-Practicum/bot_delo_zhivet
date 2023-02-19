@@ -1,6 +1,7 @@
-import subprocess
 import os
+import subprocess
 from pathlib import Path
+
 import redis
 from celery import Celery
 
@@ -19,6 +20,7 @@ app.conf.update(
     accept_content=['pickle'],
     timezone='Europe/Moscow'
 )
+
 
 @app.task
 def dump_postgres_database(database_name, key_prefix='database_dump'):
@@ -43,6 +45,7 @@ def dump_postgres_database(database_name, key_prefix='database_dump'):
         redis_instance.set(key, file_contents)
 
     return str(dump_file)
+
 
 if __name__ == '__main__':
     dump_postgres_database('my_database').delay()
