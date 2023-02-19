@@ -9,6 +9,8 @@ from src.bot.service.pollution import create_new_pollution
 from src.bot.service.save_new_user import create_new_user
 from src.bot.service.save_tracker_id import save_tracker_id_pollution
 from src.core.db.db import get_async_session
+from src.core.db.repository.assistance_disabled_repository import crud_assistance_disabled
+from src.core.db.repository.volunteer_repository import crud_volunteer
 
 from .start import start
 from .state_constants import (
@@ -152,15 +154,37 @@ async def save_and_exit_pollution(update: Update, context: ContextTypes.DEFAULT_
     session = await session_generator.asend(None)
     await create_new_user(user, session)
     await create_new_pollution(user_data, session)
-    summary = f"{user[TELEGRAM_USERNAME]} - {latitude}, {longitude}"
+    volunteers = await crud_volunteer.get_volunteers_by_point(user_data[LATITUDE], user_data[LONGITUDE], session)
+    city = await crud_assistance_disabled.get_full_address_by_telegram_id(user_data[TELEGRAM_ID], session)
     description = f"""
     Ник в телеграмме оставившего заявку: {user[TELEGRAM_USERNAME]}
     Координаты загрязнения: {latitude}, {longitude}
     Комментарий к заявке: {comment}
     """
+    description_add_hascar = ""
+    description_add_nocar = ""
+    volunteer_counter = 0
+    for volunteer in volunteers:
+        volunteer_counter += 1
+        volunteer_description = (
+            f"https://t.me/{volunteer.telegram_username}, {volunteer.city}\n{volunteer.ticketID}\n\n"
+        )
+        if volunteer.has_car:
+            description_add_hascar += volunteer_description
+        else:
+            description_add_nocar += volunteer_description
+
+    if not volunteer_counter:
+        description += "\n---- \n\nВолонтёров поблизости не нашлось"
+    else:
+        description += "\n---- \n\nВолонтёры поблизости\n\n"
+        if description_add_hascar:
+            description += "* с авто:\n\n" + description_add_hascar
+        if description_add_nocar:
+            description += "* без авто:\n\n" + description_add_nocar
     tracker = client.issues.create(
         queue=POLLUTION,
-        summary=summary,
+        summary=city,
         description=description,
     )
     tracker.attachments.create(file_path)
