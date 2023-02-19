@@ -11,81 +11,81 @@ env:
     BRANCH: 'refs/heads/feature/testing_environment'
 
 jobs:
-#  tests:
-#    name: Testing
-#    runs-on: ubuntu-latest
-#    strategy:
-#      matrix:
-#        python-version: [ "3.10", "3.11" ]
-#
-#    steps:
-#      - name: Check out the repo
-#        uses: actions/checkout@v3
-#
-#      - name: Set up Python ${{ matrix.python-version }}
-#        uses: actions/setup-python@v4
-#        with:
-#          python-version: ${{ matrix.python-version }}
-#
-#      - name: Install poetry
-#        run: |
-#          curl -sSL https://install.python-poetry.org | python3 -
-#
-#      - name: Install dependencies
-#        run: |
-#          poetry install --with test
-#
-#      - name: Test with flake8 - bot
-#        run: |
-#          poetry run python -m flake8
+  tests:
+    name: Testing
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [ "3.10", "3.11" ]
 
-#  build_and_push_to_docker_hub:
-#    name: Build and push Docker image to Docker Hub
-#    runs-on: ubuntu-latest
-##    needs: tests
-#
-#    steps:
-#      - name: Check out the repo
-#        uses: actions/checkout@v3
-#
-#      - name: Set up QEMU
-#        uses: docker/setup-qemu-action@v2
-#
-#      - name: Set up Docker Buildx
-#        uses: docker/setup-buildx-action@v2
-#
-#      - name: Login to Docker Hub
-#        uses: docker/login-action@v2
-#        with:
-#          username: ${{ secrets.DOCKERHUB_USERNAME }}
-#          password: ${{ secrets.DOCKERHUB_TOKEN }}
-#
-#      - name: Build and push a bot&admin image to Docker Hub
-#        if: github.ref == env.BRANCH
-#        uses: docker/build-push-action@v3
-#        with:
-#          context: .
-#          file: Dockerfile
-#          push: true
-#          no-cache: true
-#          tags: ${{ secrets.DOCKERHUB_USERNAME }}/delo_zhivet_bot_and_admin:latest
-#
-#      - name: Build and push a nginx image to Docker Hub
-#        if: github.ref == env.BRANCH
-#        uses: docker/build-push-action@v3
-#        with:
-#          context: ./infrastructure/nginx
-#          file: ./infrastructure/nginx/Dockerfile
-#          push: true
-#          no-cache: true
-#          tags: ${{ secrets.DOCKERHUB_USERNAME }}/delo_zhivet_nginx:latest
-#          build-args: |
-#            NGINX_CONFIG=default.conf
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+
+      - name: Install dependencies
+        run: |
+          poetry install --with test
+
+      - name: Test with flake8 - bot
+        run: |
+          poetry run python -m flake8
+
+  build_and_push_to_docker_hub:
+    name: Build and push Docker image to Docker Hub
+    runs-on: ubuntu-latest
+    needs: tests
+
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push a bot&admin image to Docker Hub
+        if: github.ref == env.BRANCH
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: Dockerfile
+          push: true
+          no-cache: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/delo_zhivet_bot_and_admin:latest
+
+      - name: Build and push a nginx image to Docker Hub
+        if: github.ref == env.BRANCH
+        uses: docker/build-push-action@v3
+        with:
+          context: ./infrastructure/nginx
+          file: ./infrastructure/nginx/Dockerfile
+          push: true
+          no-cache: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/delo_zhivet_nginx:latest
+          build-args: |
+            NGINX_CONFIG=default.conf
 
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
-#    needs: build_and_push_to_docker_hub
+    needs: build_and_push_to_docker_hub
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
@@ -114,7 +114,6 @@ jobs:
           source: "infrastructure/nginx"
           target: "~/test"
           overwrite: true
-#          strip_components: 1
 
       - name: Executing remote ssh commands to deploy
         if: github.ref == env.BRANCH
@@ -159,34 +158,3 @@ jobs:
               chmod +x update_certificate.sh
               . ./update_certificate.sh
               docker-compose -f docker-compose-test.yaml exec web alembic upgrade head
-
-#      - name: Executing remote ssh commands to deploy developer bot
-#        if: github.ref == 'refs/heads/develop'
-#        uses: appleboy/ssh-action@master
-#        with:
-#          host: ${{ secrets.SERVER_HOST }}
-#          username: ${{ secrets.SERVER_USER }}
-#          key: ${{ secrets.SERVER_SSH_KEY }}
-#          passphrase: ${{ secrets.SERVER_PASSPHRASE }}
-#          script: |
-#              cd ~/develop
-#              docker-compose -f docker-compose-develop.yaml stop
-#              docker-compose -f docker-compose-develop.yaml rm -f web-develop
-#              docker image rm -f ${{ secrets.DOCKER_USERNAME }}/delo_zhivet_bot_and_admin:latest
-#              rm .env
-#              touch .env
-#              echo TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_DEVELOPER_TOKEN }} >> .env
-#              echo GEOCODER_APIKEY=${{ secrets.GEOCODER_APIKEY }} >> .env
-#              echo GEOCODER_BASE_URL=${{ secrets.GEOCODER_BASE_URL }} >> .env
-#              echo MAXIMUM_OBJECTS_FROM_GEOCODER=${{ secrets.MAXIMUM_OBJECTS_FROM_GEOCODER }} >> .env
-#              echo POSTGRES_DB=${{ secrets.POSTGRES_DB }}_dev >> .env
-#              echo POSTGRES_USER=${{ secrets.POSTGRES_USER }}_dev >> .env
-#              echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}_dev >> .env
-#              echo DB_HOST=${{ secrets.DEVELOPER_DB_HOST }} >> .env
-#              echo DB_PORT=${{ secrets.DEVELOPER_DB_PORT }} >> .env
-#              echo OAUTH_TOKEN=${{ secrets.OAUTH_TOKEN }} >> .env
-#              echo ORG_ID=${{ secrets.ORG_ID }} >> .env
-#              echo DADATA_TOKEN=${{ secrets.DADATA_TOKEN }} >> .env
-#              echo DADATA_SECRET=${{ secrets.DADATA_SECRET }} >> .env
-#              docker-compose -f docker-compose-develop.yaml up -d
-#              docker-compose -f docker-compose-develop.yaml exec web-develop alembic upgrade head
