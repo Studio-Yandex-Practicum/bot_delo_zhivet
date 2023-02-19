@@ -3,10 +3,9 @@ import shutil
 
 import click
 import flask_admin
-from flask import Blueprint, Flask, current_app, redirect, render_template
-
 import sentry_sdk
 from dotenv import load_dotenv
+from flask import Blueprint, Flask, current_app, redirect, render_template
 from sentry_sdk.integrations.flask import FlaskIntegration
 
 from admin.config import Config
@@ -36,6 +35,7 @@ sentry_sdk.init(
         FlaskIntegration(),
     ],
     traces_sample_rate=1.0,
+    environment="admin",
 )
 
 app = create_app()

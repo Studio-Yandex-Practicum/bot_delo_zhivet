@@ -10,8 +10,9 @@ ___
 2. [Установка pre-commit hook](#Установка-pre-commit-hook)
     1. [Установка pre-commit](#Установка-pre-commit)
     2. [Установка hook](#Установка-hook)
+3. [Подключение системы мониторинга Sentry](#Подключение-системы-мониторинга-Sentry)
 4. [Запуск базы и применение миграций на локальной машине](#Запуск-базы-и-применение-миграций-на-локальной-машине)
-4. [Запуск бота](#Запуск-бота)
+5. [Запуск бота](#Запуск-бота)
 ___
 ## Установка poetry и запуск виртауального окружения
 Для Linux, macOS, Windows (WSL):
@@ -126,7 +127,15 @@ pre-commit install --all
 ```bash
 pre-commit run --all-files
 ```
-
+___
+### Подключение системы мониторинга Sentry
+1. Зарегистрируйтесь на платформе:
+https://sentry.io/signup/
+2. Создайте новый проект, выбрав при этом платформу FLASK.
+https://<your-organization-name>-ac.sentry.io/projects/new/
+3. В настройках проекта перейдите в раздел "Client Keys", скопируйте ключ DSN (Data Source Name).
+https://<your-organization-name>-ac.sentry.io/settings/projects/<your-project-name>/keys/
+4. Присвойте переменной SENTRY_DSN_URL в файле .env полученное значение.
 ___
 ## Запуск бота
 Для Linux, macOS, Windows (WSL):
