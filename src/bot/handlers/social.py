@@ -1,5 +1,6 @@
 from dotenv import load_dotenv
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram.constants import ParseMode
 from telegram.ext import ContextTypes
 
 from api.tracker import client
@@ -16,6 +17,7 @@ from bot.handlers.state_constants import (
     LATITUDE,
     LONGITUDE,
     SAVE,
+    SECOND_LEVEL_TEXT,
     SELECTING_FEATURE,
     SOCIAL,
     SOCIAL_ADDRESS,
@@ -146,21 +148,22 @@ async def report_about_social_problem(update: Update, context: ContextTypes.DEFA
     if not context.user_data.get(START_OVER):
         context.user_data[FEATURES] = {}
         text = (
-            "Пожалуйста, укажите адрес, по которому нужна помощь и оставьте контакты и комментарий – это "
+            "Пожалуйста, укажите адрес, по которому нужна помощь, и оставьте контакты и комментарий – это "
             "обязательно нужно для того, чтобы мы взяли заявку в работу:"
         )
         await update.callback_query.answer()
         await update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
     else:
         if check_data(context.user_data[FEATURES]) is True:
-            buttons.append([InlineKeyboardButton(text="Отправить заявку на помощь", callback_data=SAVE)])
+            buttons.append([InlineKeyboardButton(text="Отправить заявку", callback_data=SAVE)])
             keyboard = InlineKeyboardMarkup(buttons)
 
-        text = "Готово! Пожалуйста, выберите функцию для добавления."
         if update.message is not None:
-            await update.message.reply_text(text=text, reply_markup=keyboard)
+            await update.message.reply_text(text=SECOND_LEVEL_TEXT, reply_markup=keyboard, parse_mode=ParseMode.HTML)
         else:
-            await update.callback_query.edit_message_text(text, reply_markup=keyboard)
+            await update.callback_query.edit_message_text(
+                text=SECOND_LEVEL_TEXT, reply_markup=keyboard, parse_mode=ParseMode.HTML
+            )
 
     context.user_data[START_OVER] = False
     return SELECTING_FEATURE

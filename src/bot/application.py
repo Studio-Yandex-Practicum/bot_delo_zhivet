@@ -42,6 +42,7 @@ from .handlers.state_constants import (
     CITY_COMMAND,
     CITY_INPUT,
     CITY_SOCIAL,
+    END,
     POLLUTION_COMMENT,
     POLLUTION_COORDINATES,
     POLLUTION_FOTO,
@@ -54,6 +55,7 @@ from .handlers.state_constants import (
     SOCIAL_COMMENT,
     SOCIAL_PROBLEM_ADDRESS,
     SOCIAL_PROBLEM_TYPING,
+    STOPPING,
     TYPING,
     TYPING_CITY,
     TYPING_SOCIAL_CITY,
@@ -97,6 +99,9 @@ def start_bot() -> None:
             CallbackQueryHandler(ask_for_input_city, pattern=CITY_INPUT),
             CallbackQueryHandler(add_volunteer, pattern=BACK),
         ],
+        map_to_parent={
+            STOPPING: END,
+        },
     )
 
     add_pollution_conv = ConversationHandler(
@@ -119,6 +124,9 @@ def start_bot() -> None:
             CommandHandler("stop", stop_nested),
             CallbackQueryHandler(select_option_to_report_about_pollution, pattern=BACK),
         ],
+        map_to_parent={
+            STOPPING: END,
+        },
     )
 
     add_social_conv = ConversationHandler(
@@ -148,6 +156,9 @@ def start_bot() -> None:
             CallbackQueryHandler(ask_for_input_address, pattern=CITY_INPUT),
             CallbackQueryHandler(report_about_social_problem, pattern=BACK),
         ],
+        map_to_parent={
+            STOPPING: END,
+        },
     )
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler("start", start)],
@@ -158,7 +169,9 @@ def start_bot() -> None:
                 add_social_conv,
             ],
         },
-        fallbacks=[CommandHandler("stop", stop)],
+        fallbacks=[
+            CommandHandler("stop", stop),
+        ],
     )
 
     bot.add_handler(conv_handler)
