@@ -1,7 +1,5 @@
 import os
 import subprocess
-from pathlib import Path
-
 import redis
 from celery import Celery
 
@@ -21,31 +19,35 @@ app.conf.update(
     timezone='Europe/Moscow'
 )
 
-
 @app.task
 def dump_postgres_database(database_name, key_prefix='database_dump'):
     """Dumps a PostgreSQL database to a file using the pg_dump tool, and saves it to a Redis instance."""
-    db_user = os.getenv('POSTGRES_USER')
-    db_password = os.getenv('POSTGRES_PASSWORD')
-    db_host = os.getenv('POSTGRES_HOST')
-    db_port = os.getenv('POSTGRES_PORT')
-    dump_file = Path(f'{Path(__file__).parent}/databasedump/{database_name}.sql')
+    POSTGRES_DB = "delo_zhivet"
+    POSTGRES_USER = "admin_delo_zhivet"
+    POSTGRES_PASSWORD = "RJlcSxU&5c9c3L!P7h"
+    DB_HOST = "localhost"
+    DB_PORT = "5432"
+    dump_file = os.path.join(os.getcwd(), 'my_dump_database.sql')
+    os.makedirs(os.path.dirname(dump_file), exist_ok=True)
+
     cmd = [
-        'pg_dump',
-        f'--dbname=postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{database_name}',
-        '--clean',
-        '--if-exists',
-        f'--file={dump_file}',
+        'docker', 'exec', 'db-local', 'pg_dump',
+        f'--dbname=postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{DB_HOST}:{DB_PORT}/{POSTGRES_DB}',
+        '--clean', '--if-exists', f'--file={dump_file}'
     ]
-    subprocess.run(cmd, check=True)
+
+    try:
+        subprocess.run(cmd, check=True)
+    except subprocess.CalledProcessError as e:
+        print(f"pg_dump command returned non-zero exit status: {e.returncode}")
 
     with open(dump_file, 'rb') as f:
         file_contents = f.read()
         key = f"{key_prefix}:{database_name}"
         redis_instance.set(key, file_contents)
 
-    return str(dump_file)
+    return f"Database dump saved to {dump_file} and Redis key {key}"
 
 
 if __name__ == '__main__':
-    dump_postgres_database('my_database').delay()
+    dump_postgres_database('database_dump').delay()

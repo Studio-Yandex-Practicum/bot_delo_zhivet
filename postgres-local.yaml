@@ -1,10 +1,11 @@
 version: '3.7'
 
+volumes:
+  postgis-data:
+
 services:
   postgis:
-    build:
-      context: .
-      dockerfile: Dockerfile-postgres-client
+    image: postgis/postgis:14-3.3-alpine
     restart: always
     volumes:
       - postgis-data:/var/lib/postgresql/data
@@ -12,6 +13,3 @@ services:
       - ./.env
     ports:
       - "5432:5432"
-
-volumes:
-  postgis-data:
