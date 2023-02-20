@@ -84,7 +84,7 @@ class MyAdminIndexView(AdminIndexView):
 
 admin = flask_admin.Admin(
     app,
-    "Bot delo zhivet : Admin console",
+    "Бот 'Дело живёт'",
     index_view=MyAdminIndexView(),
     base_template="my_master.html",
     template_mode=Config.BOOTSTRAP_VERSION,
