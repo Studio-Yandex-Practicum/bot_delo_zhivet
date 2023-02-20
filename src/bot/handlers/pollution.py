@@ -9,7 +9,6 @@ from src.bot.service.pollution import create_new_pollution
 from src.bot.service.save_new_user import create_new_user
 from src.bot.service.save_tracker_id import save_tracker_id_pollution
 from src.core.db.db import get_async_session
-from src.core.db.repository.assistance_disabled_repository import crud_assistance_disabled
 from src.core.db.repository.volunteer_repository import crud_volunteer
 
 from .start import start
@@ -154,8 +153,8 @@ async def save_and_exit_pollution(update: Update, context: ContextTypes.DEFAULT_
     session = await session_generator.asend(None)
     await create_new_user(user, session)
     await create_new_pollution(user_data, session)
-    volunteers = await crud_volunteer.get_volunteers_by_point(user_data[LATITUDE], user_data[LONGITUDE], session)
-    city = await crud_assistance_disabled.get_full_address_by_telegram_id(user_data[TELEGRAM_ID], session)
+    volunteers = await crud_volunteer.get_volunteers_by_point(latitude, longitude, session)
+    summary = f"{user[TELEGRAM_USERNAME]} - {latitude}, {longitude}"
     description = f"""
     Ник в телеграмме оставившего заявку: {user[TELEGRAM_USERNAME]}
     Координаты загрязнения: {latitude}, {longitude}
@@ -184,7 +183,7 @@ async def save_and_exit_pollution(update: Update, context: ContextTypes.DEFAULT_
             description += "* без авто:\n\n" + description_add_nocar
     tracker = client.issues.create(
         queue=POLLUTION,
-        summary=city,
+        summary=summary,
         description=description,
     )
     tracker.attachments.create(file_path)
