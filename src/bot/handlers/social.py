@@ -177,6 +177,8 @@ async def save_and_exit_from_social_problem(update: Update, context: ContextType
     user_data[TELEGRAM_ID] = update.effective_user.id
     if SOCIAL_ADDRESS in user_data:
         del user_data[SOCIAL_ADDRESS]
+    if CITY_INPUT in user_data:
+        del user_data[CITY_INPUT]
     user = {}
     user[TELEGRAM_ID] = user_data[TELEGRAM_ID]
     user[TELEGRAM_USERNAME] = update.effective_user.username

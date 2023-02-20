@@ -75,7 +75,7 @@ async def add_volunteer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> s
         await update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
     else:
         if check_data(context.user_data[FEATURES]) is True:
-            buttons.append([InlineKeyboardButton(text="Сохранить и выйти", callback_data=SAVE)])
+            buttons.append([InlineKeyboardButton(text="Отправить заявку", callback_data=SAVE)])
             keyboard = InlineKeyboardMarkup(buttons)
         if update.message is not None:
             await update.message.reply_text(text=SECOND_LEVEL_TEXT, reply_markup=keyboard, parse_mode=ParseMode.HTML)
@@ -236,6 +236,7 @@ async def save_and_exit_volunteer(update: Update, context: ContextTypes.DEFAULT_
     session = await session_generator.asend(None)
     await create_new_user(user, session)
     old_volunteer = await check_volunteer_in_db(user_data[TELEGRAM_ID], session)
+    old_ticket_id = None
     if old_volunteer:
         old_ticket_id = old_volunteer.ticketID
         await update_volunteer(old_volunteer, user_data, session)
@@ -247,8 +248,9 @@ async def save_and_exit_volunteer(update: Update, context: ContextTypes.DEFAULT_
     Адрес: {user_data['full_address']}
     Наличие машины: {car}
     Радиус выезда: {radius}
-    Старый тикет: {old_ticket_id}
     """
+    if old_ticket_id:
+        description += f"Старый тикет: {old_ticket_id}"
     tracker = client.issues.create(
         queue=VOLUNTEER,
         summary=summary,
