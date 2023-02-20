@@ -39,9 +39,9 @@ def create_roles_and_superuser():
         staff = Staff(
             login=os.getenv("SUPER_USER_LOGIN"),
             email=os.getenv("SUPER_USER_EMAIL"),
-            password=os.getenv("SUPER_USER_PASSWORD"),
             active=True,
         )
+        staff.set_password(os.getenv("SUPER_USER_PASSWORD"))
         role = Role(name="superuser", description="superuser")
         role_admin = Role(name="admin", description="admin")
         staff.roles.append(role)

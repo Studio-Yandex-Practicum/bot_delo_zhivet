@@ -6,7 +6,7 @@ from flask import Flask, current_app, redirect, url_for
 from admin.config import Config
 
 from .commands import admin_utils
-from .database import db, get_not_existing_required_tables
+from .database import create_roles_and_superuser, db, get_not_existing_required_tables
 from .messages import DB_NOT_READY_FOR_INIT_APP_ERROR, MISSING_REQUIRED_TABLES_ERROR
 
 REQUIRED_TABLES = (
@@ -33,6 +33,7 @@ def create_app():
     return app
 
 
+create_roles_and_superuser()
 app = create_app()
 
 
