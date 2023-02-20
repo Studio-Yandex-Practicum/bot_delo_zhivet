@@ -44,9 +44,9 @@ poetry completions bash >> ~/.bash_completion
 ```bash
 poetry env use python3.10
 ```
-Установка зависимостей
+Установка зависимостей (для разработки)
 ```bash
-poetry install
+poetry install --with dev
 ```
 Запуск оболочки и активация виртуального окружения
 ```bash
@@ -79,6 +79,9 @@ alembic revision --autogenerate -m "you_migration_name"
 ```bash
 alembic upgrade head
 ```
+Если в модели появляется новое поле типа geoalchemy2.types.Geography,
+необходимо проверить autogenerate-миграцию перед применением по доке:
+https://geoalchemy-2.readthedocs.io/en/latest/alembic.html#interactions-between-alembic-and-geoalchemy-2
 
 [:arrow_up:Оглавление](#Оглавление)
 ___
@@ -139,4 +142,3 @@ flask run
 Перейти по ссылке в терминала, ввести логин(admin) и пароль(admin123)
 ___
 [:arrow_up:Оглавление](#Оглавление)
-

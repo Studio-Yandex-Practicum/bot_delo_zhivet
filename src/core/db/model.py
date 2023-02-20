@@ -1,11 +1,9 @@
-from sqlalchemy import (BigInteger, Boolean, Column, Date, DateTime, Float,
-                        Table, ForeignKey, Integer, String, Text)
-from sqlalchemy.dialects.postgresql import UUID
-
-from flask_security import RoleMixin
 from flask_login import UserMixin
-
-from sqlalchemy.orm import relationship, backref
+from flask_security import RoleMixin
+from geoalchemy2.types import Geography
+from sqlalchemy import BigInteger, Boolean, Column, Date, DateTime, Float, ForeignKey, Integer, String, Table, Text
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import backref, relationship
 
 from core.mixins import ExtraUserMixin
 from src.core.db.db import Base
@@ -14,6 +12,7 @@ from src.core.db.db import Base
 class User(Base):
     """Модель пользователя"""
 
+    telegram_username = Column(String(100), nullable=True)
     telegram_id = Column(BigInteger, unique=True, nullable=False)
     is_banned = Column(Boolean, default=False)
 
@@ -26,8 +25,9 @@ class Volunteer(Base):
     full_address = Column(Text, nullable=False)
     radius = Column(Integer, nullable=False)
     has_car = Column(Boolean, nullable=False)
-    latitude = Column(Float, nullable=True)
-    longitude = Column(Float, nullable=True)
+    latitude = Column(Float, nullable=False)
+    longitude = Column(Float, nullable=False)
+    geometry = Column(Geography(geometry_type="POINT", srid=4326, dimension=2))
     telegram_username = Column(String(100), nullable=True)
     first_name = Column(String(100), nullable=True)
     last_name = Column(String(100), nullable=True)
@@ -44,6 +44,7 @@ class Pollution(Base):
     photo = Column(String(100), nullable=False)
     latitude = Column(Float, nullable=False)
     longitude = Column(Float, nullable=False)
+    geometry = Column(Geography(geometry_type="POINT", srid=4326, dimension=2))
     comment = Column(Text, nullable=True)
     telegram_id = Column(BigInteger, ForeignKey("user.telegram_id"))
     ticketID = Column(Text, nullable=True)
@@ -57,15 +58,16 @@ class Assistance_disabled(Base):
     comment = Column(Text, nullable=False)
     telegram_id = Column(BigInteger, ForeignKey("user.telegram_id"))
     ticketID = Column(Text, nullable=True)
-    latitude = Column(Float, nullable=True)
-    longitude = Column(Float, nullable=True)
+    latitude = Column(Float, nullable=False)
+    longitude = Column(Float, nullable=False)
+    geometry = Column(Geography(geometry_type="POINT", srid=4326, dimension=2))
 
 
 roles_users = Table(
-    'roles_users',
+    "roles_users",
     Base.metadata,
-    Column('staff_id', UUID(as_uuid=True), ForeignKey('staff.id')),
-    Column('role_id', UUID(as_uuid=True), ForeignKey('role.id'))
+    Column("staff_id", UUID(as_uuid=True), ForeignKey("staff.id")),
+    Column("role_id", UUID(as_uuid=True), ForeignKey("role.id")),
 )
 
 
@@ -88,5 +90,4 @@ class Staff(Base, UserMixin, ExtraUserMixin):
     email = Column(String(255), unique=True)
     password = Column(String(255))
     active = Column(Boolean())
-    roles = relationship('Role', secondary=roles_users,
-                         backref=backref('users', lazy='dynamic'))
+    roles = relationship("Role", secondary=roles_users, backref=backref("users", lazy="dynamic"))

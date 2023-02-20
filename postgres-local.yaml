@@ -1,15 +1,15 @@
-version: '3.3'
+version: '3.8'
 
 volumes:
-  postgres_data_local:
+  postgis_local_data:
 
 services:
-  postgres-local:
-    container_name: postgres-local
-    image: postgres:14.5-alpine
+  postgis-local:
+    container_name: postgis-local
+    image: postgis/postgis:14-3.3-alpine
     restart: always
     volumes:
-      - postgres_data_local:/var/lib/postgresql/data/
+      - postgis_local_data:/var/lib/postgresql/data/
     env_file:
       - ./.env
     healthcheck:
@@ -19,10 +19,3 @@ services:
       retries: 10
     ports:
       - "5432:5432"
-#    networks:
-#      - mynetwork
-#
-#networks:
-#  mynetwork:
-#    name: bot_delo_zhivet_mynetwork_1
-#    driver: bridge

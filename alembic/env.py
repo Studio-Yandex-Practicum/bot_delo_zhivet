@@ -3,6 +3,7 @@ import os
 from logging.config import fileConfig
 
 from dotenv import load_dotenv
+from geoalchemy2 import alembic_helpers
 from sqlalchemy import engine_from_config, pool
 from sqlalchemy.ext.asyncio import AsyncEngine
 
@@ -55,6 +56,9 @@ def run_migrations_offline():
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
+        include_object=alembic_helpers.include_object,
+        process_revision_directives=alembic_helpers.writer,
+        render_item=alembic_helpers.render_item,
     )
 
     with context.begin_transaction():
@@ -66,6 +70,9 @@ def do_run_migrations(connection):
         connection=connection,
         target_metadata=target_metadata,
         render_as_batch=True,
+        include_object=alembic_helpers.include_object,
+        process_revision_directives=alembic_helpers.writer,
+        render_item=alembic_helpers.render_item,
     )
 
     with context.begin_transaction():

@@ -34,7 +34,8 @@ END = ConversationHandler.END
 
 # Различные константы для проекта
 LONGITUDE = "longitude"
-LATITUDE = 'latitude'
+LATITUDE = "latitude"
+GEOM = "geometry"
 FILE_PATH = "file_path"
 START_OVER = "start_over"
 FEATURES = "features"
@@ -62,6 +63,7 @@ LAST_NAME = "last_name"
 SLEEP_TIME = 3
 CITY_INPUT = "city_input"
 BACK = "back"
+CITY = "city"
 
 # Различные сообщения пользователю
 
@@ -71,4 +73,9 @@ GREETING_MESSAGE = (
     " Выбери необходимое действие."
 )
 
-TOP_LEVEL_MENU_TEXT = "Ты можешь выбрать необходимое действие или закончить разговор. Для отмены отправь /stop"
+TOP_LEVEL_MENU_TEXT = "Можно выбрать новое действие или закончить разговор, набрав команду /stop"
+
+SECOND_LEVEL_TEXT = (
+    "Понял-принял! Укажите информацию для остальных пунктов или нажмите на кнопку "
+    "<b>Отправить заявку</b> (она появится, когда всё будет заполнено):"
+)
