@@ -6,7 +6,7 @@ from telegram.ext import ContextTypes
 
 from src.api.tracker import client
 from src.bot.service.pollution import create_new_pollution
-from src.bot.service.save_new_user import create_new_user
+from src.bot.service.save_new_user import check_user_in_db, create_new_user
 from src.bot.service.save_tracker_id import save_tracker_id_pollution
 from src.core.db.db import get_async_session
 from src.core.db.repository.volunteer_repository import crud_volunteer
@@ -151,7 +151,12 @@ async def save_and_exit_pollution(update: Update, context: ContextTypes.DEFAULT_
     user[TELEGRAM_USERNAME] = update.effective_user.username
     session_generator = get_async_session()
     session = await session_generator.asend(None)
-    await create_new_user(user, session)
+    old_user = await check_user_in_db(user_data[TELEGRAM_ID], session)
+    if not old_user:
+        await create_new_user(user, session)
+    if old_user and old_user.is_banned:
+        await start(update, context)
+        return END
     await create_new_pollution(user_data, session)
     volunteers = await crud_volunteer.get_volunteers_by_point(latitude, longitude, session)
     summary = f"{user[TELEGRAM_USERNAME]} - {latitude}, {longitude}"
