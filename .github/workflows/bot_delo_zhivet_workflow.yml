@@ -157,4 +157,5 @@ jobs:
               docker-compose -f docker-compose-test.yaml up -d
               chmod +x update_certificate.sh
               . ./update_certificate.sh
-              docker-compose -f docker-compose-test.yaml exec web alembic upgrade head
+              docker-compose -f docker-compose-test.yaml exec bot alembic upgrade head
+              docker-compose -f docker-compose-test.yaml exec web poetry run flask collectstatic static --overwrite
