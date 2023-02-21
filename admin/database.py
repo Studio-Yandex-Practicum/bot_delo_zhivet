@@ -5,11 +5,13 @@ from sqlalchemy import create_engine, exc, inspect
 from sqlalchemy.orm import scoped_session, sessionmaker
 
 from admin.config import Config
+from admin.logger import get_logger
 from src.core.db.db import Base
 from src.core.db.model import Role, Staff
 
-from .messages import DB_COMMON_ERROR, DBAPI_ERROR
+from .messages import DB_COMMON_ERROR, DBAPI_ERROR, STOP_LOGGING
 
+logger = get_logger(__file__)
 db = SQLAlchemy()
 engine = create_engine(Config.SQLALCHEMY_DATABASE_URI, pool_size=10000, max_overflow=100)
 db_session = scoped_session(sessionmaker(autocommit=False, autoflush=False, bind=engine))
@@ -21,16 +23,20 @@ db_info = f"{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('POSTGRES_D
 
 
 def get_not_existing_required_tables(tables):
-    not_existing_fileds = []
+    not_existing_tables = []
     try:
         for table in tables:
             if not inspect(engine).has_table(table):
-                not_existing_fileds.append(table)
+                not_existing_tables.append(table)
     except exc.OperationalError as error:
+        logger.critical(DBAPI_ERROR.format(db_info=db_info, details=str(error)))
+        logger.info(STOP_LOGGING)
         raise ConnectionError(DBAPI_ERROR.format(db_info=db_info, details=str(error)))
     except Exception as error:
+        logger.critical(DB_COMMON_ERROR.format(db_info=db_info, details=str(error)))
+        logger.info(STOP_LOGGING)
         raise EnvironmentError(DB_COMMON_ERROR.format(db_info=db_info, details=str(error)))
-    return not_existing_fileds
+    return not_existing_tables
 
 
 def create_roles_and_superuser():
