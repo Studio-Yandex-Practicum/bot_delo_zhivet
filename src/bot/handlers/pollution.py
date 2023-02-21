@@ -6,9 +6,10 @@ from telegram.ext import ContextTypes
 
 from src.api.tracker import client
 from src.bot.service.pollution import create_new_pollution
-from src.bot.service.save_new_user import create_new_user
+from src.bot.service.save_new_user import check_user_in_db, create_new_user
 from src.bot.service.save_tracker_id import save_tracker_id_pollution
 from src.core.db.db import get_async_session
+from src.core.db.repository.volunteer_repository import crud_volunteer
 
 from .start import start
 from .state_constants import (
@@ -150,14 +151,41 @@ async def save_and_exit_pollution(update: Update, context: ContextTypes.DEFAULT_
     user[TELEGRAM_USERNAME] = update.effective_user.username
     session_generator = get_async_session()
     session = await session_generator.asend(None)
-    await create_new_user(user, session)
+    old_user = await check_user_in_db(user_data[TELEGRAM_ID], session)
+    if not old_user:
+        await create_new_user(user, session)
+    if old_user and old_user.is_banned:
+        await start(update, context)
+        return END
     await create_new_pollution(user_data, session)
+    volunteers = await crud_volunteer.get_volunteers_by_point(latitude, longitude, session)
     summary = f"{user[TELEGRAM_USERNAME]} - {latitude}, {longitude}"
     description = f"""
     Ник в телеграмме оставившего заявку: {user[TELEGRAM_USERNAME]}
     Координаты загрязнения: {latitude}, {longitude}
     Комментарий к заявке: {comment}
     """
+    description_add_hascar = ""
+    description_add_nocar = ""
+    volunteer_counter = 0
+    for volunteer in volunteers:
+        volunteer_counter += 1
+        volunteer_description = (
+            f"https://t.me/{volunteer.telegram_username}, {volunteer.city}\n{volunteer.ticketID}\n\n"
+        )
+        if volunteer.has_car:
+            description_add_hascar += volunteer_description
+        else:
+            description_add_nocar += volunteer_description
+
+    if not volunteer_counter:
+        description += "\n---- \n\nВолонтёров поблизости не нашлось"
+    else:
+        description += "\n---- \n\nВолонтёры поблизости\n\n"
+        if description_add_hascar:
+            description += "* с авто:\n\n" + description_add_hascar
+        if description_add_nocar:
+            description += "* без авто:\n\n" + description_add_nocar
     tracker = client.issues.create(
         queue=POLLUTION,
         summary=summary,

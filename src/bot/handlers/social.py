@@ -31,7 +31,7 @@ from bot.handlers.state_constants import (
 )
 from bot.service.dadata import get_fields_from_dadata
 from src.bot.service.assistance_disabled import create_new_social
-from src.bot.service.save_new_user import create_new_user
+from src.bot.service.save_new_user import check_user_in_db, create_new_user
 from src.bot.service.save_tracker_id import save_tracker_id_assistance_disabled
 from src.core.db.db import get_async_session
 from src.core.db.repository.assistance_disabled_repository import crud_assistance_disabled
@@ -177,12 +177,19 @@ async def save_and_exit_from_social_problem(update: Update, context: ContextType
     user_data[TELEGRAM_ID] = update.effective_user.id
     if SOCIAL_ADDRESS in user_data:
         del user_data[SOCIAL_ADDRESS]
+    if CITY_INPUT in user_data:
+        del user_data[CITY_INPUT]
     user = {}
     user[TELEGRAM_ID] = user_data[TELEGRAM_ID]
     user[TELEGRAM_USERNAME] = update.effective_user.username
     session_generator = get_async_session()
     session = await session_generator.asend(None)
-    await create_new_user(user, session)
+    old_user = await check_user_in_db(user_data[TELEGRAM_ID], session)
+    if not old_user:
+        await create_new_user(user, session)
+    if old_user and old_user.is_banned:
+        await start(update, context)
+        return END
     await create_new_social(user_data, session)
     volunteers = await crud_volunteer.get_volunteers_by_point(user_data[LATITUDE], user_data[LONGITUDE], session)
     city = await crud_assistance_disabled.get_full_address_by_telegram_id(user_data[TELEGRAM_ID], session)

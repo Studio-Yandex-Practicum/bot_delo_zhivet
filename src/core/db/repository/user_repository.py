@@ -19,13 +19,13 @@ class UserCRUD(CRUDBase):
         max_time=120,
         jitter=JITTER["RandomJitter_method"],
     )
-    async def get_user_id_by_telegram_id(
+    async def get_user_by_telegram_id(
         self,
         telegram_id: int,
         session: AsyncSession,
     ):
-        user_id = await session.execute(select(User.id).where(User.telegram_id == telegram_id))
-        return user_id.scalars().first()
+        user = await session.execute(select(User).where(User.telegram_id == telegram_id))
+        return user.scalars().first()
 
 
 crud_user = UserCRUD(User)
