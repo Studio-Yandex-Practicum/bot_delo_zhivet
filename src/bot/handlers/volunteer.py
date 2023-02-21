@@ -35,7 +35,7 @@ from src.bot.handlers.state_constants import (
     VOLUNTEER,
 )
 from src.bot.service.dadata import get_fields_from_dadata
-from src.bot.service.save_new_user import create_new_user
+from src.bot.service.save_new_user import check_user_in_db, create_new_user
 from src.bot.service.save_tracker_id import save_tracker_id_volunteer
 from src.bot.service.volunteer import check_volunteer_in_db, create_volunteer, update_volunteer
 from src.core.db.db import get_async_session
@@ -75,7 +75,7 @@ async def add_volunteer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> s
         await update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
     else:
         if check_data(context.user_data[FEATURES]) is True:
-            buttons.append([InlineKeyboardButton(text="Сохранить и выйти", callback_data=SAVE)])
+            buttons.append([InlineKeyboardButton(text="Отправить заявку", callback_data=SAVE)])
             keyboard = InlineKeyboardMarkup(buttons)
         if update.message is not None:
             await update.message.reply_text(text=SECOND_LEVEL_TEXT, reply_markup=keyboard, parse_mode=ParseMode.HTML)
@@ -234,21 +234,28 @@ async def save_and_exit_volunteer(update: Update, context: ContextTypes.DEFAULT_
     user[TELEGRAM_USERNAME] = user_data[TELEGRAM_USERNAME]
     session_generator = get_async_session()
     session = await session_generator.asend(None)
-    await create_new_user(user, session)
+    old_user = await check_user_in_db(user_data[TELEGRAM_ID], session)
+    if not old_user:
+        await create_new_user(user, session)
+    if old_user and old_user.is_banned:
+        await start(update, context)
+        return END
     old_volunteer = await check_volunteer_in_db(user_data[TELEGRAM_ID], session)
+    old_ticket_id = None
     if old_volunteer:
         old_ticket_id = old_volunteer.ticketID
         await update_volunteer(old_volunteer, user_data, session)
     else:
         await create_volunteer(user_data, session)
-    summary = f"{user_data[TELEGRAM_USERNAME]}({user[TELEGRAM_ID]}) - {user_data['full_address']}"
+    summary = f"{user_data[TELEGRAM_USERNAME]} - {user_data['full_address']}"
     description = f"""
     Ник в телеграмме: {user_data[TELEGRAM_USERNAME]}
     Адрес: {user_data['full_address']}
     Наличие машины: {car}
     Радиус выезда: {radius}
-    Старый тикет: {old_ticket_id}
     """
+    if old_ticket_id:
+        description += f"Старый тикет: {old_ticket_id}"
     tracker = client.issues.create(
         queue=VOLUNTEER,
         summary=summary,
