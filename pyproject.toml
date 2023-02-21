@@ -36,6 +36,7 @@ backoff = "^2.2.1"
 backoff-utils = "^1.0.1"
 postgis = "^1.0.4"
 geoalchemy2 = "^0.13.1"
+boto3 = "^1.26.75"
 
 [tool.poetry.group.test]
 optional = true
