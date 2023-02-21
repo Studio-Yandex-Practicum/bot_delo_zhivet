@@ -65,17 +65,6 @@ async def select_option_to_report_about_pollution(update: Update, context: Conte
         await update.callback_query.answer()
         await update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
     else:
-        print(
-            f"""
-
-
-
-        {context.user_data[FEATURES]}
-
-
-
-        """
-        )
         if check_data(context.user_data[FEATURES]) is True:
             buttons.append([InlineKeyboardButton(text="Отправить заявку", callback_data=SAVE)])
             keyboard = InlineKeyboardMarkup(buttons)
