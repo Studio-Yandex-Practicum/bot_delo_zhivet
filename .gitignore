@@ -181,3 +181,4 @@ cython_debug/
 *.code-workspace
 
 .DS_Store
+bot_persistence_data
