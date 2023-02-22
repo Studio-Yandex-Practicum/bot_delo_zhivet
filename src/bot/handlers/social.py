@@ -33,6 +33,7 @@ from bot.service.dadata import get_fields_from_dadata
 from src.bot.service.assistance_disabled import create_new_social
 from src.bot.service.save_new_user import create_new_user
 from src.bot.service.save_tracker_id import save_tracker_id_assistance_disabled
+from src.bot.service.volunteer import volunteers_description
 from src.core.db.db import get_async_session
 from src.core.db.repository.assistance_disabled_repository import crud_assistance_disabled
 from src.core.db.repository.volunteer_repository import crud_volunteer
@@ -190,28 +191,7 @@ async def save_and_exit_from_social_problem(update: Update, context: ContextType
     Ник в телеграмме оставившего заявку: {user[TELEGRAM_USERNAME]}
     Комментарий к заявке: {user_data[SOCIAL_COMMENT]}
     """
-    description_add_hascar = ""
-    description_add_nocar = ""
-    volunteer_counter = 0
-    for volunteer in volunteers:
-        volunteer_counter += 1
-        volunteer_description = (
-            f"https://t.me/{volunteer.telegram_username}, {volunteer.city}\n{volunteer.ticketID}\n\n"
-        )
-        if volunteer.has_car:
-            description_add_hascar += volunteer_description
-        else:
-            description_add_nocar += volunteer_description
-
-    if not volunteer_counter:
-        description += "\n---- \n\nВолонтёров поблизости не нашлось"
-    else:
-        description += "\n---- \n\nВолонтёры поблизости\n\n"
-        if description_add_hascar:
-            description += "* с авто:\n\n" + description_add_hascar
-        if description_add_nocar:
-            description += "* без авто:\n\n" + description_add_nocar
-
+    description += volunteers_description(volunteers)
     tracker = client.issues.create(
         queue=SOCIAL,
         summary=city,
