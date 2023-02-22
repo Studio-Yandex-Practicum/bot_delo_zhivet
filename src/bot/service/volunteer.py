@@ -45,12 +45,12 @@ async def update_volunteer(db_obj: Volunteer, data: VolunteerCreate, session: As
 
 
 def volunteers_description(volunteers):
-    description = ""
+    if not volunteers:
+        return "\n---- \n\nВолонтёров поблизости не нашлось"
+    description = "\n---- \n\nВолонтёры поблизости\n\n"
     description_add_hascar = ""
     description_add_nocar = ""
-    volunteer_counter = 0
     for volunteer in volunteers:
-        volunteer_counter += 1
         volunteer_description = (
             f"https://t.me/{volunteer.telegram_username}, {volunteer.city}\n{volunteer.ticketID}\n\n"
         )
@@ -58,13 +58,8 @@ def volunteers_description(volunteers):
             description_add_hascar += volunteer_description
         else:
             description_add_nocar += volunteer_description
-
-    if not volunteer_counter:
-        description += "\n---- \n\nВолонтёров поблизости не нашлось"
-    else:
-        description += "\n---- \n\nВолонтёры поблизости\n\n"
-        if description_add_hascar:
-            description += "* с авто:\n\n" + description_add_hascar
-        if description_add_nocar:
-            description += "* без авто:\n\n" + description_add_nocar
+    if description_add_hascar:
+        description += "* с авто:\n\n" + description_add_hascar
+    if description_add_nocar:
+        description += "* без авто:\n\n" + description_add_nocar
     return description
