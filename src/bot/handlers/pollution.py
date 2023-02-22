@@ -167,7 +167,7 @@ async def save_and_exit_pollution(update: Update, context: ContextTypes.DEFAULT_
     Ник в телеграмме оставившего заявку: {user[TELEGRAM_USERNAME]}
     Координаты загрязнения: {latitude}, {longitude}
     Комментарий к заявке: {comment}
-    {settings.AWS_ENDPOINT_URL}/{settings.AWS_BUCKET_NAME}/{file_path[6:]}w
+    {settings.AWS_ENDPOINT_URL}/{settings.AWS_BUCKET_NAME}/{file_path[6:]}
     """
     description_add_hascar = ""
     description_add_nocar = ""
