@@ -15,23 +15,27 @@ from messages import (
     COLLECT_TEMPLATES_ERROR,
     COLLECT_TEMPLATES_SUCCESS,
     COMMON_ERROR,
+    START_LOGGING,
     STOP_LOGGING,
     UNKNOWN_COMMAND,
 )
 
+logging.root.setLevel(logging.NOTSET)
 
 # Переопределение логгера для manage.py
 # При попытке импорта по цепочке manage.py не импортирует модули через '.'
 # из-за ошибки attempted relative import with no known parent package
 # Изящнее решения не нашел
+
+
 def get_logger(file, display=False):
 
     """Создание и настройка логгера."""
 
-    log_file = os.path.join(
-        os.path.join(os.path.dirname(file), Config.LOG_REL_PATH), os.path.basename(file) + Config.LOG_EXTENSION
-    )
-
+    log_path = os.path.join(os.path.dirname(file), Config.LOG_REL_PATH)
+    if not os.path.exists(log_path):
+        os.mkdir(log_path)
+    log_file = os.path.join(log_path, os.path.basename(file) + Config.LOG_EXTENSION)
     logger = logging.getLogger(os.path.basename(file))
     formatter = logging.Formatter(Config.LOG_FORMAT)
     file_handler = logging.FileHandler(log_file)
@@ -42,17 +46,18 @@ def get_logger(file, display=False):
         console_handler = logging.StreamHandler(stream=sys.stdout)
         console_handler.setLevel(Config.LOG_DEFAULT_LVL)
         console_handler.setFormatter(formatter)
-
+        logger.addHandler(console_handler)
     return logger
 
 
-logger = get_logger(__file__)
+logger = get_logger(__file__, display=True)
+logger.info(START_LOGGING)
 
 
 def recursive_copy_not_existing_items(src, dst):
 
     """Рекурсивное копирование несуществующих файлов и папок"""
-
+    logger.debug("start recurse")
     for item in os.listdir(src):
         if os.path.isdir(os.path.join(src, item)):
             dst_subdir = os.path.join(dst, item)
@@ -103,7 +108,7 @@ class Manage(object):
                 folder - относительный путь к папке статики;
                 overwrite - флаг перезаписи существующей папки статики.
                 --------------------------------------------------------------------------------------
-                Примеры вызовов и возвратов (с отключенным логгированием):
+                Примеры вызовов и возвратов:
                 --------------------------------------------------------------------------------------
                 $ python manage.py collectstatic --static_folder static_demo
                 >>> Собираем статику Flask-Admin в папку 'C:\\Dev\\delo_zhivet\\bot_delo_zhivet\\admin\\static_demo'
@@ -161,7 +166,7 @@ class Manage(object):
                 При режиме merge сначал будут скопированы имеющиеся шаблоны приложены, потом шаблоны
                 Flask-Admin без перезаписи.
                 --------------------------------------------------------------------------------------
-                Примеры вызовов и возвратов (с отключенным логгированием):
+                Примеры вызовов и возвратов:
                 --------------------------------------------------------------------------------------
                 $ python manage.py collecttemplates --templates_folder templates_demo
                 >>> Копирование шаблонов Flask-Admin завершено успешно

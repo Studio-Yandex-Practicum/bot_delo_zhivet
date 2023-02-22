@@ -9,9 +9,10 @@ from admin.logger import get_logger
 from src.core.db.db import Base
 from src.core.db.model import Role, Staff
 
-from .messages import DB_COMMON_ERROR, DBAPI_ERROR, STOP_LOGGING
+from .messages import DB_COMMON_ERROR, DBAPI_ERROR, START_LOGGING, STOP_LOGGING
 
 logger = get_logger(__file__)
+logger.info(START_LOGGING)
 db = SQLAlchemy()
 engine = create_engine(Config.SQLALCHEMY_DATABASE_URI, pool_size=10000, max_overflow=100)
 db_session = scoped_session(sessionmaker(autocommit=False, autoflush=False, bind=engine))
