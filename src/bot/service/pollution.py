@@ -1,17 +1,11 @@
-import os
 from typing import Optional
 
 import boto3
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.core.config import settings
 from src.core.db.repository.pollution_repository import crud_pollution
-
-aws_access_key_id = os.environ["AWS_ACCESS_KEY_ID"]
-aws_secret_access_key = os.environ["AWS_SECRET_ACCESS_KEY"]
-service_name = os.environ["AWS_SERVICE_NAME"]
-endpoint_url = os.environ["AWS_ENDPOINT_URL"]
-bucket_name = os.environ["AWS_BUCKET_NAME"]
 
 
 class PollutionCreate(BaseModel):
@@ -38,9 +32,9 @@ async def create_new_pollution(
 async def download_to_object_storage(file_path: str):
     session = boto3.session.Session()
     s3 = session.client(
-        aws_access_key_id=aws_access_key_id,
-        aws_secret_access_key=aws_secret_access_key,
-        service_name=service_name,
-        endpoint_url=endpoint_url,
+        aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+        aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+        service_name=settings.AWS_SERVICE_NAME,
+        endpoint_url=settings.AWS_ENDPOINT_URL,
     )
-    s3.upload_file(file_path, bucket_name, file_path[6:])
+    s3.upload_file(file_path, settings.AWS_BUCKET_NAME, file_path[6:])

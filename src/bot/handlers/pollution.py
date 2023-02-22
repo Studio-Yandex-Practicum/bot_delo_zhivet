@@ -9,6 +9,7 @@ from src.api.tracker import client
 from src.bot.service.pollution import create_new_pollution, download_to_object_storage
 from src.bot.service.save_new_user import check_user_in_db, create_new_user
 from src.bot.service.save_tracker_id import save_tracker_id_pollution
+from src.core.config import settings
 from src.core.db.db import get_async_session
 from src.core.db.repository.volunteer_repository import crud_volunteer
 
@@ -32,9 +33,6 @@ from .state_constants import (
     TELEGRAM_USERNAME,
     TYPING,
 )
-
-endpoint_url = os.environ["AWS_ENDPOINT_URL"]
-bucket_name = os.environ["AWS_BUCKET_NAME"]
 
 
 async def select_option_to_report_about_pollution(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
@@ -169,7 +167,7 @@ async def save_and_exit_pollution(update: Update, context: ContextTypes.DEFAULT_
     Ник в телеграмме оставившего заявку: {user[TELEGRAM_USERNAME]}
     Координаты загрязнения: {latitude}, {longitude}
     Комментарий к заявке: {comment}
-    {endpoint_url}/{bucket_name}/{file_path[6:]}
+    {settings.AWS_ENDPOINT_URL}/{settings.AWS_BUCKET_NAME}/{file_path[6:]}w
     """
     description_add_hascar = ""
     description_add_nocar = ""
