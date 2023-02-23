@@ -7,7 +7,7 @@ from flask import Blueprint, Flask, current_app, redirect, render_template
 
 from admin.config import Config
 
-from .database import db
+from .database import create_roles_and_superuser, db
 
 
 def create_app():
@@ -23,7 +23,7 @@ def create_app():
 
 
 app = create_app()
-
+create_roles_and_superuser()
 
 @app.route("/")
 def index():
@@ -82,7 +82,10 @@ app.register_blueprint(bp, cli_group=None)
 
 from . import views  # noqa
 
-print(views.admin.index_view.endpoint)
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('/admin/404.html'), 404
+
 
 if __name__ == "__main__":
     app.run(debug=True)
