@@ -1,4 +1,6 @@
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+# import telebot # noqa
+# from telebot import types # noqa
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, KeyboardButton, ReplyKeyboardMarkup, Update
 from telegram.constants import ParseMode
 from telegram.ext import ContextTypes
 
@@ -21,6 +23,9 @@ from src.bot.handlers.state_constants import (
     LAST_NAME,
     LATITUDE,
     LONGITUDE,
+    PHONE_COMMAND,
+    PHONE_INPUT,
+    PHONE_NUMBER,
     RADIUS_COMMAND,
     SAVE,
     SECOND_LEVEL_TEXT,
@@ -28,6 +33,7 @@ from src.bot.handlers.state_constants import (
     SPECIFY_ACTIVITY_RADIUS,
     SPECIFY_CAR_AVAILABILITY,
     SPECIFY_CITY,
+    SPECIFY_PHONE_PERMISSION,
     START_OVER,
     TELEGRAM_ID,
     TELEGRAM_USERNAME,
@@ -53,6 +59,9 @@ async def add_volunteer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> s
     context.user_data[CURRENT_LEVEL] = level
 
     buttons = [
+        [
+            InlineKeyboardButton(text="Разрешение на использование номера", callback_data=SPECIFY_PHONE_PERMISSION),
+        ],
         [
             InlineKeyboardButton(text="Указать свой адрес", callback_data=SPECIFY_CITY),
         ],
@@ -94,6 +103,63 @@ async def end_second_level(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     await start(update, context)
 
     return END
+
+
+# bot = telebot.TeleBot(token='5712052331:AAGBMT1FNiiukbIF115WBg4jTpvi_ndu2Ss')
+
+
+async def handle_get_phone(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
+    """Предложить пользователю выбор: взять телефон из ТГ или ввести новый"""
+    text = "Для свази с вами необходим ваш телефоннный номер, вы хотите использовать номер для связи указанный в ТГ"
+    context.user_data[CURRENT_FEATURE] = update.callback_query.data
+    buttons = [
+        [
+            InlineKeyboardButton(text="Да", callback_data=PHONE_COMMAND + "Yes"),
+            InlineKeyboardButton(text="Нет", callback_data=PHONE_COMMAND + "No"),
+        ],
+        [InlineKeyboardButton(text="Назад", callback_data=BACK)],
+    ]
+
+    keyboard = InlineKeyboardMarkup(buttons)
+
+    await update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
+    return SELECTING_OVER
+
+
+async def ask_user_phone_number(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
+    """Предложить пользователю ввести свой номер телефона."""
+    context.user_data[CURRENT_FEATURE] = update.callback_query.data
+    text = "Укажите свой номер телефона:"
+    button = [[InlineKeyboardButton(text="Назад", callback_data=BACK)]]
+    keyboard = InlineKeyboardMarkup(button)
+
+    await update.callback_query.answer()
+    await update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
+
+    return PHONE_NUMBER
+
+
+async def handle_phone_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
+    """Обработчик данных вводимого пользователем телефона."""
+    user_input = update.message.text
+    phone = get_fields_from_dadata(user_input)
+    if phone is not None:
+        text = f"Это правильный номер:{phone}?"
+        context.user_data[FEATURES] = phone
+
+        data = PHONE_COMMAND + user_input
+        buttons = [
+            [
+                InlineKeyboardButton(text="Да", callback_data=data),
+                InlineKeyboardButton(text="Нет", callback_data=PHONE_INPUT),
+            ]
+        ]
+
+        keyboard = InlineKeyboardMarkup(buttons)
+
+        await update.message.reply_text(text=text, reply_markup=keyboard)
+
+    return SELECTING_OVER
 
 
 async def ask_for_input_city(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
@@ -216,6 +282,9 @@ async def save_and_exit_volunteer(update: Update, context: ContextTypes.DEFAULT_
     user_data = context.user_data[FEATURES]
     radius = user_data[SPECIFY_ACTIVITY_RADIUS][7:]
     car = user_data[SPECIFY_CAR_AVAILABILITY][4:]
+    phone = user_data[SPECIFY_PHONE_PERMISSION]
+    print("***!!!****************************")
+    print(phone)
     user_data[GEOM] = f"POINT({user_data[LATITUDE]} {user_data[LONGITUDE]})"
     user_data[SPECIFY_ACTIVITY_RADIUS] = int(radius) * 1000
     user_data[SPECIFY_CAR_AVAILABILITY] = car
@@ -229,6 +298,12 @@ async def save_and_exit_volunteer(update: Update, context: ContextTypes.DEFAULT_
         user_data[SPECIFY_CAR_AVAILABILITY] = True
     else:
         user_data[SPECIFY_CAR_AVAILABILITY] = False
+    if user_data[SPECIFY_PHONE_PERMISSION] == "Yes":
+        user_data[SPECIFY_PHONE_PERMISSION] = True
+        print("НОМЕР ТЕЛЕФОНА: +79778877060")
+    else:
+        user_data[SPECIFY_PHONE_PERMISSION] = False
+        print("ЧТО ТО")
     user = {}
     user[TELEGRAM_ID] = user_data[TELEGRAM_ID]
     user[TELEGRAM_USERNAME] = user_data[TELEGRAM_USERNAME]
