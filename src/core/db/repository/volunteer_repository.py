@@ -36,7 +36,7 @@ class VolunteerCRUD(CRUDBase):
             .order_by(Volunteer.radius, desc(Volunteer.created_at))
         )
         volunteers = await session.execute(stmt)
-        return volunteers
+        return volunteers.all()
 
 
 crud_volunteer = VolunteerCRUD(Volunteer)

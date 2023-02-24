@@ -1,3 +1,4 @@
+import logging
 import os
 
 from dotenv import load_dotenv
@@ -15,3 +16,10 @@ class Config(object):
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     FLASK_ENV = "development"
+
+    # Дополнительные параметры, не участвующие в ините приложения
+    BOOTSTRAP_VERSION = "bootstrap4"
+    LOG_DEFAULT_LVL = logging.DEBUG
+    LOG_EXTENSION = ".log"
+    LOG_FORMAT = "%(asctime)s [%(levelname)s]  %(message)s"
+    LOG_REL_PATH = "logs"
