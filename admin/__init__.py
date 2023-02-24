@@ -1,7 +1,7 @@
 import os
 import sys
 
-from flask import Flask, current_app, redirect, url_for
+from flask import Flask, current_app, redirect, render_template, url_for
 
 from .config import Config
 from .database import create_roles_and_superuser, db, get_not_existing_required_tables
@@ -38,8 +38,8 @@ def create_app():
     return app
 
 
-create_roles_and_superuser()
 app = create_app()
+create_roles_and_superuser()
 
 
 @app.route("/")
@@ -53,6 +53,12 @@ def static_redirect(p):
 
 
 from . import views  # noqa
+
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template("/admin/404.html"), 404
+
 
 if __name__ == "__main__":
     app.run(debug=True)
