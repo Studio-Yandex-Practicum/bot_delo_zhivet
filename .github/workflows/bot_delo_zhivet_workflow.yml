@@ -166,6 +166,11 @@ jobs:
             echo WEBHOOK_DOMAIN=${{ secrets.WEBHOOK_DOMAIN }} >> .env
             echo WEBHOOK_PORT=${{ secrets.WEBHOOK_PORT }} >> .env
             echo WEBHOOK_PATH=${{ secrets.WEBHOOK_PATH }} >> .env
+            echo AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }} >> .env
+            echo AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }} >> .env
+            echo AWS_SERVICE_NAME=${{ secrets.AWS_SERVICE_NAME }} >> .env
+            echo AWS_ENDPOINT_URL=${{ secrets.AWS_ENDPOINT_URL }} >> .env
+            echo AWS_BUCKET_NAME=${{ secrets.AWS_BUCKET_NAME }} >> .env
             echo HOST=${{ secrets.HOST }} >> .env
             chmod +x update_nginx_conf.sh
             . ./update_nginx_conf.sh
