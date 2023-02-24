@@ -46,9 +46,9 @@ poetry completions bash >> ~/.bash_completion
 ```bash
 poetry env use python3.10
 ```
-Установка зависимостей
+Установка зависимостей (для разработки)
 ```bash
-poetry install
+poetry install --with dev
 ```
 Запуск оболочки и активация виртуального окружения
 ```bash

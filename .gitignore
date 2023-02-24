@@ -1,4 +1,5 @@
-admin/static/
+admin/static/*
+!admin/static/.gitkeep
 admin/logs/
 # admin/templates/
 
@@ -181,5 +182,4 @@ cython_debug/
 .vscode/
 *.code-workspace
 
-.DS_Store
 bot_persistence_data

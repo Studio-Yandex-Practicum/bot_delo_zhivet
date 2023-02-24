@@ -40,6 +40,10 @@ jobs:
           pip install pipx
           pipx install poetry==1.3.2
 
+      - name: Validate the structure of the pyproject.toml
+        run: |
+          poetry check
+
       - name: Verify that poetry.lock is consistent with pyproject.toml
         run: poetry lock --check
 
