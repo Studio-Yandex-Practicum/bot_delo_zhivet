@@ -10,6 +10,7 @@ from werkzeug.security import generate_password_hash
 from src.core.db.model import Assistance_disabled, Pollution, Staff, User, Volunteer
 
 from . import app
+from .config import Config
 from .database import db
 from .forms import LoginForm, RegistrationForm
 
@@ -243,10 +244,10 @@ class PolutionModelView(BaseModelView):
 
 admin = flask_admin.Admin(
     app,
-    "Bot delo zhivet : Admin console",
+    "Бот 'Дело живёт'",
     index_view=MyAdminIndexView(name="Главная"),
     base_template="my_master.html",
-    template_mode="bootstrap4",
+    template_mode=Config.BOOTSTRAP_VERSION,
 )
 
 admin.add_view(StaffModelView(Staff, db.session, name="Администраторы"))

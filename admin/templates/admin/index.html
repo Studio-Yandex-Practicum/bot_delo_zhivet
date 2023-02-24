@@ -5,13 +5,12 @@
 
     <div>
         {% if current_user.is_authenticated %}
-        <h1>Flask-Admin example</h1>
+        <h1>Админка бота "Дело живет"</h1>
         <p class="lead">
-            Authentication
+          Добро пожаловать, {{ current_user.login }}!
         </p>
         <p>
-            This example shows how you can use Flask-Login for authentication. It is only intended as a basic
-            demonstration.
+			Управление пользователями и волонтёрами в базе данных бота "Дело живёт".
         </p>
         {% else %}
         <form method="POST" action="">
@@ -34,7 +33,8 @@
         {{ link | safe }}
         {% endif %}
     </div>
-
-    <a class="btn btn-primary" href="/"><i class="icon-arrow-left icon-white"></i> Назад</a>
+	{% if not current_user.is_authenticated %}
+	  <a class="btn btn-primary" href="/"><i class="icon-arrow-left icon-white"></i> Назад</a>
+	{% endif %}
 </div>
 {% endblock body %}

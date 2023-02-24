@@ -7,9 +7,10 @@ from telegram.ext import ContextTypes
 from src.api.tracker import client
 from src.bot.service.pollution import create_new_pollution
 from src.bot.service.save_new_user import check_user_in_db, create_new_user
-from src.bot.service.save_tracker_id import save_tracker_id_pollution
+from src.bot.service.save_tracker_id import save_tracker_id
 from src.bot.service.volunteer import volunteers_description
 from src.core.db.db import get_async_session
+from src.core.db.repository.pollution_repository import crud_pollution
 from src.core.db.repository.volunteer_repository import crud_volunteer
 
 from .start import start
@@ -173,7 +174,7 @@ async def save_and_exit_pollution(update: Update, context: ContextTypes.DEFAULT_
         description=description,
     )
     tracker.attachments.create(file_path)
-    await save_tracker_id_pollution(tracker.key, user_data[TELEGRAM_ID], session)
+    await save_tracker_id(crud_pollution, tracker.key, user_data[TELEGRAM_ID], session)
     await start(update, context)
     return END
 
