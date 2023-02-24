@@ -1,0 +1,60 @@
+version: '3.8'
+
+
+services:
+  db:
+    image: postgis/postgis:14-3.3-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - ./.env
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:?err} -d ${POSTGRES_DB:?err}"]
+      timeout: 10s
+      interval: 1s
+      retries: 10
+
+  bot:
+    image: vasilekx/delo_zhivet_bot_and_admin:latest
+    command: ["poetry", "run", "runbot"]
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - ./.env
+    volumes:
+      - persistence_data:/app/persistence_data/
+
+  web:
+    image: vasilekx/delo_zhivet_bot_and_admin:latest
+    command: ["gunicorn", "--bind", "0.0.0.0:5000", "--access-logfile=-", "manage:app"]
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+      bot:
+        condition: service_started
+    env_file:
+      - ./.env
+    volumes:
+      - static_value:/app/admin/static/
+
+  nginx:
+    image: vasilekx/delo_zhivet_nginx:latest
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/delo.conf:/etc/nginx/servers/delo.conf:rw
+      - ./nginx/letsencrypt/:/etc/letsencrypt/:rw
+      - static_value:/var/html/static/
+    depends_on:
+      - web
+
+
+volumes:
+  postgres_data:
+  persistence_data:
+  static_value:
