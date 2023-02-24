@@ -160,6 +160,8 @@ jobs:
               echo SUPER_USER_EMAIL=${{ secrets.SUPER_USER_EMAIL }} >> .env
               echo SUPER_USER_PASSWORD=${{ secrets.SUPER_USER_PASSWORD }} >> .env
               echo ADMIN_SECRET_KEY=${{ secrets.ADMIN_SECRET_KEY }} >> .env
+              echo WEBHOOK_DOMAIN=${{ secrets.WEBHOOK_DOMAIN }} >> .env
+              echo WEBHOOK_PORT=${{ secrets.WEBHOOK_PORT }} >> .env
               chmod +x update_nginx_conf.sh
               . ./update_nginx_conf.sh
               docker-compose -f docker-compose-test.yaml up -d
