@@ -136,10 +136,10 @@ jobs:
             docker-compose -f docker-compose-test.yaml stop
             docker-compose -f docker-compose-test.yaml rm -fs bot
             docker-compose -f docker-compose-test.yaml rm -fs nginx
-            docker image rm -f ${{ secrets.DOCKER_USERNAME }}/delo_zhivet_bot_and_admin:latest
-            docker image rm -f ${{ secrets.DOCKER_USERNAME }}/delo_zhivet_nginx:latest
-            docker image pull -q ${{ secrets.DOCKER_USERNAME }}/delo_zhivet_bot_and_admin:latest
-            docker image pull -q ${{ secrets.DOCKER_USERNAME }}/delo_zhivet_nginx:latest
+            docker image rm -f ${{ secrets.DOCKERHUB_USERNAME }}/delo_zhivet_bot_and_admin:latest
+            docker image rm -f ${{ secrets.DOCKERHUB_USERNAME }}/delo_zhivet_nginx:latest
+            docker image pull -q ${{ secrets.DOCKERHUB_USERNAME }}/delo_zhivet_bot_and_admin:latest
+            docker image pull -q ${{ secrets.DOCKERHUB_USERNAME }}/delo_zhivet_nginx:latest
             rm .env
             touch .env
             echo TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }} >> .env
@@ -163,10 +163,12 @@ jobs:
             echo ADMIN_SECRET_KEY=${{ secrets.ADMIN_SECRET_KEY }} >> .env
             echo WEBHOOK_DOMAIN=${{ secrets.WEBHOOK_DOMAIN }} >> .env
             echo WEBHOOK_PORT=${{ secrets.WEBHOOK_PORT }} >> .env
+            echo WEBHOOK_PATH=${{ secrets.WEBHOOK_PATH }} >> .env
+            echo HOST=${{ secrets.HOST }} >> .env
             chmod +x update_nginx_conf.sh
             . ./update_nginx_conf.sh
             docker-compose -f docker-compose-test.yaml up -d
             chmod +x update_certificate.sh
             . ./update_certificate.sh
             docker-compose -f docker-compose-test.yaml exec bot alembic upgrade head
-            docker-compose -f docker-compose-test.yaml exec web python manage.py collectstatic --static_folder static_demo --overwrite
+            docker-compose -f docker-compose-test.yaml exec web python admin/manage.py collectstatic --static_folder static --overwrite
