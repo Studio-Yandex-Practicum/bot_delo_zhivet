@@ -19,3 +19,13 @@ class Config(object):
     LOG_EXTENSION = ".log"
     LOG_FORMAT = "%(asctime)s [%(levelname)s]  %(message)s"
     LOG_REL_PATH = "logs"
+
+    # Требуются настройки аккаунта из веб-интерфейса
+    # Шестернка -> Все настройки -> Безопасность >
+    # в тексте найти "Пароли приложений" ->
+    # Создать пароль приложения
+    MAIL_SERVER = "smtp.yandex.ru"
+    MAIL_PORT = 465
+    MAIL_USE_SSL = True
+    MAIL_USERNAME = "test.delo.zhivet@yandex.ru"
+    MAIL_PASSWORD = "bctlgfnckbtxhgzt"
