@@ -3,12 +3,13 @@ name: Deploy
 on:
   push:
     branches:
+      - develop
 #      - master
-#      - develop
-      - feature/testing_environment
+#      - feature/testing_environment
 
 env:
-    BRANCH: 'refs/heads/feature/testing_environment'
+    BRANCH: 'refs/heads/develop'
+    #    BRANCH: 'refs/heads/feature/testing_environment'
 
 jobs:
   tests:
@@ -134,6 +135,7 @@ jobs:
           script: |
             cd ~/test
             docker-compose -f docker-compose-test.yaml stop
+            docker-compose -f docker-compose-test.yaml rm -fs web
             docker-compose -f docker-compose-test.yaml rm -fs bot
             docker-compose -f docker-compose-test.yaml rm -fs nginx
             docker image rm -f ${{ secrets.DOCKERHUB_USERNAME }}/delo_zhivet_bot_and_admin:latest
