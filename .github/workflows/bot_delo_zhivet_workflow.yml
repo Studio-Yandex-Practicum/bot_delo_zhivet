@@ -134,7 +134,6 @@ jobs:
           script: |
               cd ~/test
               docker-compose -f docker-compose-test.yaml stop
-              docker-compose -f docker-compose-test.yaml rm -f web
               docker-compose -f docker-compose-test.yaml rm -f bot
               docker-compose -f docker-compose-test.yaml rm -f nginx
               docker image rm -f ${{ secrets.DOCKER_USERNAME }}/delo_zhivet_bot_and_admin:latest
@@ -168,4 +167,3 @@ jobs:
               chmod +x update_certificate.sh
               . ./update_certificate.sh
               docker-compose -f docker-compose-test.yaml exec bot alembic upgrade head
-              docker-compose -f docker-compose-test.yaml exec web poetry run flask collectstatic static --overwrite
