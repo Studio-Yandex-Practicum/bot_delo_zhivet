@@ -13,6 +13,8 @@ services:
       timeout: 10s
       interval: 1s
       retries: 10
+    expose:
+      - "5432"
 
   bot:
     image: vasilekx/delo_zhivet_bot_and_admin:latest
@@ -23,18 +25,27 @@ services:
         condition: service_healthy
     env_file:
       - ./.env
+    expose:
+      - "5432"
+      - "7772"
+    volumes:
+      - ./volumes/persistence_data/:/app/persistence_data/
 
-  web:
-    image: vasilekx/delo_zhivet_bot_and_admin:latest
-    command: ["gunicorn", "--bind", "0.0.0.0:5000", "--access-logfile=-", "manage:app"]
-    restart: always
-    depends_on:
-      db:
-        condition: service_healthy
-      bot:
-        condition: service_started
-    env_file:
-      - ./.env
+# Без админки
+#  web:
+#    image: vasilekx/delo_zhivet_bot_and_admin:latest
+#    command: ["gunicorn", "--bind", "0.0.0.0:5000", "--access-logfile=-", "manage:app"]
+#    restart: always
+#    depends_on:
+#      db:
+#        condition: service_healthy
+#      bot:
+#        condition: service_started
+#    env_file:
+#      - ./.env
+#    expose:
+#      - "5432"
+#      - "7772"
 #    volumes:
 #      - static_value:/app/admin/static/
 
@@ -47,9 +58,11 @@ services:
     volumes:
       - ./nginx/delo.conf:/etc/nginx/servers/delo.conf:rw
       - ./nginx/letsencrypt/:/etc/letsencrypt/:rw
+
 #      - static_value:/var/html/static/
     depends_on:
-      - web
+      - bot
+#      - web
 
 volumes:
   postgres_data:
