@@ -32,7 +32,7 @@ from bot.handlers.state_constants import (
 from bot.service.dadata import get_fields_from_dadata
 from src.bot.service.assistance_disabled import create_new_social
 from src.bot.service.save_new_user import check_user_in_db, create_new_user
-from src.bot.service.save_tracker_id import save_tracker_id_assistance_disabled
+from src.bot.service.save_tracker_id import save_tracker_id
 from src.bot.service.volunteer import volunteers_description
 from src.core.db.db import get_async_session
 from src.core.db.repository.assistance_disabled_repository import crud_assistance_disabled
@@ -204,7 +204,7 @@ async def save_and_exit_from_social_problem(update: Update, context: ContextType
         summary=city,
         description=description,
     )
-    await save_tracker_id_assistance_disabled(tracker.key, user_data[TELEGRAM_ID], session)
+    await save_tracker_id(crud_assistance_disabled, tracker.key, user_data[TELEGRAM_ID], session)
     await start(update, context)
     return END
 
