@@ -134,10 +134,12 @@ jobs:
           script: |
             cd ~/test
             docker-compose -f docker-compose-test.yaml stop
-            docker-compose -f docker-compose-test.yaml rm -f bot
-            docker-compose -f docker-compose-test.yaml rm -f nginx
+            docker-compose -f docker-compose-test.yaml rm -fs bot
+            docker-compose -f docker-compose-test.yaml rm -fs nginx
             docker image rm -f ${{ secrets.DOCKER_USERNAME }}/delo_zhivet_bot_and_admin:latest
             docker image rm -f ${{ secrets.DOCKER_USERNAME }}/delo_zhivet_nginx:latest
+            docker image pull -q ${{ secrets.DOCKER_USERNAME }}/delo_zhivet_bot_and_admin:latest
+            docker image pull -q ${{ secrets.DOCKER_USERNAME }}/delo_zhivet_nginx:latest
             rm .env
             touch .env
             echo TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }} >> .env
@@ -167,3 +169,4 @@ jobs:
             chmod +x update_certificate.sh
             . ./update_certificate.sh
             docker-compose -f docker-compose-test.yaml exec bot alembic upgrade head
+            docker-compose -f docker-compose-test.yaml exec web python manage.py collectstatic --static_folder static_demo --overwrite
