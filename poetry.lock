@@ -1672,4 +1672,4 @@ six = ">=1.9"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "9ae9a934e5f68af38bdeeb83f2f75e2c09562d94d9683f1a53b73e92c91fd4dc"
+content-hash = "59a96a134cb35d29c138909e6bc875ab460f991347fe5d95272cf5be6467b839"
