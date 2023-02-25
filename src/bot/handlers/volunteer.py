@@ -142,12 +142,9 @@ async def ask_user_phone_number(update: Update, context: ContextTypes.DEFAULT_TY
 async def handle_phone_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     """Обработчик данных вводимого пользователем телефона."""
     input_phone_number = update.message.text
-    # phone = get_fields_from_dadata(user_input)
     if input_phone_number is not None:
         text = f"Номер введен правильно?\n{input_phone_number}"
-        # context.user_data[FEATURES] = input_phone_number
-        # context.user_data[CURRENT_FEATURE] = input_phone_number # рабочий вариант с дублем номера
-        context.user_data[CURRENT_FEATURE] = SPECIFY_PHONE_PERMISSION
+        context.user_data[CURRENT_FEATURE] = SPECIFY_PHONE_PERMISSION # маленький костыль
 
         data = PHONE_COMMAND + input_phone_number
         buttons = [
@@ -272,10 +269,6 @@ async def save_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     city = update.callback_query.data
 
     user_data = context.user_data
-    # if bool(user_data["features"]) == False:
-    #     user_data[FEATURES][user_data[CURRENT_FEATURE]] = city
-    #     user_data[START_OVER] = True
-    # else:
 
     user_data[FEATURES][user_data[CURRENT_FEATURE]] = city
 
@@ -295,8 +288,6 @@ async def save_and_exit_volunteer(update: Update, context: ContextTypes.DEFAULT_
     user_data[SPECIFY_ACTIVITY_RADIUS] = int(radius) * 1000
     user_data[SPECIFY_CAR_AVAILABILITY] = car
     user_data[SPECIFY_PHONE_PERMISSION] = phone
-    print('**8**')
-    print(user_data[SPECIFY_PHONE_PERMISSION])
     user_data[TELEGRAM_ID] = update.effective_user.id
     user_data[TELEGRAM_USERNAME] = update.effective_user.username
     user_data[FIRST_NAME] = update.effective_user.first_name
@@ -314,7 +305,7 @@ async def save_and_exit_volunteer(update: Update, context: ContextTypes.DEFAULT_
     session = await session_generator.asend(None)
     old_user = await check_user_in_db(user_data[TELEGRAM_ID], session)
     if not old_user:
-        await create_new_user(user, session)
+        await create_new_user(user, session) # !!! внутри функции куски закомментированного кода
         # await create_new_user(user, phone_number, session)
     if old_user and old_user.is_banned:
         await start(update, context)
