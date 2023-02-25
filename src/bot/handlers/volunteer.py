@@ -60,9 +60,6 @@ async def add_volunteer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> s
 
     buttons = [
         [
-            InlineKeyboardButton(text="Разрешение на использование номера", callback_data=SPECIFY_PHONE_PERMISSION),
-        ],
-        [
             InlineKeyboardButton(text="Указать свой адрес", callback_data=SPECIFY_CITY),
         ],
         [
@@ -70,6 +67,9 @@ async def add_volunteer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> s
         ],
         [
             InlineKeyboardButton(text="Указать наличие автомобиля", callback_data=SPECIFY_CAR_AVAILABILITY),
+        ],
+        [
+            InlineKeyboardButton(text="Указать номер телефона", callback_data=SPECIFY_PHONE_PERMISSION),
         ],
         [
             InlineKeyboardButton(text="Назад", callback_data=str(END)),
@@ -185,7 +185,6 @@ async def handle_city_input(update: Update, context: ContextTypes.DEFAULT_TYPE) 
             "а мы постараемся определить его правильно!"
         )
         context.user_data[FEATURES] = address
-        print(context.user_data[FEATURES])
 
         data = CITY_COMMAND + user_input
         buttons = [
@@ -283,7 +282,10 @@ async def save_and_exit_volunteer(update: Update, context: ContextTypes.DEFAULT_
     user_data = context.user_data[FEATURES]
     radius = user_data[SPECIFY_ACTIVITY_RADIUS][7:]
     car = user_data[SPECIFY_CAR_AVAILABILITY][4:]
-    phone = user_data[SPECIFY_PHONE_PERMISSION][7:]
+    if SPECIFY_PHONE_PERMISSION in user_data:
+        phone = user_data[SPECIFY_PHONE_PERMISSION][7:]
+    else:
+        phone = ''
     user_data[GEOM] = f"POINT({user_data[LATITUDE]} {user_data[LONGITUDE]})"
     user_data[SPECIFY_ACTIVITY_RADIUS] = int(radius) * 1000
     user_data[SPECIFY_CAR_AVAILABILITY] = car
@@ -301,7 +303,6 @@ async def save_and_exit_volunteer(update: Update, context: ContextTypes.DEFAULT_
     user = {}
     user[TELEGRAM_ID] = user_data[TELEGRAM_ID]
     user[TELEGRAM_USERNAME] = user_data[TELEGRAM_USERNAME]
-    user[SPECIFY_PHONE_PERMISSION] = phone
     session_generator = get_async_session()
     session = await session_generator.asend(None)
     old_user = await check_user_in_db(user_data[TELEGRAM_ID], session)

@@ -15,7 +15,6 @@ class UserCreate(BaseModel):
     telegram_id = int
     telegram_username = str
     is_banned = Optional[bool]
-    phone = Optional[str]
 
     class Config:
         arbitrary_types_allowed = True
