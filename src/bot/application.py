@@ -46,7 +46,7 @@ from .handlers.state_constants import (
     END,
     PHONE_COMMAND,
     PHONE_INPUT,
-    PHONE_NUMBER,
+    TYPING_PHONE_NUMBER,
     POLLUTION_COMMENT,
     POLLUTION_COORDINATES,
     POLLUTION_FOTO,
@@ -95,7 +95,7 @@ def start_bot() -> None:
                 CallbackQueryHandler(save_and_exit_volunteer, pattern="^" + SAVE + "$"),
             ],
             TYPING_CITY: [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_city_input)],
-            PHONE_NUMBER: [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_phone_input)],
+            TYPING_PHONE_NUMBER: [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_phone_input)],
             SELECTING_OVER: [
                 CallbackQueryHandler(save_input, pattern="^" + CITY_COMMAND),
                 CallbackQueryHandler(save_input, pattern="^" + RADIUS_COMMAND),

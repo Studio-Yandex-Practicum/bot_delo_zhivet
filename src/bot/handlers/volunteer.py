@@ -25,7 +25,7 @@ from src.bot.handlers.state_constants import (
     LONGITUDE,
     PHONE_COMMAND,
     PHONE_INPUT,
-    PHONE_NUMBER,
+    TYPING_PHONE_NUMBER,
     RADIUS_COMMAND,
     SAVE,
     SECOND_LEVEL_TEXT,
@@ -136,7 +136,7 @@ async def ask_user_phone_number(update: Update, context: ContextTypes.DEFAULT_TY
     await update.callback_query.answer()
     await update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
 
-    return PHONE_NUMBER
+    return TYPING_PHONE_NUMBER
 
 
 async def handle_phone_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
@@ -290,10 +290,13 @@ async def save_and_exit_volunteer(update: Update, context: ContextTypes.DEFAULT_
     user_data = context.user_data[FEATURES]
     radius = user_data[SPECIFY_ACTIVITY_RADIUS][7:]
     car = user_data[SPECIFY_CAR_AVAILABILITY][4:]
-    phone_number = user_data[SPECIFY_PHONE_PERMISSION][7:]
+    phone = user_data[SPECIFY_PHONE_PERMISSION][7:]
     user_data[GEOM] = f"POINT({user_data[LATITUDE]} {user_data[LONGITUDE]})"
     user_data[SPECIFY_ACTIVITY_RADIUS] = int(radius) * 1000
     user_data[SPECIFY_CAR_AVAILABILITY] = car
+    user_data[SPECIFY_PHONE_PERMISSION] = phone
+    print('**8**')
+    print(user_data[SPECIFY_PHONE_PERMISSION])
     user_data[TELEGRAM_ID] = update.effective_user.id
     user_data[TELEGRAM_USERNAME] = update.effective_user.username
     user_data[FIRST_NAME] = update.effective_user.first_name
@@ -312,6 +315,7 @@ async def save_and_exit_volunteer(update: Update, context: ContextTypes.DEFAULT_
     old_user = await check_user_in_db(user_data[TELEGRAM_ID], session)
     if not old_user:
         await create_new_user(user, session)
+        # await create_new_user(user, phone_number, session)
     if old_user and old_user.is_banned:
         await start(update, context)
         return END
