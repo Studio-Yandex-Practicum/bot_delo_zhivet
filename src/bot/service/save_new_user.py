@@ -24,7 +24,3 @@ class UserCreate(BaseModel):
 async def create_new_user(user_data: UserCreate, session: AsyncSession):
     new_user = await crud_user.create(user_data, session)
     return new_user
-
-# async def create_new_user(user_data: UserCreate, phone_number, session: AsyncSession):
-#     new_user = await crud_user.create(user_data, phone_number, session)
-#     return new_user

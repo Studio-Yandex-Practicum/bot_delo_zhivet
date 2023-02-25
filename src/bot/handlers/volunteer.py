@@ -306,8 +306,7 @@ async def save_and_exit_volunteer(update: Update, context: ContextTypes.DEFAULT_
     session = await session_generator.asend(None)
     old_user = await check_user_in_db(user_data[TELEGRAM_ID], session)
     if not old_user:
-        await create_new_user(user, session) # !!! внутри функции куски закомментированного кода
-        # await create_new_user(user, phone_number, session)
+        await create_new_user(user, session)
     if old_user and old_user.is_banned:
         await start(update, context)
         return END

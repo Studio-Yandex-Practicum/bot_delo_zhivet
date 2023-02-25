@@ -22,11 +22,9 @@ class UserCRUD(CRUDBase):
     async def get_user_by_telegram_id(
         self,
         telegram_id: int,
-        # user_phone_number: str,
         session: AsyncSession,
     ):
         user = await session.execute(select(User).where(User.telegram_id == telegram_id))
-        # user = await session.execute(select(User).where(User.telegram_id == telegram_id, User.user_phone_number == user_phone_number))
         return user.scalars().first()
 
 
