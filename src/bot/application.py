@@ -70,7 +70,7 @@ from .handlers.volunteer import (
     ask_user_phone_number,
     handle_car_input,
     handle_city_input,
-    handle_get_phone,
+    # handle_get_phone,
     handle_phone_input,
     handle_radius_input,
     save_and_exit_volunteer,
@@ -88,7 +88,7 @@ def start_bot() -> None:
         entry_points=[CallbackQueryHandler(add_volunteer, pattern=BECOME_VOLUNTEER_CMD)],
         states={
             ADDING_VOLUNTEER: [
-                CallbackQueryHandler(handle_get_phone, pattern=SPECIFY_PHONE_PERMISSION_CMD),
+                CallbackQueryHandler(ask_user_phone_number, pattern=SPECIFY_PHONE_PERMISSION_CMD),
                 CallbackQueryHandler(ask_for_input_city, pattern=SPECIFY_CITY_CMD),
                 CallbackQueryHandler(handle_radius_input, pattern=SPECIFY_ACTIVITY_RADIUS_CMD),
                 CallbackQueryHandler(handle_car_input, pattern=SPECIFY_CAR_AVAILABILITY_CMD),
@@ -106,9 +106,9 @@ def start_bot() -> None:
         fallbacks=[
             CallbackQueryHandler(end_describing, pattern=END_CMD),
             CommandHandler("stop", stop_nested),
+            CallbackQueryHandler(ask_user_phone_number, pattern=PHONE_INPUT),
             CallbackQueryHandler(ask_for_input_city, pattern=CITY_INPUT),
             CallbackQueryHandler(add_volunteer, pattern=BACK),
-            CallbackQueryHandler(ask_user_phone_number, pattern=PHONE_INPUT),
         ],
         map_to_parent={
             STOPPING: END,
