@@ -14,7 +14,7 @@ class User(Base):
 
     telegram_username = Column(String(100), nullable=True)
     telegram_id = Column(BigInteger, unique=True, nullable=False)
-    # user_phone_number = Column(String(50), nullable=True)
+    phone = Column(String(20), unique=True, nullable=True)
     is_banned = Column(Boolean, default=False)
 
 

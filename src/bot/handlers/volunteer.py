@@ -301,6 +301,7 @@ async def save_and_exit_volunteer(update: Update, context: ContextTypes.DEFAULT_
     user = {}
     user[TELEGRAM_ID] = user_data[TELEGRAM_ID]
     user[TELEGRAM_USERNAME] = user_data[TELEGRAM_USERNAME]
+    user[SPECIFY_PHONE_PERMISSION] = phone
     session_generator = get_async_session()
     session = await session_generator.asend(None)
     old_user = await check_user_in_db(user_data[TELEGRAM_ID], session)
