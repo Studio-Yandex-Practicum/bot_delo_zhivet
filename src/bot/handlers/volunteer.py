@@ -120,7 +120,7 @@ async def handle_city_input(update: Update, context: ContextTypes.DEFAULT_TYPE) 
             'Если адрес не правильный, то выберите "Нет" и укажите более подробный вариант адреса, '
             "а мы постараемся определить его правильно!"
         )
-        context.user_data[FEATURES] = address
+        context.user_data[FEATURES] |= address
 
         data = CITY_COMMAND + user_input
         buttons = [
@@ -136,7 +136,7 @@ async def handle_city_input(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 
     else:
         chat_text = "Не нашли такой адрес. Пожалуйста, укажи адрес подробнее:"
-        context.user_data[FEATURES] = address
+        context.user_data[FEATURES] |= address
 
         buttons = [
             [
