@@ -1,6 +1,4 @@
-# import telebot # noqa
-# from telebot import types # noqa
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, KeyboardButton, ReplyKeyboardMarkup, Update
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.constants import ParseMode
 from telegram.ext import ContextTypes
 
@@ -103,27 +101,6 @@ async def end_second_level(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     await start(update, context)
 
     return END
-
-
-# bot = telebot.TeleBot(token='5712052331:AAGBMT1FNiiukbIF115WBg4jTpvi_ndu2Ss')
-
-
-# async def handle_get_phone(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
-#     """Предложить пользователю выбор: взять телефон из ТГ или ввести новый"""
-#     text = "Для свази с вами необходим ваш телефоннный номер, вы хотите использовать номер для связи указанный в ТГ"
-#     context.user_data[CURRENT_FEATURE] = update.callback_query.data
-#     buttons = [
-#         [
-#             InlineKeyboardButton(text="Да", callback_data=PHONE_COMMAND + "Yes"),
-#             InlineKeyboardButton(text="Нет", callback_data=PHONE_COMMAND + "No"),
-#         ],
-#         [InlineKeyboardButton(text="Назад", callback_data=BACK)],
-#     ]
-#
-#     keyboard = InlineKeyboardMarkup(buttons)
-#
-#     await update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
-#     return SELECTING_OVER
 
 
 async def ask_user_phone_number(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
