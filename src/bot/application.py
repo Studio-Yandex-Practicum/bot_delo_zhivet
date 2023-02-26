@@ -70,7 +70,8 @@ from .handlers.volunteer import (
     ask_user_phone_number,
     handle_car_input,
     handle_city_input,
-    handle_phone_input,
+    save_phone,
+    # handle_phone_input,
     handle_radius_input,
     save_and_exit_volunteer,
     save_input,
@@ -94,12 +95,13 @@ def start_bot() -> None:
                 CallbackQueryHandler(save_and_exit_volunteer, pattern="^" + SAVE + "$"),
             ],
             TYPING_CITY: [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_city_input)],
-            TYPING_PHONE_NUMBER: [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_phone_input)],
+            # TYPING_PHONE_NUMBER: [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_phone_input)],
             SELECTING_OVER: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, save_phone),
                 CallbackQueryHandler(save_input, pattern="^" + CITY_COMMAND),
                 CallbackQueryHandler(save_input, pattern="^" + RADIUS_COMMAND),
                 CallbackQueryHandler(save_input, pattern="^" + CAR_COMMAND),
-                CallbackQueryHandler(save_input, pattern="^" + PHONE_COMMAND),
+                # CallbackQueryHandler(save_input, pattern="^" + PHONE_COMMAND),
             ],
         },
         fallbacks=[
@@ -108,6 +110,7 @@ def start_bot() -> None:
             CallbackQueryHandler(ask_user_phone_number, pattern=PHONE_INPUT),
             CallbackQueryHandler(ask_for_input_city, pattern=CITY_INPUT),
             CallbackQueryHandler(add_volunteer, pattern=BACK),
+            CallbackQueryHandler(save_phone, pattern=BACK),
         ],
         map_to_parent={
             STOPPING: END,

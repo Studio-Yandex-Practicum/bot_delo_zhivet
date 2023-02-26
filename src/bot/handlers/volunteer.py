@@ -53,8 +53,8 @@ async def add_volunteer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> s
         "- Расстояние, на которое ты готов выезжать;\n"
         "- Наличие автомобиля, и готовность задействовать его."
     )
-    level = update.callback_query.data
-    context.user_data[CURRENT_LEVEL] = level
+    # level = update.callback_query.data
+    # context.user_data[CURRENT_LEVEL] = level
 
     buttons = [
         [
@@ -111,11 +111,24 @@ async def ask_user_phone_number(update: Update, context: ContextTypes.DEFAULT_TY
     keyboard = InlineKeyboardMarkup(button)
 
     await update.callback_query.answer()
-    await update.callback_query.edit_message_text(text=text,reply_markup=keyboard)
+    await update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
 
-    return TYPING_PHONE_NUMBER
+    return SELECTING_OVER
 
 
+async def save_phone(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
+    """Сохранение комментария"""
+    # city = update.callback_query.data
+    # update.callback_query.data = 'NUMBER='
+    user_data = context.user_data
+    # user_data[FEATURES][POLLUTION_COMMENT] = update.message.text
+    user_data[FEATURES][user_data[CURRENT_FEATURE]] = update.message.text
+    user_data[START_OVER] = True
+    # update.callback_query.data = PHONE_COMMAND + update.message.text
+
+    return await add_volunteer(update, context)
+
+'''
 async def handle_phone_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     """Обработчик данных вводимого пользователем телефона."""
     input_phone_number = update.message.text
@@ -136,7 +149,7 @@ async def handle_phone_input(update: Update, context: ContextTypes.DEFAULT_TYPE)
         await update.message.reply_text(text=text, reply_markup=keyboard)
 
     return SELECTING_OVER
-
+'''
 
 async def ask_for_input_city(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     """Предложить пользователю ввести данные о населенном пункте."""
@@ -260,7 +273,7 @@ async def save_and_exit_volunteer(update: Update, context: ContextTypes.DEFAULT_
     radius = user_data[SPECIFY_ACTIVITY_RADIUS][7:]
     car = user_data[SPECIFY_CAR_AVAILABILITY][4:]
     if SPECIFY_PHONE_PERMISSION in user_data:
-        phone = user_data[SPECIFY_PHONE_PERMISSION][7:]
+        phone = user_data[SPECIFY_PHONE_PERMISSION]
     else:
         phone = ''
     user_data[GEOM] = f"POINT({user_data[LATITUDE]} {user_data[LONGITUDE]})"
