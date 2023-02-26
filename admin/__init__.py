@@ -1,6 +1,5 @@
 import os
 import sys
-from threading import Thread
 
 from flask import Flask, current_app, redirect, render_template, url_for
 from flask_mail import Mail, Message
@@ -65,7 +64,7 @@ message_args = (
     Config.MAIL_USERNAME,
     "Админка запущена",
 )
-Thread(target=send_email, args=(*message_args,)).start()
+# Thread(target=send_email, args=(*message_args,)).start()
 
 
 @app.route("/")
@@ -84,6 +83,11 @@ from . import views  # noqa
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template("/admin/404.html"), 404
+
+
+@app.errorhandler(403)
+def forbidden(e):
+    return render_template("/admin/403.html"), 403
 
 
 if __name__ == "__main__":

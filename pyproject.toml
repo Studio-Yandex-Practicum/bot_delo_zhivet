@@ -37,6 +37,8 @@ backoff-utils = "^1.0.1"
 postgis = "^1.0.4"
 geoalchemy2 = "^0.13.1"
 uvicorn = "^0.20.0"
+flask-mail = "^0.9.1"
+pyjwt = "^2.6.0"
 
 [tool.poetry.group.test]
 optional = true

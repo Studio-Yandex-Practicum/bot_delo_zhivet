@@ -21,20 +21,9 @@ class ExtraUserMixin:
     def check_password(self, password):
         return check_password_hash(self.password, password)
 
-    def get_reset_token(self, expires=500):
+    def get_reset_password_token(self, expires_in=600):
         return jwt.encode(
-            {
-                "reset_password": self.username,
-                "exp": time() + expires,
-            },
-            key=os.getenv("ADMIN_SECRET_KEY", default="SECRET_KEY"),
+            {"reset_password": self.login, "exp": time() + expires_in},
+            os.getenv("ADMIN_SECRET_KEY", default="SECRET_KEY"),
+            algorithm="HS256",
         )
-
-    def verify_reset_token(self, token):
-        try:
-            username = jwt.decode(token, key=os.getenv("ADMIN_SECRET_KEY", default="SECRET_KEY"))["reset_password"]
-            print(username)
-        except Exception as e:
-            print(e)
-            return
-        return
