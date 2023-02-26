@@ -13,7 +13,6 @@ from src.bot.handlers.state_constants import (
     CITY_COMMAND,
     CITY_INPUT,
     CURRENT_FEATURE,
-    CURRENT_LEVEL,
     END,
     FEATURES,
     FIRST_NAME,
@@ -50,8 +49,6 @@ async def add_volunteer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> s
         "- Расстояние, на которое ты готов выезжать;\n"
         "- Наличие автомобиля, и готовность задействовать его."
     )
-    # level = update.callback_query.data
-    # context.user_data[CURRENT_LEVEL] = level
 
     buttons = [
         [
