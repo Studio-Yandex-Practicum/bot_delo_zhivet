@@ -10,6 +10,7 @@ dadata = Dadata(token, secret)
 def get_fields_from_dadata(data):
     try:
         result = dadata.suggest("address", data)[0]
+        print(result)
         if result["data"]["settlement_with_type"] is not None:
             city = result["data"]["settlement_with_type"]
         else:
@@ -17,11 +18,12 @@ def get_fields_from_dadata(data):
         full_address = result["unrestricted_value"]
         latitude = float(result["data"]["geo_lat"])
         longitude = float(result["data"]["geo_lon"])
+        print(result)
         return dict(
             city=city,
             full_address=full_address,
             latitude=latitude,
             longitude=longitude,
         )
-    except IndexError:
+    except (IndexError, TypeError):
         return None
