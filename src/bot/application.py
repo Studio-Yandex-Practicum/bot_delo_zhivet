@@ -70,7 +70,6 @@ from .handlers.volunteer import (
     ask_user_phone_number,
     handle_car_input,
     handle_city_input,
-    # handle_get_phone,
     handle_phone_input,
     handle_radius_input,
     save_and_exit_volunteer,

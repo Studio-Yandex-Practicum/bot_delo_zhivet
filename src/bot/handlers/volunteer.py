@@ -111,7 +111,7 @@ async def ask_user_phone_number(update: Update, context: ContextTypes.DEFAULT_TY
     keyboard = InlineKeyboardMarkup(button)
 
     await update.callback_query.answer()
-    await update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
+    await update.callback_query.edit_message_text(text=text,reply_markup=keyboard)
 
     return TYPING_PHONE_NUMBER
 
