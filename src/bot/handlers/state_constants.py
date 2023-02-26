@@ -27,9 +27,7 @@ SELECTING_OVER = "selecting_city"
 
 # Состояния диалога Получение Телефонного номера
 SPECIFY_PHONE_PERMISSION = "phone"  # кажется отправляется в БД
-PHONE_COMMAND = "NUMBER="
-TYPING_PHONE_NUMBER = "phone_number1"
-PHONE_INPUT = "phone_input"
+
 
 # Meta состояния
 STOPPING = "stopping"

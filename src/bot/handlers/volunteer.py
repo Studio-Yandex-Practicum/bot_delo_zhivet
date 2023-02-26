@@ -21,9 +21,6 @@ from src.bot.handlers.state_constants import (
     LAST_NAME,
     LATITUDE,
     LONGITUDE,
-    PHONE_COMMAND,
-    PHONE_INPUT,
-    TYPING_PHONE_NUMBER,
     RADIUS_COMMAND,
     SAVE,
     SECOND_LEVEL_TEXT,
@@ -118,38 +115,12 @@ async def ask_user_phone_number(update: Update, context: ContextTypes.DEFAULT_TY
 
 async def save_phone(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     """Сохранение комментария"""
-    # city = update.callback_query.data
-    # update.callback_query.data = 'NUMBER='
     user_data = context.user_data
-    # user_data[FEATURES][POLLUTION_COMMENT] = update.message.text
     user_data[FEATURES][user_data[CURRENT_FEATURE]] = update.message.text
     user_data[START_OVER] = True
-    # update.callback_query.data = PHONE_COMMAND + update.message.text
 
     return await add_volunteer(update, context)
 
-'''
-async def handle_phone_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
-    """Обработчик данных вводимого пользователем телефона."""
-    input_phone_number = update.message.text
-    if input_phone_number is not None:
-        text = f"Номер введен правильно?\n{input_phone_number}"
-        context.user_data[CURRENT_FEATURE] = SPECIFY_PHONE_PERMISSION # маленький костыль
-
-        data = PHONE_COMMAND + input_phone_number
-        buttons = [
-            [
-                InlineKeyboardButton(text="Да", callback_data=data),
-                InlineKeyboardButton(text="Нет", callback_data=PHONE_INPUT),
-            ]
-        ]
-
-        keyboard = InlineKeyboardMarkup(buttons)
-
-        await update.message.reply_text(text=text, reply_markup=keyboard)
-
-    return SELECTING_OVER
-'''
 
 async def ask_for_input_city(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     """Предложить пользователю ввести данные о населенном пункте."""
