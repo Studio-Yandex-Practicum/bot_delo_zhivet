@@ -32,6 +32,8 @@ Windows
 ```bash
 $Env:Path += ";C:\Users\jetbrains\AppData\Roaming\Python\Scripts"; setx PATH "$Env:Path"
 ```
+Не забудьте поменять jetbrains на имя вашего пользователя. Настройка окружения poetry для pycharm [тут](https://www.jetbrains.com/help/pycharm/poetry.html)
+
 Для проверки установки выполните следующую команду:
 ```bash
 poetry --version
@@ -44,9 +46,9 @@ poetry completions bash >> ~/.bash_completion
 ```bash
 poetry env use python3.10
 ```
-Установка зависимостей
+Установка зависимостей (для разработки)
 ```bash
-poetry install
+poetry install --with dev
 ```
 Запуск оболочки и активация виртуального окружения
 ```bash
@@ -129,6 +131,10 @@ pre-commit run --all-files
 
 ___
 ## Запуск бота
+Переименуйте файл .env.example в .env и заполните его.
+Запуск может быть в режимах polling и webhook. Для режима webhook в файле .env должны быть указаны параметры WEBHOOK_DOMAIN и WEBHOOK_PORT. Подробнее об этом написано [в официальном гайде telegram](https://core.telegram.org/bots/webhooks)
+
+### Запуск бота осуществляется командой
 Для Linux, macOS, Windows (WSL):
 ```bash
 your@device:~/your_project_pwd/bot_delo_zhivet/$ poetry run runbot
