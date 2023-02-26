@@ -48,7 +48,7 @@ async def add_volunteer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> s
         "- Свой адрес, можно без квартиры, для удобства расчетов расстояния;\n"
         "- Расстояние, на которое ты готов выезжать;\n"
         "- Наличие автомобиля, и готовность задействовать его;\n"
-        "- [Опционально] Мобильный номер телефона."
+        "- [Опционально] Номер телефона для связи."
     )
 
     buttons = [
@@ -244,7 +244,7 @@ async def save_and_exit_volunteer(update: Update, context: ContextTypes.DEFAULT_
     if SPECIFY_PHONE_PERMISSION in user_data:
         phone = user_data[SPECIFY_PHONE_PERMISSION]
     else:
-        phone = ''
+        phone = ""
     user_data[GEOM] = f"POINT({user_data[LATITUDE]} {user_data[LONGITUDE]})"
     user_data[SPECIFY_ACTIVITY_RADIUS] = int(radius) * 1000
     user_data[SPECIFY_CAR_AVAILABILITY] = car
