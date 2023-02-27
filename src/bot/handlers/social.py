@@ -79,7 +79,7 @@ async def address_confirmation(update: Update, context: ContextTypes.DEFAULT_TYP
             'Если адрес не правильный, то выберите "Нет" и укажите более подробный вариант адреса, '
             "а мы постараемся определить его правильно!"
         )
-        context.user_data[FEATURES] = address
+        context.user_data[FEATURES] |= address
 
         data = CITY_SOCIAL + user_input
         buttons = [
@@ -95,7 +95,7 @@ async def address_confirmation(update: Update, context: ContextTypes.DEFAULT_TYP
 
     else:
         chat_text = "Не нашли такой адрес. Пожалуйста, укажи адрес подробнее:"
-        context.user_data[FEATURES] = address
+        context.user_data[FEATURES] |= address
 
         buttons = [
             [
