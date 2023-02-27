@@ -36,9 +36,10 @@ from src.bot.handlers.state_constants import (
 )
 from src.bot.service.dadata import get_fields_from_dadata
 from src.bot.service.save_new_user import check_user_in_db, create_new_user
-from src.bot.service.save_tracker_id import save_tracker_id_volunteer
+from src.bot.service.save_tracker_id import save_tracker_id
 from src.bot.service.volunteer import check_volunteer_in_db, create_volunteer, update_volunteer
 from src.core.db.db import get_async_session
+from src.core.db.repository.volunteer_repository import crud_volunteer
 
 
 async def add_volunteer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
@@ -119,7 +120,7 @@ async def handle_city_input(update: Update, context: ContextTypes.DEFAULT_TYPE) 
             'Если адрес не правильный, то выберите "Нет" и укажите более подробный вариант адреса, '
             "а мы постараемся определить его правильно!"
         )
-        context.user_data[FEATURES] = address
+        context.user_data[FEATURES] |= address
 
         data = CITY_COMMAND + user_input
         buttons = [
@@ -135,7 +136,7 @@ async def handle_city_input(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 
     else:
         chat_text = "Не нашли такой адрес. Пожалуйста, укажи адрес подробнее:"
-        context.user_data[FEATURES] = address
+        context.user_data[FEATURES] |= address
 
         buttons = [
             [
@@ -261,7 +262,7 @@ async def save_and_exit_volunteer(update: Update, context: ContextTypes.DEFAULT_
         summary=summary,
         description=description,
     )
-    await save_tracker_id_volunteer(tracker.key, user_data[TELEGRAM_ID], session)
+    await save_tracker_id(crud_volunteer, tracker.key, user_data[TELEGRAM_ID], session)
     await start(update, context)
     return END
 
