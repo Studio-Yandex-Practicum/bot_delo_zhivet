@@ -26,7 +26,7 @@ SOCIAL_PROBLEM_ADDRESS = "social_problem_address"
 SELECTING_OVER = "selecting_city"
 
 # Состояния диалога Получение Телефонного номера
-SPECIFY_PHONE_PERMISSION = "phone"  # кажется отправляется в БД
+SPECIFY_PHONE_PERMISSION = "phone"
 
 
 # Meta состояния
