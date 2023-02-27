@@ -39,6 +39,7 @@ geoalchemy2 = "^0.13.1"
 uvicorn = "^0.20.0"
 flask-mail = "^0.9.1"
 pyjwt = "^2.6.0"
+greenlet = "^2.0.2"
 
 [tool.poetry.group.test]
 optional = true
@@ -47,6 +48,11 @@ optional = true
 flake8 = "^6.0.0"
 pep8-naming = "^0.13.3"
 flake8-return = "^1.2.0"
+
+
+[tool.poetry.group.prod.dependencies]
+pytest = "^7.2.1"
+psycopg2 = "^2.9.5"
 
 [build-system]
 requires = ["poetry-core"]
