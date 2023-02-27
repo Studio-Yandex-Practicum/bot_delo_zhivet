@@ -23,5 +23,5 @@ def get_fields_from_dadata(data):
             latitude=latitude,
             longitude=longitude,
         )
-    except IndexError:
+    except (IndexError, TypeError):
         return None
