@@ -1,10 +1,8 @@
 import os
 import sys
 
-from flask import Flask, current_app, redirect, render_template, url_for
-
 import sentry_sdk
-from dotenv import load_dotenv
+from flask import Flask, current_app, redirect, render_template, url_for
 from sentry_sdk.integrations.flask import FlaskIntegration
 
 from .config import Config
@@ -29,10 +27,6 @@ if not_existing_tables:
     logger.info(STOP_LOGGING)
     sys.exit(MISSING_REQUIRED_TABLES_ERROR.format(app_name=__name__, not_existing_tables=not_existing_tables))
 
-load_dotenv(".env")
-
-SENTRY_DSN_URL = os.getenv("SENTRY_DSN_URL", default="None")
-
 
 def create_app():
     app = Flask(__name__)
@@ -46,14 +40,15 @@ def create_app():
     return app
 
 
-sentry_sdk.init(
-    dsn=SENTRY_DSN_URL,
-    integrations=[
-        FlaskIntegration(),
-    ],
-    traces_sample_rate=1.0,
-    environment="admin",
-)
+if Config.SENTRY_DSN_URL:
+    sentry_sdk.init(
+        dsn=Config.SENTRY_DSN_URL,
+        integrations=[
+            FlaskIntegration(),
+        ],
+        traces_sample_rate=1.0,
+        environment="admin",
+    )
 
 app = create_app()
 create_roles_and_superuser()
