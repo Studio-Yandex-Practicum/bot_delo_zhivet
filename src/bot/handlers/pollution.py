@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
@@ -5,10 +6,11 @@ from telegram.constants import ParseMode
 from telegram.ext import ContextTypes
 
 from src.api.tracker import client
-from src.bot.service.pollution import create_new_pollution
+from src.bot.service.pollution import create_new_pollution, download_to_object_storage
 from src.bot.service.save_new_user import check_user_in_db, create_new_user
 from src.bot.service.save_tracker_id import save_tracker_id
 from src.bot.service.volunteer import volunteers_description
+from src.core.config import settings
 from src.core.db.db import get_async_session
 from src.core.db.repository.pollution_repository import crud_pollution
 from src.core.db.repository.volunteer_repository import crud_volunteer
@@ -116,7 +118,7 @@ async def save_foto(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     """Сохранение фотографии"""
     user_data = context.user_data
     photo_file = await update.message.photo[-1].get_file()
-    date = datetime.now().strftime("%m_%d_%Y_%H_%M_%S")
+    date = datetime.now().strftime("%d_%m_%Y_%H_%M_%S")
     file_path = f"media\\{date}.jpg"
     await photo_file.download_to_drive(custom_path=file_path)
     user_data[FEATURES][POLLUTION_FOTO] = str(file_path)
@@ -151,6 +153,7 @@ async def save_and_exit_pollution(update: Update, context: ContextTypes.DEFAULT_
     user = {}
     user[TELEGRAM_ID] = user_data[TELEGRAM_ID]
     user[TELEGRAM_USERNAME] = update.effective_user.username
+    await download_to_object_storage(file_path)
     session_generator = get_async_session()
     session = await session_generator.asend(None)
     old_user = await check_user_in_db(user_data[TELEGRAM_ID], session)
@@ -166,6 +169,7 @@ async def save_and_exit_pollution(update: Update, context: ContextTypes.DEFAULT_
     Ник в телеграмме оставившего заявку: {user[TELEGRAM_USERNAME]}
     Координаты загрязнения: {latitude}, {longitude}
     Комментарий к заявке: {comment}
+    {settings.AWS_ENDPOINT_URL}/{settings.AWS_BUCKET_NAME}/{file_path[6:]}
     """
     description += volunteers_description(volunteers)
     tracker = client.issues.create(
@@ -173,7 +177,7 @@ async def save_and_exit_pollution(update: Update, context: ContextTypes.DEFAULT_
         summary=summary,
         description=description,
     )
-    tracker.attachments.create(file_path)
+    os.remove(file_path)
     await save_tracker_id(crud_pollution, tracker.key, user_data[TELEGRAM_ID], session)
     await start(update, context)
     return END

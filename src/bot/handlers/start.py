@@ -11,8 +11,8 @@ from bot.handlers.state_constants import (
 )
 
 GREETING_MESSAGE = (
-    'Привет, {username}. Я бот экологического проекта "Дело живёт".'
-    " Я могу принять заявку на помощь, или зарегистрировать тебя волонтером."
+    "Я бот экологического проекта «Дело живёт»."
+    " Я могу принять заявку на помощь, или зарегистрировать тебя волонтёром."
     " Выбери, что хочешь сделать:"
 )
 
@@ -45,7 +45,10 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     if not context.user_data.get(START_OVER):
         user = update.message.from_user
         username = user["username"]
-        text = GREETING_MESSAGE.format(username=username)
+        if username:
+            text = f"Привет, {username}! " + GREETING_MESSAGE
+        else:
+            text = "Привет! " + GREETING_MESSAGE
         await update.message.reply_text(text=text, reply_markup=keyboard)
     else:
         await update.callback_query.answer()
