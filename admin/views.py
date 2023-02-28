@@ -15,15 +15,26 @@ from . import app
 from .config import Config
 from .database import db
 from .forms import ForgotForm, LoginForm, PasswordResetForm, RegistrationForm
+from .logger import get_logger
 from .messages import (
     ALREADY_REGISTRED,
     BAD_TOKEN,
+    MAIL_SEND_ERROR,
+    MAIL_SEND_SUCCESS,
     PASSWORD_CHANGED_SUCCESS,
     RESET_PASSWORD_SUBJECT,
     RESTORE_PASSWORD_SEND,
     SUGGEST_REGISTRATION,
 )
-from .utils import get_readonly_dict, get_table_fields_from_model, get_translated_lables
+from .utils import (
+    get_readonly_dict,
+    get_reset_password_token,
+    get_table_fields_from_model,
+    get_translated_lables,
+    verify_reset_password_token,
+)
+
+logger = get_logger(__file__)
 
 
 def init_login():
@@ -42,7 +53,11 @@ mail = Mail(app)
 
 def send_async_email(app, msg):
     with app.app_context():
-        mail.send(msg)
+        try:
+            mail.send(msg)
+            logger.info(MAIL_SEND_SUCCESS.format(subject=msg.subject, recipients=msg.recipients))
+        except Exception as e:
+            logger.error(MAIL_SEND_ERROR.format(subject=msg.subject, recipients=msg.recipients, details=str(e)))
 
 
 def send_email(subject, sender, recipients, text_body, html_body):
@@ -53,8 +68,7 @@ def send_email(subject, sender, recipients, text_body, html_body):
 
 
 def send_password_reset_email(user):
-    token = user.get_reset_password_token()
-    print(token)
+    token = get_reset_password_token(user)
     send_email(
         RESET_PASSWORD_SUBJECT,
         sender=Config.MAIL_USERNAME,
@@ -128,7 +142,7 @@ class MyAdminIndexView(AdminIndexView):
     def reset_password_view(self, token):
         if login.current_user.is_authenticated:
             return redirect(url_for(".index"))
-        user = Staff.verify_reset_password_token(token)
+        user = verify_reset_password_token(token)
         if not user:
             flash(BAD_TOKEN, "error")
             return redirect(url_for(".index"))

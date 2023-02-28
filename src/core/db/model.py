@@ -1,6 +1,3 @@
-import os  # новое
-
-import jwt  # новое
 from flask_login import UserMixin
 from flask_security import RoleMixin
 from geoalchemy2.types import Geography
@@ -94,14 +91,3 @@ class Staff(Base, UserMixin, ExtraUserMixin):
     password = Column(String(255))
     active = Column(Boolean())
     roles = relationship("Role", secondary=roles_users, backref=backref("users", lazy="dynamic"))
-
-    @staticmethod
-    def verify_reset_password_token(token):
-        try:
-            login = jwt.decode(token, key=os.getenv("ADMIN_SECRET_KEY", default="SECRET_KEY"), algorithms="HS256")[
-                "reset_password"
-            ]
-        except Exception as e:
-            print(e)
-            return
-        return Staff.query.filter_by(login=login).first()
