@@ -38,4 +38,4 @@ async def stop_nested(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Обработчик команды /help."""
-    await update.message.reply_text(HELP_TEXT + SITE_INFO)
+    await update.message.reply_text(HELP_TEXT.format(site_info=SITE_INFO))
