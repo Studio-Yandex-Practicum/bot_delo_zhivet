@@ -42,7 +42,7 @@ MAIL_USERNAME=test.delo.zhivet@yandex.ru
 ```
 Пароль приложения:
 ```
-MAIL_PASSWORD=bctlgfnckbtxhgzt
+MAIL_PASSWORD=baftyonckbtxhgxt
 ```
 Режим отладки отправки сообщений:
 ```
