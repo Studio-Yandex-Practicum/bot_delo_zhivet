@@ -2,7 +2,7 @@ from telegram import Update
 from telegram.ext import ContextTypes
 
 from bot.handlers.start import start
-from bot.handlers.state_constants import END, START_OVER, STOPPING
+from bot.handlers.state_constants import END, HELP_TEXT, SITE_INFO, START_OVER, STOPPING
 
 
 async def stop(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -38,10 +38,4 @@ async def stop_nested(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Обработчик команды /help."""
-    await update.message.reply_text(
-        "«Дело Живёт» помогает волонтёрам узнать, где требуется их помощь и организует локальные команды "
-        "для решения экологических проблем.\n"
-        "Подробнее на сайте: https://delozhivet.ru/ \n"
-        "Наш бот может принять заявку на помощь и зарегистрировать тебя волонтёром. \n"
-        "Присоединяйся!"
-    )
+    await update.message.reply_text(HELP_TEXT + SITE_INFO)
