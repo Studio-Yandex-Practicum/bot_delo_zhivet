@@ -245,7 +245,7 @@ async def save_and_exit_volunteer(update: Update, context: ContextTypes.DEFAULT_
     if SPECIFY_PHONE_PERMISSION in user_data:
         phone = user_data[SPECIFY_PHONE_PERMISSION]
     else:
-        phone = ""
+        phone = "Не указан"
     user_data[GEOM] = f"POINT({user_data[LATITUDE]} {user_data[LONGITUDE]})"
     user_data[SPECIFY_ACTIVITY_RADIUS] = int(radius) * 1000
     user_data[SPECIFY_CAR_AVAILABILITY] = car
@@ -278,12 +278,16 @@ async def save_and_exit_volunteer(update: Update, context: ContextTypes.DEFAULT_
         await update_volunteer(old_volunteer, user_data, session)
     else:
         await create_volunteer(user_data, session)
-    summary = f"{user_data[TELEGRAM_USERNAME]} - {user_data['full_address']}"
+    user_name = user_data[TELEGRAM_USERNAME]
+    if user_name is None:
+        user_name = "Никнейм скрыт"
+    summary = f"{user_name} - {user_data['full_address']}"
     description = f"""
-    Ник в телеграмме: {user_data[TELEGRAM_USERNAME]}
+    Ник в телеграмме: {user_name}
     Адрес: {user_data['full_address']}
     Наличие машины: {car}
     Радиус выезда: {radius}
+    Номер телефона: {phone}
     """
     if old_ticket_id:
         description += f"Старый тикет: {old_ticket_id}"
