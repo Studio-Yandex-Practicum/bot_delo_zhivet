@@ -126,7 +126,10 @@ async def handle_city_input(update: Update, context: ContextTypes.DEFAULT_TYPE) 
             [
                 InlineKeyboardButton(text="Да", callback_data=CITY_COMMAND),
                 InlineKeyboardButton(text="Нет", callback_data=CITY_INPUT),
-            ]
+            ],
+            [
+                InlineKeyboardButton(text="Назад", callback_data=BACK),
+            ],
         ]
 
         keyboard = InlineKeyboardMarkup(buttons)
