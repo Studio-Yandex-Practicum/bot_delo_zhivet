@@ -24,15 +24,14 @@ class Config(object):
     LOG_FORMAT = "%(asctime)s [%(levelname)s]  %(message)s"
     LOG_REL_PATH = "logs"
 
-    # Требуются настройки аккаунта из веб-интерфейса
-    # Шестеренка -> Все настройки -> Безопасность >
-    # в тексте найти "Пароли приложений" ->
-    # Создать пароль приложения
+    # Параметры почтового клиента
     MAIL_SERVER = os.getenv("MAIL_SERVER", default="smtp.yandex.ru")
     MAIL_PORT = os.getenv("MAIL_PORT", default=465)
     MAIL_USE_SSL = os.getenv("MAIL_USE_SSL", default=True)
     MAIL_USERNAME = os.getenv("MAIL_USERNAME", default="test.delo.zhivet@yandex.ru")
     MAIL_PASSWORD = os.getenv("MAIL_PASSWORD", default="bctlgfnckbtxhgzt")
     MAIL_DEBUG = os.getenv("MAIL_DEBUG", default=1)
+
+    # Параметры генерации токенов сброса пароля
     PASSWORD_RESET_TOKEN_TTL = os.getenv("PASSWORD_RESET_TOKEN_TTL", default=600)
     PASSWORD_RESET_TOKEN_ALGORITHM = os.getenv("PASSWORD_RESET_TOKEN_ALGORITHM", default="HS256")

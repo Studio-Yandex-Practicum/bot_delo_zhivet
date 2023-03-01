@@ -2,7 +2,6 @@ import os
 import sys
 
 from flask import Flask, current_app, redirect, render_template, url_for
-from flask_mail import Mail, Message
 
 from .config import Config
 from .database import create_roles_and_superuser, db, get_not_existing_required_tables
@@ -41,30 +40,6 @@ def create_app():
 
 app = create_app()
 create_roles_and_superuser()
-
-mail = Mail(app)
-
-
-def send_email(app, subject, recipients, sender, body):
-    with app.app_context():
-        message = Message()
-        message.subject = subject
-        message.recipients = recipients
-        message.sender = sender
-        message.body = body
-        mail.send(message)
-
-
-message_args = (
-    app,
-    "Сброс пароля админки бота 'Дело живет'",
-    [
-        "loshchilov.aleksandr@gmail.com",
-    ],
-    Config.MAIL_USERNAME,
-    "Админка запущена",
-)
-# Thread(target=send_email, args=(*message_args,)).start()
 
 
 @app.route("/")
