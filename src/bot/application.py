@@ -128,6 +128,7 @@ def create_bot() -> Application:
         },
         persistent=True,
         name="add_volunteer_conv",
+        allow_reentry=True,
     )
 
     add_pollution_conv = ConversationHandler(
@@ -155,6 +156,7 @@ def create_bot() -> Application:
         },
         persistent=True,
         name="add_pollution_conv",
+        allow_reentry=True,
     )
 
     add_social_conv = ConversationHandler(
@@ -189,6 +191,7 @@ def create_bot() -> Application:
         },
         persistent=True,
         name="add_social_conv",
+        allow_reentry=True,
     )
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler("start", start)],

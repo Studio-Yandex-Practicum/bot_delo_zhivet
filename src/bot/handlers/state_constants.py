@@ -91,6 +91,6 @@ HELP_TEXT = (
     "Присоединяйся!\n"
     "Подробнее на сайте: {site_info}"
 )
-SITE_INFO = (
-    "https://delozhivet.ru/"
-)
+SITE_INFO = "https://delozhivet.ru/"
+
+STOP_TEXT = "Всего доброго! Отправь /start, когда я снова понадоблюсь."

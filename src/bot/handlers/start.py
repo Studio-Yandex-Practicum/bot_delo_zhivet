@@ -22,7 +22,10 @@ BYE_MESSAGE = "До свидания, {username}. Возвращайся в лю
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     """Выбор действия: Добавление проблемы/регистрация волонтера."""
     text = TOP_LEVEL_MENU_TEXT
-
+    # Если пользователь отправляет именно КОМАНДУ старт, то очищаем его данные
+    if update.message:
+        context.user_data.clear()
+        await context.application.persistence.drop_user_data(update.message.from_user["id"])
     buttons = [
         [
             InlineKeyboardButton(text="Сообщить об экологической проблеме", callback_data=ADDING_ECO_TASK),
