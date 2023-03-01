@@ -172,7 +172,7 @@ async def save_and_exit_from_social_problem(update: Update, context: ContextType
     """Сохранение данных в базу и отправка в трекер"""
     context.user_data[START_OVER] = True
     user_data = context.user_data[FEATURES]
-    user_data[GEOM] = f"POINT({user_data[LATITUDE]} {user_data[LONGITUDE]})"
+    user_data[GEOM] = f"POINT({user_data[LONGITUDE]} {user_data[LATITUDE]})"
     user_data[TELEGRAM_ID] = update.effective_user.id
     if SOCIAL_ADDRESS in user_data:
         del user_data[SOCIAL_ADDRESS]
@@ -190,7 +190,7 @@ async def save_and_exit_from_social_problem(update: Update, context: ContextType
         await start(update, context)
         return END
     await create_new_social(user_data, session)
-    volunteers = await crud_volunteer.get_volunteers_by_point(user_data[LATITUDE], user_data[LONGITUDE], session)
+    volunteers = await crud_volunteer.get_volunteers_by_point(user_data[LONGITUDE], user_data[LATITUDE], session)
     city = await crud_assistance_disabled.get_full_address_by_telegram_id(user_data[TELEGRAM_ID], session)
     description = f"""
     Ник в телеграмме оставившего заявку: {user[TELEGRAM_USERNAME]}
