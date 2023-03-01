@@ -142,7 +142,7 @@ async def save_and_exit_pollution(update: Update, context: ContextTypes.DEFAULT_
     context.user_data[START_OVER] = True
     user_data = context.user_data[FEATURES]
     user_data[TELEGRAM_ID] = update.effective_user.id
-    user_data[GEOM] = f"POINT({user_data[LATITUDE]} {user_data[LONGITUDE]})"
+    user_data[GEOM] = f"POINT({user_data[LONGITUDE]} {user_data[LATITUDE]})"
     file_path = user_data[POLLUTION_FOTO]
     latitude = user_data[LATITUDE]
     longitude = user_data[LONGITUDE]
@@ -163,7 +163,7 @@ async def save_and_exit_pollution(update: Update, context: ContextTypes.DEFAULT_
         await start(update, context)
         return END
     await create_new_pollution(user_data, session)
-    volunteers = await crud_volunteer.get_volunteers_by_point(latitude, longitude, session)
+    volunteers = await crud_volunteer.get_volunteers_by_point(longitude, latitude, session)
     summary = f"{user[TELEGRAM_USERNAME]} - {latitude}, {longitude}"
     description = f"""
     Ник в телеграмме оставившего заявку: {user[TELEGRAM_USERNAME]}

@@ -247,7 +247,7 @@ async def save_and_exit_volunteer(update: Update, context: ContextTypes.DEFAULT_
         phone = user_data[SPECIFY_PHONE_PERMISSION]
     else:
         phone = "Не указан"
-    user_data[GEOM] = f"POINT({user_data[LATITUDE]} {user_data[LONGITUDE]})"
+    user_data[GEOM] = f"POINT({user_data[LONGITUDE]} {user_data[LATITUDE]})"
     user_data[SPECIFY_ACTIVITY_RADIUS] = int(radius) * 1000
     user_data[SPECIFY_CAR_AVAILABILITY] = car
     user_data[SPECIFY_PHONE_PERMISSION] = phone
