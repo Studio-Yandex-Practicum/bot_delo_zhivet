@@ -99,7 +99,7 @@ async def input(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "Отправьте геопозицию, для этого:\n"
             "1. Нажмите на значок в виде «скрепки», находится справа от поля ввода;\n"
             "2. В открывшемся меню выберите «Геопозиция»;\n"
-            "3. Выберете место на карте и нажмите «Отправить геопозицию."
+            "3. Выберете место на карте и нажмите «Отправить геопозицию»."
         )
     button = [[InlineKeyboardButton(text="Назад", callback_data=BACK)]]
     keyboard = InlineKeyboardMarkup(button)
