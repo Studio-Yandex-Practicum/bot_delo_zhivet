@@ -34,7 +34,7 @@ from bot.const import (
 )
 from core.config import settings
 
-from .handlers.common import end_describing, help_command, stop, stop_nested
+from .handlers.common import end_describing, help_command, stop
 from .handlers.participation import make_donation
 from .handlers.pollution import (
     input,
@@ -62,7 +62,6 @@ from .handlers.state_constants import (
     CITY_COMMAND,
     CITY_INPUT,
     CITY_SOCIAL,
-    END,
     POLLUTION_COMMENT,
     POLLUTION_COORDINATES,
     POLLUTION_FOTO,
@@ -75,7 +74,6 @@ from .handlers.state_constants import (
     SOCIAL_COMMENT,
     SOCIAL_PROBLEM_ADDRESS,
     SOCIAL_PROBLEM_TYPING,
-    STOPPING,
     TYPING,
     TYPING_CITY,
     TYPING_SOCIAL_CITY,
@@ -118,14 +116,11 @@ def create_bot() -> Application:
         },
         fallbacks=[
             CallbackQueryHandler(end_describing, pattern=END_CMD),
-            CommandHandler("stop", stop_nested),
+            CommandHandler("stop", stop),
             CallbackQueryHandler(ask_for_input_city, pattern=CITY_INPUT),
             CallbackQueryHandler(add_volunteer, pattern=BACK),
             CallbackQueryHandler(save_phone, pattern=BACK),
         ],
-        map_to_parent={
-            STOPPING: END,
-        },
         persistent=True,
         name="add_volunteer_conv",
         allow_reentry=True,
@@ -148,12 +143,9 @@ def create_bot() -> Application:
         },
         fallbacks=[
             CallbackQueryHandler(end_describing, pattern=END_CMD),
-            CommandHandler("stop", stop_nested),
+            CommandHandler("stop", stop),
             CallbackQueryHandler(select_option_to_report_about_pollution, pattern=BACK),
         ],
-        map_to_parent={
-            STOPPING: END,
-        },
         persistent=True,
         name="add_pollution_conv",
         allow_reentry=True,
@@ -182,13 +174,10 @@ def create_bot() -> Application:
         },
         fallbacks=[
             CallbackQueryHandler(end_describing, pattern=END_CMD),
-            CommandHandler("stop", stop_nested),
+            CommandHandler("stop", stop),
             CallbackQueryHandler(ask_for_input_address, pattern=CITY_INPUT),
             CallbackQueryHandler(report_about_social_problem, pattern=BACK),
         ],
-        map_to_parent={
-            STOPPING: END,
-        },
         persistent=True,
         name="add_social_conv",
         allow_reentry=True,
