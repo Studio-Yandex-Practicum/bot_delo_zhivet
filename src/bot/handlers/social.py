@@ -79,14 +79,14 @@ async def address_confirmation(update: Update, context: ContextTypes.DEFAULT_TYP
             'Если адрес не правильный, то выберите "Нет" и укажите более подробный вариант адреса, '
             "а мы постараемся определить его правильно!"
         )
-        context.user_data[FEATURES] = address
+        context.user_data[FEATURES] |= address
 
-        data = CITY_SOCIAL + user_input
         buttons = [
             [
-                InlineKeyboardButton(text="Да", callback_data=data),
+                InlineKeyboardButton(text="Да", callback_data=CITY_SOCIAL),
                 InlineKeyboardButton(text="Нет", callback_data=CITY_INPUT),
-            ]
+            ],
+            [InlineKeyboardButton(text="Назад", callback_data=BACK)],
         ]
 
         keyboard = InlineKeyboardMarkup(buttons)
@@ -95,8 +95,6 @@ async def address_confirmation(update: Update, context: ContextTypes.DEFAULT_TYP
 
     else:
         chat_text = "Не нашли такой адрес. Пожалуйста, укажи адрес подробнее:"
-        context.user_data[FEATURES] = address
-
         buttons = [
             [
                 InlineKeyboardButton(text="Указать адрес заново", callback_data=CITY_INPUT),
