@@ -10,13 +10,13 @@ from core.config import settings
 logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-if settings.SENTRY_DSN_URL:
+if settings.SENTRY_DSN_BOT:
     sentry_logging = LoggingIntegration(
         level=logging.INFO,
         event_level=logging.ERROR,
     )
     sentry_sdk.init(
-        dsn=settings.SENTRY_DSN_URL,
+        dsn=settings.SENTRY_DSN_BOT,
         integrations=[
             sentry_logging,
         ],

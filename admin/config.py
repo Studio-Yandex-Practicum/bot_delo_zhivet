@@ -17,7 +17,7 @@ class Config(object):
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     FLASK_ENV = "development"
 
-    SENTRY_DSN_URL = os.getenv("SENTRY_DSN_URL", default=None)
+    SENTRY_DSN_ADMIN = os.getenv("SENTRY_DSN_ADMIN", default=None)
 
     # Дополнительные параметры, не участвующие в ините приложения
     BOOTSTRAP_VERSION = "bootstrap4"

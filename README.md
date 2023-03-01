@@ -133,11 +133,16 @@ ___
 ### Подключение системы мониторинга Sentry
 1. Зарегистрируйтесь на платформе:
 https://sentry.io/signup/
-2. Создайте новый проект, выбрав при этом платформу FLASK.
-https://<your-organization-name>-ac.sentry.io/projects/new/
-3. В настройках проекта перейдите в раздел "Client Keys", скопируйте ключ DSN (Data Source Name).
-https://<your-organization-name>-ac.sentry.io/settings/projects/<your-project-name>/keys/
-4. Присвойте переменной SENTRY_DSN_URL в файле .env полученное значение.
+2. Подключите Sentry к админке, для этого:
+    - Создайте новый проект, выбрав при этом платформу FLASK.
+      https://<your-organization>-ac.sentry.io/projects/new/
+    - В настройках проекта перейдите в раздел "Client Keys", скопируйте ключ DSN (Data Source Name).
+      https://<your-organization>-ac.sentry.io/settings/projects/<your-project>/keys/
+    - Присвойте переменной SENTRY_DSN_ADMIN в файле .env полученное значение.
+3. Подключите Sentry к боту, выполнив для этого аналогичные шаги:
+    - Создайте еще один проект, выбрав при этом платформу PYTHON.
+    - В настройках проекта перейдите в раздел "Client Keys", скопируйте ключ DSN.
+    - Присвойте переменной SENTRY_DSN_BOT в файле .env полученное значение.
 ___
 ## Запуск бота
 Переименуйте файл .env.example в .env и заполните его.

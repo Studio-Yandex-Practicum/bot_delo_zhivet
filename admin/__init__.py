@@ -40,9 +40,9 @@ def create_app():
     return app
 
 
-if Config.SENTRY_DSN_URL:
+if Config.SENTRY_DSN_ADMIN:
     sentry_sdk.init(
-        dsn=Config.SENTRY_DSN_URL,
+        dsn=Config.SENTRY_DSN_ADMIN,
         integrations=[
             FlaskIntegration(),
         ],
