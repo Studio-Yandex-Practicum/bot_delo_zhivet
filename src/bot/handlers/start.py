@@ -5,18 +5,11 @@ from bot.handlers.state_constants import (
     ADDING_ECO_TASK,
     ADDING_SOCIAL_TASK,
     ADDING_VOLUNTEER,
+    GREETING_MESSAGE,
     SELECTING_ACTION,
     START_OVER,
     TOP_LEVEL_MENU_TEXT,
 )
-
-GREETING_MESSAGE = (
-    "Я бот экологического проекта «Дело живёт»."
-    " Я могу принять заявку на помощь, или зарегистрировать тебя волонтёром."
-    " Выбери, что хочешь сделать:"
-)
-
-BYE_MESSAGE = "До свидания, {username}. Возвращайся в любой момент." 'Фонд "Дело живёт" ждёт тебя.'
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
