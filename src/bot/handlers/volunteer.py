@@ -274,30 +274,50 @@ async def save_and_exit_volunteer(update: Update, context: ContextTypes.DEFAULT_
         return END
     old_volunteer = await check_volunteer_in_db(user_data[TELEGRAM_ID], session)
     old_ticket_id = None
+    new_volunteer_duplicate_old = False
+    # print('old_volunteer')
+    # print(old_volunteer.full_address)
+    # print(old_volunteer.has_car)
+    # print(old_volunteer.radius)
+    # print(old_volunteer.phone)
+    # print('user_data')
+    # print(user_data['full_address'])
+    # print(user_data[SPECIFY_CAR_AVAILABILITY])
+    # print(int(radius) * 1000)
+    # print(phone)
     if old_volunteer:
-        old_ticket_id = old_volunteer.ticketID
+        # old_ticket_id = old_volunteer.ticketID
+        if (
+            old_volunteer.full_address == user_data["full_address"]
+            and old_volunteer.has_car == user_data[SPECIFY_CAR_AVAILABILITY]
+            and old_volunteer.radius == int(radius) * 1000
+            and old_volunteer.phone == phone
+        ):
+            new_volunteer_duplicate_old = True
         await update_volunteer(old_volunteer, user_data, session)
-    else:
-        await create_volunteer(user_data, session)
-    user_name = user_data[TELEGRAM_USERNAME]
-    if user_name is None:
-        user_name = "Никнейм скрыт"
-    summary = f"{user_name} - {user_data['full_address']}"
-    description = f"""
-    Ник в телеграмме: {user_name}
-    Адрес: {user_data['full_address']}
-    Наличие машины: {car}
-    Радиус выезда: {radius}
-    Номер телефона: {phone}
-    """
-    if old_ticket_id:
-        description += f"Старый тикет: {old_ticket_id}"
-    tracker = client.issues.create(
-        queue=VOLUNTEER,
-        summary=summary,
-        description=description,
-    )
-    await save_tracker_id(crud_volunteer, tracker.key, user_data[TELEGRAM_ID], session)
+    await create_volunteer(user_data, session)
+    if new_volunteer_duplicate_old == False:
+        user_name = user_data[TELEGRAM_USERNAME]
+        if user_name is None:
+            user_name = "Никнейм скрыт"
+        summary = f"{user_name} - {user_data['full_address']}"
+        description = f"""
+        Ник в телеграмме: {user_name}
+        Адрес: {user_data['full_address']}
+        Наличие машины: {car}
+        Радиус выезда: {radius}
+        Номер телефона: {phone}
+        """
+        # if old_ticket_id:
+        #     description += f"Старый тикет: {old_ticket_id}"
+        tracker = client.issues.create(
+            queue=VOLUNTEER,
+            summary=summary,
+            description=description,
+        )
+        await save_tracker_id(crud_volunteer, tracker.key, user_data[TELEGRAM_ID], session)
+        await start(update, context)
+        return END
     await start(update, context)
     return END
 
