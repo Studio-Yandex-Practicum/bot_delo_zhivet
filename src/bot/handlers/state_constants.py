@@ -25,6 +25,10 @@ SOCIAL_PROBLEM_TYPING = "social_problem_typing"
 SOCIAL_PROBLEM_ADDRESS = "social_problem_address"
 SELECTING_OVER = "selecting_city"
 
+# Состояния диалога Получение Телефонного номера
+SPECIFY_PHONE_PERMISSION = "phone"
+
+
 # Meta состояния
 STOPPING = "stopping"
 SHOWING = "showing"

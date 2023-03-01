@@ -13,7 +13,6 @@ from src.bot.handlers.state_constants import (
     CITY_COMMAND,
     CITY_INPUT,
     CURRENT_FEATURE,
-    CURRENT_LEVEL,
     END,
     FEATURES,
     FIRST_NAME,
@@ -28,6 +27,7 @@ from src.bot.handlers.state_constants import (
     SPECIFY_ACTIVITY_RADIUS,
     SPECIFY_CAR_AVAILABILITY,
     SPECIFY_CITY,
+    SPECIFY_PHONE_PERMISSION,
     START_OVER,
     TELEGRAM_ID,
     TELEGRAM_USERNAME,
@@ -48,10 +48,9 @@ async def add_volunteer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> s
         "Для регистрации волонтером вам надо указать:\n"
         "- Свой адрес, можно без квартиры, для удобства расчетов расстояния;\n"
         "- Расстояние, на которое ты готов выезжать;\n"
-        "- Наличие автомобиля, и готовность задействовать его."
+        "- Наличие автомобиля, и готовность задействовать его;\n"
+        "- [Опционально] Номер телефона для связи."
     )
-    level = update.callback_query.data
-    context.user_data[CURRENT_LEVEL] = level
 
     buttons = [
         [
@@ -62,6 +61,9 @@ async def add_volunteer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> s
         ],
         [
             InlineKeyboardButton(text="Указать наличие автомобиля", callback_data=SPECIFY_CAR_AVAILABILITY),
+        ],
+        [
+            InlineKeyboardButton(text="Указать номер телефона", callback_data=SPECIFY_PHONE_PERMISSION),
         ],
         [
             InlineKeyboardButton(text="Назад", callback_data=str(END)),
@@ -95,6 +97,28 @@ async def end_second_level(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     await start(update, context)
 
     return END
+
+
+async def ask_user_phone_number(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
+    """Предложить пользователю ввести свой номер телефона."""
+    context.user_data[CURRENT_FEATURE] = update.callback_query.data
+    text = "Укажите свой номер телефона:"
+    button = [[InlineKeyboardButton(text="Назад", callback_data=BACK)]]
+    keyboard = InlineKeyboardMarkup(button)
+
+    await update.callback_query.answer()
+    await update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
+
+    return SELECTING_OVER
+
+
+async def save_phone(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
+    """Сохранение комментария"""
+    user_data = context.user_data
+    user_data[FEATURES][user_data[CURRENT_FEATURE]] = update.message.text
+    user_data[START_OVER] = True
+
+    return await add_volunteer(update, context)
 
 
 async def ask_for_input_city(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
@@ -205,6 +229,7 @@ async def save_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     city = update.callback_query.data
 
     user_data = context.user_data
+
     user_data[FEATURES][user_data[CURRENT_FEATURE]] = city
 
     user_data[START_OVER] = True
@@ -218,9 +243,14 @@ async def save_and_exit_volunteer(update: Update, context: ContextTypes.DEFAULT_
     user_data = context.user_data[FEATURES]
     radius = user_data[SPECIFY_ACTIVITY_RADIUS][7:]
     car = user_data[SPECIFY_CAR_AVAILABILITY][4:]
+    if SPECIFY_PHONE_PERMISSION in user_data:
+        phone = user_data[SPECIFY_PHONE_PERMISSION]
+    else:
+        phone = "Не указан"
     user_data[GEOM] = f"POINT({user_data[LATITUDE]} {user_data[LONGITUDE]})"
     user_data[SPECIFY_ACTIVITY_RADIUS] = int(radius) * 1000
     user_data[SPECIFY_CAR_AVAILABILITY] = car
+    user_data[SPECIFY_PHONE_PERMISSION] = phone
     user_data[TELEGRAM_ID] = update.effective_user.id
     user_data[TELEGRAM_USERNAME] = update.effective_user.username
     user_data[FIRST_NAME] = update.effective_user.first_name
@@ -249,12 +279,16 @@ async def save_and_exit_volunteer(update: Update, context: ContextTypes.DEFAULT_
         await update_volunteer(old_volunteer, user_data, session)
     else:
         await create_volunteer(user_data, session)
-    summary = f"{user_data[TELEGRAM_USERNAME]} - {user_data['full_address']}"
+    user_name = user_data[TELEGRAM_USERNAME]
+    if user_name is None:
+        user_name = "Никнейм скрыт"
+    summary = f"{user_name} - {user_data['full_address']}"
     description = f"""
-    Ник в телеграмме: {user_data[TELEGRAM_USERNAME]}
+    Ник в телеграмме: {user_name}
     Адрес: {user_data['full_address']}
     Наличие машины: {car}
     Радиус выезда: {radius}
+    Номер телефона: {phone}
     """
     if old_ticket_id:
         description += f"Старый тикет: {old_ticket_id}"

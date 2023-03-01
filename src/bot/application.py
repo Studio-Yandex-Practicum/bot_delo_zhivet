@@ -30,6 +30,7 @@ from bot.const import (
     SPECIFY_ACTIVITY_RADIUS_CMD,
     SPECIFY_CAR_AVAILABILITY_CMD,
     SPECIFY_CITY_CMD,
+    SPECIFY_PHONE_PERMISSION_CMD,
 )
 from core.config import settings
 
@@ -82,11 +83,13 @@ from .handlers.state_constants import (
 from .handlers.volunteer import (
     add_volunteer,
     ask_for_input_city,
+    ask_user_phone_number,
     handle_car_input,
     handle_city_input,
     handle_radius_input,
     save_and_exit_volunteer,
     save_input,
+    save_phone,
 )
 
 
@@ -99,6 +102,7 @@ def create_bot() -> Application:
         entry_points=[CallbackQueryHandler(add_volunteer, pattern=BECOME_VOLUNTEER_CMD)],
         states={
             ADDING_VOLUNTEER: [
+                CallbackQueryHandler(ask_user_phone_number, pattern=SPECIFY_PHONE_PERMISSION_CMD),
                 CallbackQueryHandler(ask_for_input_city, pattern=SPECIFY_CITY_CMD),
                 CallbackQueryHandler(handle_radius_input, pattern=SPECIFY_ACTIVITY_RADIUS_CMD),
                 CallbackQueryHandler(handle_car_input, pattern=SPECIFY_CAR_AVAILABILITY_CMD),
@@ -106,6 +110,7 @@ def create_bot() -> Application:
             ],
             TYPING_CITY: [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_city_input)],
             SELECTING_OVER: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, save_phone),
                 CallbackQueryHandler(save_input, pattern="^" + CITY_COMMAND),
                 CallbackQueryHandler(save_input, pattern="^" + RADIUS_COMMAND),
                 CallbackQueryHandler(save_input, pattern="^" + CAR_COMMAND),
@@ -116,6 +121,7 @@ def create_bot() -> Application:
             CommandHandler("stop", stop_nested),
             CallbackQueryHandler(ask_for_input_city, pattern=CITY_INPUT),
             CallbackQueryHandler(add_volunteer, pattern=BACK),
+            CallbackQueryHandler(save_phone, pattern=BACK),
         ],
         map_to_parent={
             STOPPING: END,
