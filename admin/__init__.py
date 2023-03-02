@@ -59,11 +59,6 @@ def index():
     return redirect(url_for("admin.index"))
 
 
-@app.route("/admin/static/<path:p>")
-def static_redirect(p):
-    return redirect("/static/" + p)
-
-
 from . import views  # noqa
 
 

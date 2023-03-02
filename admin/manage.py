@@ -10,6 +10,7 @@ from messages import (
     APP_TEMPLATE_FOLDER_COPY_SUCCESS,
     APP_TEMPLATE_FOLDER_NOT_FOUND,
     COLLECT_STATIC_CLEAR_DIR_INFO,
+    COLLECT_STATIC_DIR_ALREADY_EXIST,
     COLLECT_STATIC_ERROR,
     COLLECT_STATIC_INFO,
     COLLECT_TEMPLATES_ERROR,
@@ -54,10 +55,23 @@ logger = get_logger(__file__, display=True)
 logger.info(START_LOGGING)
 
 
+def flush_folder(folder):
+    """Рекурсивное удаление файлов и папок без удаления корневой папки"""
+    logger.debug("start recurse deleting")
+    for items in os.listdir(folder):
+        logger.debug(os.path.join(folder, items))
+        if os.path.isdir(os.path.join(folder, items)):
+            flush_folder(os.path.join(folder, items))
+            os.rmdir(os.path.join(folder, items))
+        else:
+            os.remove(os.path.join(folder, items))
+            logger.debug(f"Item removed: {folder}")
+
+
 def recursive_copy_not_existing_items(src, dst):
 
     """Рекурсивное копирование несуществующих файлов и папок"""
-    logger.debug("start recurse")
+    logger.debug("start recurse copying")
     for item in os.listdir(src):
         if os.path.isdir(os.path.join(src, item)):
             dst_subdir = os.path.join(dst, item)
@@ -70,6 +84,7 @@ def recursive_copy_not_existing_items(src, dst):
             dst_file = os.path.join(dst, item)
             if not os.path.exists(dst_file):
                 shutil.copy(src_file, dst_file)
+                logger.debug(f"Copied from {src_file} to {dst_file}")
 
 
 class Manage(object):
@@ -141,10 +156,16 @@ class Manage(object):
             if os.path.exists(dst) and overwrite:
                 print(COLLECT_STATIC_CLEAR_DIR_INFO.format(dst=dst))
                 logger.info(COLLECT_STATIC_CLEAR_DIR_INFO.format(dst=dst))
-                shutil.rmtree(dst)
+                flush_folder(dst)
+            elif not os.path.exists(dst):
+                os.mkdir(dst)
+            else:
+                print(COLLECT_STATIC_DIR_ALREADY_EXIST.format(dst=dst, overwrite=overwrite))
+                logger.info(COLLECT_STATIC_DIR_ALREADY_EXIST.format(dst=dst, overwrite=overwrite))
+                return True
             print(COLLECT_STATIC_INFO.format(dst=dst))
             logger.info(COLLECT_STATIC_INFO.format(dst=dst))
-            shutil.copytree(src, dst)
+            recursive_copy_not_existing_items(src, dst)
             return True
         except Exception as error:
             print(COLLECT_STATIC_ERROR.format(details=str(error)))

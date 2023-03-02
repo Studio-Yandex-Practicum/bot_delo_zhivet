@@ -16,6 +16,9 @@ MISSING_REQUIRED_TABLES_ERROR = (
 APP_TEMPLATE_FOLDER_COPY_SUCCESS = "Копирование существующих шаблонов успешно завершено"
 APP_TEMPLATE_FOLDER_NOT_FOUND = "Не найдена папка с шаблонами приложения. Будут скопированы только шаблоны Flask-Admin"
 COLLECT_STATIC_CLEAR_DIR_INFO = "Очищаем папку '{dst}'"
+COLLECT_STATIC_DIR_ALREADY_EXIST = (
+    "Папка {dst} уже существует. Значение параметра --overwrite {overwrite}. Не будет произведено никаких действий"
+)
 COLLECT_STATIC_ERROR = "В ходе сбора статики возникла ошибка. Подробности:\n{details}"
 COLLECT_STATIC_INFO = "Собираем статику Flask-Admin в папку '{dst}'"
 COLLECT_TEMPLATES_ERROR = "Копирование шаблонов Flask-Admin завершено с ошибкой. Подробности:\n{details}"
