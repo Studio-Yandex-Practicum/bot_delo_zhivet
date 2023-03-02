@@ -1,5 +1,6 @@
 from dotenv import load_dotenv
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram.constants import ParseMode
 from telegram.ext import ContextTypes
 
 from api.tracker import client
@@ -16,6 +17,7 @@ from bot.handlers.state_constants import (
     LATITUDE,
     LONGITUDE,
     SAVE,
+    SECOND_LEVEL_TEXT,
     SELECTING_FEATURE,
     SOCIAL,
     SOCIAL_ADDRESS,
@@ -29,8 +31,9 @@ from bot.handlers.state_constants import (
 )
 from bot.service.dadata import get_fields_from_dadata
 from src.bot.service.assistance_disabled import create_new_social
-from src.bot.service.save_new_user import create_new_user
-from src.bot.service.save_tracker_id import save_tracker_id_assistance_disabled
+from src.bot.service.save_new_user import check_user_in_db, create_new_user
+from src.bot.service.save_tracker_id import save_tracker_id
+from src.bot.service.volunteer import volunteers_description
 from src.core.db.db import get_async_session
 from src.core.db.repository.assistance_disabled_repository import crud_assistance_disabled
 from src.core.db.repository.volunteer_repository import crud_volunteer
@@ -76,14 +79,14 @@ async def address_confirmation(update: Update, context: ContextTypes.DEFAULT_TYP
             'Если адрес не правильный, то выберите "Нет" и укажите более подробный вариант адреса, '
             "а мы постараемся определить его правильно!"
         )
-        context.user_data[FEATURES] = address
+        context.user_data[FEATURES] |= address
 
-        data = CITY_SOCIAL + user_input
         buttons = [
             [
-                InlineKeyboardButton(text="Да", callback_data=data),
+                InlineKeyboardButton(text="Да", callback_data=CITY_SOCIAL),
                 InlineKeyboardButton(text="Нет", callback_data=CITY_INPUT),
-            ]
+            ],
+            [InlineKeyboardButton(text="Назад", callback_data=BACK)],
         ]
 
         keyboard = InlineKeyboardMarkup(buttons)
@@ -92,8 +95,6 @@ async def address_confirmation(update: Update, context: ContextTypes.DEFAULT_TYP
 
     else:
         chat_text = "Не нашли такой адрес. Пожалуйста, укажи адрес подробнее:"
-        context.user_data[FEATURES] = address
-
         buttons = [
             [
                 InlineKeyboardButton(text="Указать адрес заново", callback_data=CITY_INPUT),
@@ -146,21 +147,22 @@ async def report_about_social_problem(update: Update, context: ContextTypes.DEFA
     if not context.user_data.get(START_OVER):
         context.user_data[FEATURES] = {}
         text = (
-            "Пожалуйста, укажите адрес, по которому нужна помощь и оставьте контакты и комментарий – это "
+            "Пожалуйста, укажите адрес, по которому нужна помощь, и оставьте контакты и комментарий – это "
             "обязательно нужно для того, чтобы мы взяли заявку в работу:"
         )
         await update.callback_query.answer()
         await update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
     else:
         if check_data(context.user_data[FEATURES]) is True:
-            buttons.append([InlineKeyboardButton(text="Отправить заявку на помощь", callback_data=SAVE)])
+            buttons.append([InlineKeyboardButton(text="Отправить заявку", callback_data=SAVE)])
             keyboard = InlineKeyboardMarkup(buttons)
 
-        text = "Готово! Пожалуйста, выберите функцию для добавления."
         if update.message is not None:
-            await update.message.reply_text(text=text, reply_markup=keyboard)
+            await update.message.reply_text(text=SECOND_LEVEL_TEXT, reply_markup=keyboard, parse_mode=ParseMode.HTML)
         else:
-            await update.callback_query.edit_message_text(text, reply_markup=keyboard)
+            await update.callback_query.edit_message_text(
+                text=SECOND_LEVEL_TEXT, reply_markup=keyboard, parse_mode=ParseMode.HTML
+            )
 
     context.user_data[START_OVER] = False
     return SELECTING_FEATURE
@@ -170,51 +172,37 @@ async def save_and_exit_from_social_problem(update: Update, context: ContextType
     """Сохранение данных в базу и отправка в трекер"""
     context.user_data[START_OVER] = True
     user_data = context.user_data[FEATURES]
-    user_data[GEOM] = f"POINT({user_data[LATITUDE]} {user_data[LONGITUDE]})"
+    user_data[GEOM] = f"POINT({user_data[LONGITUDE]} {user_data[LATITUDE]})"
     user_data[TELEGRAM_ID] = update.effective_user.id
     if SOCIAL_ADDRESS in user_data:
         del user_data[SOCIAL_ADDRESS]
+    if CITY_INPUT in user_data:
+        del user_data[CITY_INPUT]
     user = {}
     user[TELEGRAM_ID] = user_data[TELEGRAM_ID]
     user[TELEGRAM_USERNAME] = update.effective_user.username
     session_generator = get_async_session()
     session = await session_generator.asend(None)
-    await create_new_user(user, session)
+    old_user = await check_user_in_db(user_data[TELEGRAM_ID], session)
+    if not old_user:
+        await create_new_user(user, session)
+    if old_user and old_user.is_banned:
+        await start(update, context)
+        return END
     await create_new_social(user_data, session)
-    volunteers = await crud_volunteer.get_volunteers_by_point(user_data[LATITUDE], user_data[LONGITUDE], session)
+    volunteers = await crud_volunteer.get_volunteers_by_point(user_data[LONGITUDE], user_data[LATITUDE], session)
     city = await crud_assistance_disabled.get_full_address_by_telegram_id(user_data[TELEGRAM_ID], session)
     description = f"""
     Ник в телеграмме оставившего заявку: {user[TELEGRAM_USERNAME]}
     Комментарий к заявке: {user_data[SOCIAL_COMMENT]}
     """
-    description_add_hascar = ""
-    description_add_nocar = ""
-    volunteer_counter = 0
-    for volunteer in volunteers:
-        volunteer_counter += 1
-        volunteer_description = (
-            f"https://t.me/{volunteer.telegram_username}, {volunteer.city}\n{volunteer.ticketID}\n\n"
-        )
-        if volunteer.has_car:
-            description_add_hascar += volunteer_description
-        else:
-            description_add_nocar += volunteer_description
-
-    if not volunteer_counter:
-        description += "\n---- \n\nВолонтёров поблизости не нашлось"
-    else:
-        description += "\n---- \n\nВолонтёры поблизости\n\n"
-        if description_add_hascar:
-            description += "* с авто:\n\n" + description_add_hascar
-        if description_add_nocar:
-            description += "* без авто:\n\n" + description_add_nocar
-
-    client.issues.create(
+    description += volunteers_description(volunteers)
+    tracker = client.issues.create(
         queue=SOCIAL,
         summary=city,
         description=description,
     )
-    await save_tracker_id_assistance_disabled(city, user_data[TELEGRAM_ID], session)
+    await save_tracker_id(crud_assistance_disabled, tracker.key, user_data[TELEGRAM_ID], session)
     await start(update, context)
     return END
 

@@ -1,4 +1,7 @@
+from dotenv import load_dotenv
 from pydantic import BaseSettings
+
+load_dotenv()
 
 
 class Settings(BaseSettings):
@@ -8,6 +11,17 @@ class Settings(BaseSettings):
     DB_HOST: str
     DB_PORT: str
     POSTGRES_DB: str
+    TELEGRAM_BOT_TOKEN: str = None
+    WEBHOOK_DOMAIN: str = None
+    WEBHOOK_PORT: int = None
+    WEBHOOK_PATH: str = None
+    HOST: str = None
+    AWS_ACCESS_KEY_ID: str
+    AWS_SECRET_ACCESS_KEY: str
+    AWS_SERVICE_NAME: str
+    AWS_ENDPOINT_URL: str
+    AWS_BUCKET_NAME: str
+    SENTRY_DSN_BOT: str = None
 
     class Config:
         env_file = ".env"

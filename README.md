@@ -10,8 +10,9 @@ ___
 2. [Установка pre-commit hook](#Установка-pre-commit-hook)
     1. [Установка pre-commit](#Установка-pre-commit)
     2. [Установка hook](#Установка-hook)
+3. [Подключение системы мониторинга Sentry](#Подключение-системы-мониторинга-Sentry)
 4. [Запуск базы и применение миграций на локальной машине](#Запуск-базы-и-применение-миграций-на-локальной-машине)
-4. [Запуск бота](#Запуск-бота)
+5. [Запуск бота](#Запуск-бота)
 ___
 ## Установка poetry и запуск виртауального окружения
 Для Linux, macOS, Windows (WSL):
@@ -32,6 +33,8 @@ Windows
 ```bash
 $Env:Path += ";C:\Users\jetbrains\AppData\Roaming\Python\Scripts"; setx PATH "$Env:Path"
 ```
+Не забудьте поменять jetbrains на имя вашего пользователя. Настройка окружения poetry для pycharm [тут](https://www.jetbrains.com/help/pycharm/poetry.html)
+
 Для проверки установки выполните следующую команду:
 ```bash
 poetry --version
@@ -44,9 +47,9 @@ poetry completions bash >> ~/.bash_completion
 ```bash
 poetry env use python3.10
 ```
-Установка зависимостей
+Установка зависимостей (для разработки)
 ```bash
-poetry install
+poetry install --with dev
 ```
 Запуск оболочки и активация виртуального окружения
 ```bash
@@ -126,9 +129,26 @@ pre-commit install --all
 ```bash
 pre-commit run --all-files
 ```
-
+___
+### Подключение системы мониторинга Sentry
+1. Зарегистрируйтесь на платформе:
+https://sentry.io/signup/
+2. Подключите Sentry к админке, для этого:
+    - Создайте новый проект, выбрав при этом платформу FLASK.
+      https://<your-organization>-ac.sentry.io/projects/new/
+    - В настройках проекта перейдите в раздел "Client Keys", скопируйте ключ DSN (Data Source Name).
+      https://<your-organization>-ac.sentry.io/settings/projects/<your-project>/keys/
+    - Присвойте переменной SENTRY_DSN_ADMIN в файле .env полученное значение.
+3. Подключите Sentry к боту, выполнив для этого аналогичные шаги:
+    - Создайте еще один проект, выбрав при этом платформу PYTHON.
+    - В настройках проекта перейдите в раздел "Client Keys", скопируйте ключ DSN.
+    - Присвойте переменной SENTRY_DSN_BOT в файле .env полученное значение.
 ___
 ## Запуск бота
+Переименуйте файл .env.example в .env и заполните его.
+Запуск может быть в режимах polling и webhook. Для режима webhook в файле .env должны быть указаны параметры WEBHOOK_DOMAIN и WEBHOOK_PORT. Подробнее об этом написано [в официальном гайде telegram](https://core.telegram.org/bots/webhooks)
+
+### Запуск бота осуществляется командой
 Для Linux, macOS, Windows (WSL):
 ```bash
 your@device:~/your_project_pwd/bot_delo_zhivet/$ poetry run runbot
