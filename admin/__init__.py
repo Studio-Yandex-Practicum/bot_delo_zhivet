@@ -1,7 +1,9 @@
 import os
 import sys
 
+import sentry_sdk
 from flask import Flask, current_app, redirect, render_template, url_for
+from sentry_sdk.integrations.flask import FlaskIntegration
 
 from .config import Config
 from .database import create_roles_and_superuser, db, get_not_existing_required_tables
@@ -37,6 +39,16 @@ def create_app():
         print(current_app.name)
     return app
 
+
+if Config.SENTRY_DSN_ADMIN:
+    sentry_sdk.init(
+        dsn=Config.SENTRY_DSN_ADMIN,
+        integrations=[
+            FlaskIntegration(),
+        ],
+        traces_sample_rate=1.0,
+        environment="admin",
+    )
 
 app = create_app()
 create_roles_and_superuser()

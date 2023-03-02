@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     AWS_SERVICE_NAME: str
     AWS_ENDPOINT_URL: str
     AWS_BUCKET_NAME: str
+    SENTRY_DSN_BOT: str = None
 
     class Config:
         env_file = ".env"
