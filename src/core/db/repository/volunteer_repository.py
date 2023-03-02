@@ -16,8 +16,8 @@ class VolunteerCRUD(CRUDBase):
 
     async def get_volunteers_by_point(
         self,
-        latitude: float,
         longitude: float,
+        latitude: float,
         session: AsyncSession,
     ):
         stmt = (
@@ -27,7 +27,7 @@ class VolunteerCRUD(CRUDBase):
                     Volunteer.is_banned.is_(False),
                     func.ST_DWithin(
                         Volunteer.geometry,
-                        func.ST_GeomFromText(f"SRID=4326;POINT({latitude} {longitude})"),
+                        func.ST_GeomFromText(f"SRID=4326;POINT({longitude} {latitude})"),
                         Volunteer.radius,
                         use_spheroid=False,
                     ),

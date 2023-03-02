@@ -95,7 +95,12 @@ async def input(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif POLLUTION_COMMENT == update.callback_query.data:
         text = "Напишите, если что-то важно знать об обнаруженной проблеме:"
     elif POLLUTION_COORDINATES == update.callback_query.data:
-        text = "Отправьте геопозицию"
+        text = (
+            "Отправьте геопозицию, для этого:\n"
+            "1. Нажмите на значок в виде «скрепки», находится справа от поля ввода;\n"
+            "2. В открывшемся меню выберите «Геопозиция»;\n"
+            "3. Выберете место на карте и нажмите «Отправить геопозицию»."
+        )
     button = [[InlineKeyboardButton(text="Назад", callback_data=BACK)]]
     keyboard = InlineKeyboardMarkup(button)
 
@@ -142,7 +147,7 @@ async def save_and_exit_pollution(update: Update, context: ContextTypes.DEFAULT_
     context.user_data[START_OVER] = True
     user_data = context.user_data[FEATURES]
     user_data[TELEGRAM_ID] = update.effective_user.id
-    user_data[GEOM] = f"POINT({user_data[LATITUDE]} {user_data[LONGITUDE]})"
+    user_data[GEOM] = f"POINT({user_data[LONGITUDE]} {user_data[LATITUDE]})"
     file_path = user_data[POLLUTION_FOTO]
     latitude = user_data[LATITUDE]
     longitude = user_data[LONGITUDE]
@@ -163,7 +168,7 @@ async def save_and_exit_pollution(update: Update, context: ContextTypes.DEFAULT_
         await start(update, context)
         return END
     await create_new_pollution(user_data, session)
-    volunteers = await crud_volunteer.get_volunteers_by_point(latitude, longitude, session)
+    volunteers = await crud_volunteer.get_volunteers_by_point(longitude, latitude, session)
     summary = f"{user[TELEGRAM_USERNAME]} - {latitude}, {longitude}"
     description = f"""
     Ник в телеграмме оставившего заявку: {user[TELEGRAM_USERNAME]}
