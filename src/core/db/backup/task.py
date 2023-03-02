@@ -1,8 +1,11 @@
-# For example, to use the script create a crontab task (crontab -e) scheduled at 3 a.m every day:
-# 0 3 * * * python3 /home/user/bot_delo_zhivet/src/core/db/backup/task.py
-# or to check it you can create task like
-# * * * * * python3 /home/user/bot_delo_zhivet/src/core/db/backup/task.py
-# This line creates dump_fiele everyminute
+'''
+For example, to use the script create a crontab task ($ crontab -e) scheduled at 3 a.m every day:
+0 3 * * * python3 /home/user/bot_delo_zhivet/src/core/db/backup/task.py
+or to check it you can create a task like
+* * * * * python3 /home/user/bot_delo_zhivet/src/core/db/backup/task.py
+The line above creates a dump_file every minute.
+'''
+
 import os
 import subprocess
 from datetime import date
@@ -20,7 +23,7 @@ def backup():
     # db_backup file is created in the user's home directory
     dump_file = os.path.join(os.getcwd(), f'db_backup_{date.today()}.sql')
 
-    # set db name as 'db' or change to another
+    # set db_container name as 'db' or change to another
     dump_command = (
         'docker exec -i db '
         f'usr/local/bin/pg_dump -U {POSTGRES_USER} '
