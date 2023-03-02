@@ -273,10 +273,17 @@ async def save_and_exit_volunteer(update: Update, context: ContextTypes.DEFAULT_
         await start(update, context)
         return END
     old_volunteer = await check_volunteer_in_db(user_data[TELEGRAM_ID], session)
-    old_ticket_id = None
     if old_volunteer:
-        old_ticket_id = old_volunteer.ticketID
-        await update_volunteer(old_volunteer, user_data, session)
+        if (
+            old_volunteer.full_address == user_data["full_address"]
+            and old_volunteer.has_car == user_data[SPECIFY_CAR_AVAILABILITY]
+            and old_volunteer.radius == int(radius) * 1000
+            and old_volunteer.phone == phone
+        ):
+            await start(update, context)
+            return END
+        else:
+            await update_volunteer(old_volunteer, user_data, session)
     else:
         await create_volunteer(user_data, session)
     user_name = user_data[TELEGRAM_USERNAME]
@@ -290,8 +297,6 @@ async def save_and_exit_volunteer(update: Update, context: ContextTypes.DEFAULT_
     Радиус выезда: {radius}
     Номер телефона: {phone}
     """
-    if old_ticket_id:
-        description += f"Старый тикет: {old_ticket_id}"
     tracker = client.issues.create(
         queue=VOLUNTEER,
         summary=summary,
