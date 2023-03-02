@@ -287,7 +287,7 @@ async def save_and_exit_volunteer(update: Update, context: ContextTypes.DEFAULT_
     Ник в телеграмме: {user_name}
     Адрес: {user_data['full_address']}
     Наличие машины: {car}
-    Радиус выезда: {radius} + " км"
+    Радиус выезда: {radius} км
     Номер телефона: {phone}
     """
     if old_ticket_id:
