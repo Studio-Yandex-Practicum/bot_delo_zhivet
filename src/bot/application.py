@@ -47,6 +47,7 @@ from .handlers.pollution import (
 from .handlers.social import (
     address_confirmation,
     ask_for_input_address,
+    back_to_add_social,
     input_social_data,
     report_about_social_problem,
     save_and_exit_from_social_problem,
@@ -177,7 +178,7 @@ def create_bot() -> Application:
             CallbackQueryHandler(end_describing, pattern=END_CMD),
             CommandHandler("stop", stop),
             CallbackQueryHandler(ask_for_input_address, pattern=CITY_INPUT),
-            CallbackQueryHandler(report_about_social_problem, pattern=BACK),
+            CallbackQueryHandler(back_to_add_social, pattern=BACK),
         ],
         persistent=True,
         name="add_social_conv",

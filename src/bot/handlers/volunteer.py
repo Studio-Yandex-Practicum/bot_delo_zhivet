@@ -87,16 +87,6 @@ async def add_volunteer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> s
     ]
     keyboard = InlineKeyboardMarkup(buttons)
 
-    print(
-        f"""
-
-
-         {context.user_data}
-
-
-         """
-    )
-
     if not context.user_data.get(START_OVER):
         context.user_data[FEATURES] = {}
 
