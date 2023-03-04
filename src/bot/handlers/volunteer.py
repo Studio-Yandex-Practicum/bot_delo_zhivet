@@ -276,6 +276,7 @@ async def save_and_exit_volunteer(update: Update, context: ContextTypes.DEFAULT_
     if old_volunteer:
         if (
             old_volunteer.full_address == user_data["full_address"]
+            and old_volunteer.telegram_username == user_data[TELEGRAM_USERNAME]
             and old_volunteer.has_car == user_data[SPECIFY_CAR_AVAILABILITY]
             and old_volunteer.radius == int(radius) * 1000
             and old_volunteer.phone == phone
