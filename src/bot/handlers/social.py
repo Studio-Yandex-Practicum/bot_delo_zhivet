@@ -212,11 +212,8 @@ async def save_and_exit_from_social_problem(update: Update, context: ContextType
         description=description,
     )
     await save_tracker_id(crud_assistance_disabled, tracker.key, user_data[TELEGRAM_ID], session)
-    print("!!!!**********************!!!")
-    print(context.user_data[FEATURES])
-    print(context.user_data[CURRENT_FEATURE])
     context.user_data.pop(FEATURES, None)
-    # context.user_data.pop(CURRENT_FEATURE, None)
+    context.user_data.pop(CURRENT_FEATURE, None)
     await start(update, context)
     return END
 
