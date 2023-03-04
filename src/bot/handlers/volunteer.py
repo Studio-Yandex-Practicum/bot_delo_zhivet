@@ -245,12 +245,12 @@ async def save_and_exit_volunteer(update: Update, context: ContextTypes.DEFAULT_
     car = user_data[SPECIFY_CAR_AVAILABILITY][4:]
     if SPECIFY_PHONE_PERMISSION in user_data:
         phone = user_data[SPECIFY_PHONE_PERMISSION]
+        user_data[SPECIFY_PHONE_PERMISSION] = phone
     else:
-        phone = "Не указан"
+        phone = None
     user_data[GEOM] = f"POINT({user_data[LONGITUDE]} {user_data[LATITUDE]})"
     user_data[SPECIFY_ACTIVITY_RADIUS] = int(radius) * 1000
     user_data[SPECIFY_CAR_AVAILABILITY] = car
-    user_data[SPECIFY_PHONE_PERMISSION] = phone
     user_data[TELEGRAM_ID] = update.effective_user.id
     user_data[TELEGRAM_USERNAME] = update.effective_user.username
     user_data[FIRST_NAME] = update.effective_user.first_name
@@ -296,8 +296,11 @@ async def save_and_exit_volunteer(update: Update, context: ContextTypes.DEFAULT_
     Адрес: {user_data['full_address']}
     Наличие машины: {car}
     Радиус выезда: {radius} км
-    Номер телефона: {phone}
     """
+    if phone is None:
+        description += "Номер телефона: Не указан"
+    else:
+        description += f"Номер телефона: {phone}"
     tracker = client.issues.create(
         queue=VOLUNTEER,
         summary=summary,
