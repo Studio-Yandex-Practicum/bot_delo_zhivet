@@ -2,7 +2,7 @@ from telegram import Update
 from telegram.ext import ContextTypes
 
 from bot.handlers.start import start
-from bot.handlers.state_constants import END, HELP_TEXT, SITE_INFO, START_OVER, STOP_TEXT
+from bot.handlers.state_constants import CURRENT_FEATURE, END, FEATURES, HELP_TEXT, SITE_INFO, START_OVER, STOP_TEXT
 
 
 async def stop(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -16,6 +16,8 @@ async def stop(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 async def end_describing(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Прекращение ввода и возврат в родительский диалог"""
     context.user_data[START_OVER] = True
+    context.user_data.pop(FEATURES, None)
+    context.user_data.pop(CURRENT_FEATURE, None)
     await start(update, context)
 
     return END

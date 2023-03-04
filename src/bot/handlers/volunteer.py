@@ -87,6 +87,16 @@ async def add_volunteer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> s
     ]
     keyboard = InlineKeyboardMarkup(buttons)
 
+    print(
+        f"""
+
+
+         {context.user_data}
+
+
+         """
+    )
+
     if not context.user_data.get(START_OVER):
         context.user_data[FEATURES] = {}
 
@@ -104,6 +114,13 @@ async def add_volunteer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> s
             )
 
     context.user_data[START_OVER] = False
+    print(
+        f"""
+         {context.user_data}
+
+
+         """
+    )
     return ADDING_VOLUNTEER
 
 
@@ -321,6 +338,13 @@ async def save_and_exit_volunteer(update: Update, context: ContextTypes.DEFAULT_
     await save_tracker_id(crud_volunteer, tracker.key, user_data[TELEGRAM_ID], session)
     await start(update, context)
     return END
+
+
+async def back_to_add_voluteer(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_data = context.user_data
+    user_data[START_OVER] = True
+
+    return await add_volunteer(update, context)
 
 
 def check_data(user_data):

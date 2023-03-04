@@ -37,6 +37,16 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     ]
     keyboard = InlineKeyboardMarkup(buttons)
 
+    print(
+        f"""
+
+         В ГЛАВНОМ МЕНЮ:
+         {context.user_data}
+
+
+         """
+    )
+
     # Если пользователь в первый раз обращается к боту, то покажем ему приветственное сообщение
     if not context.user_data.get(START_OVER):
         user = update.message.from_user
@@ -51,4 +61,14 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
         await update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
 
     context.user_data[START_OVER] = False
+
+    print(
+        f"""
+
+         В ГЛАВНОМ МЕНЮ:
+         {context.user_data}
+
+         """
+    )
+
     return SELECTING_ACTION
