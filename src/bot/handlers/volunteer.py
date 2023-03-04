@@ -336,6 +336,8 @@ async def save_and_exit_volunteer(update: Update, context: ContextTypes.DEFAULT_
         description=description,
     )
     await save_tracker_id(crud_volunteer, tracker.key, user_data[TELEGRAM_ID], session)
+    context.user_data.pop(FEATURES, None)
+    context.user_data.pop(CURRENT_FEATURE, None)
     await start(update, context)
     return END
 
