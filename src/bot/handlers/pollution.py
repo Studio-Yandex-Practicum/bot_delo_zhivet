@@ -34,20 +34,32 @@ from .state_constants import (
     TELEGRAM_ID,
     TELEGRAM_USERNAME,
     TYPING,
+    CHECK_MARK_ghost,
 )
 
 
 async def select_option_to_report_about_pollution(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
+    def check_feature(feature):
+        return FEATURES in context.user_data and feature in context.user_data[FEATURES]
+
     text = "Заполните данные о загрязнении"
     buttons = [
         [
-            InlineKeyboardButton(text="Загрузить фото", callback_data=POLLUTION_FOTO),
+            InlineKeyboardButton(
+                text=f"Загрузить фото {check_feature(POLLUTION_FOTO)*CHECK_MARK_ghost}", callback_data=POLLUTION_FOTO
+            ),
         ],
         [
-            InlineKeyboardButton(text="Отправить координаты", callback_data=POLLUTION_COORDINATES),
+            InlineKeyboardButton(
+                text=f"Отправить координаты {check_feature(LATITUDE)*CHECK_MARK_ghost}",
+                callback_data=POLLUTION_COORDINATES,
+            ),
         ],
         [
-            InlineKeyboardButton(text="Оставить комментарий", callback_data=POLLUTION_COMMENT),
+            InlineKeyboardButton(
+                text=f"Оставить комментарий {check_feature(POLLUTION_COMMENT)*CHECK_MARK_ghost}",
+                callback_data=POLLUTION_COMMENT,
+            ),
         ],
         [
             InlineKeyboardButton(text="Назад", callback_data=str(END)),
@@ -124,6 +136,7 @@ async def save_foto(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     user_data = context.user_data
     photo_file = await update.message.photo[-1].get_file()
     date = datetime.now().strftime("%d_%m_%Y_%H_%M_%S")
+    # file_path = f"bot_delo_zhivet/media\\{date}.jpg" # Это я добавил у меня только с таким путем дальше работает код, проверь что у тебя)
     file_path = f"media\\{date}.jpg"
     await photo_file.download_to_drive(custom_path=file_path)
     user_data[FEATURES][POLLUTION_FOTO] = str(file_path)
@@ -184,8 +197,16 @@ async def save_and_exit_pollution(update: Update, context: ContextTypes.DEFAULT_
     )
     os.remove(file_path)
     await save_tracker_id(crud_pollution, tracker.key, user_data[TELEGRAM_ID], session)
+    context.user_data.pop(FEATURES)
     await start(update, context)
     return END
+
+
+async def back_to_add_pollution(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_data = context.user_data
+    user_data[START_OVER] = True
+
+    return await select_option_to_report_about_pollution(update, context)
 
 
 def check_data(user_data):

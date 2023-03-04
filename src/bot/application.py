@@ -37,6 +37,7 @@ from core.config import settings
 from .handlers.common import end_describing, help_command, stop
 from .handlers.participation import make_donation
 from .handlers.pollution import (
+    back_to_add_pollution,
     input,
     save_and_exit_pollution,
     save_comment,
@@ -146,7 +147,7 @@ def create_bot() -> Application:
         fallbacks=[
             CallbackQueryHandler(end_describing, pattern=END_CMD),
             CommandHandler("stop", stop),
-            CallbackQueryHandler(select_option_to_report_about_pollution, pattern=BACK),
+            CallbackQueryHandler(back_to_add_pollution, pattern=BACK),
         ],
         persistent=True,
         name="add_pollution_conv",
