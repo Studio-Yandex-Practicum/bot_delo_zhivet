@@ -71,7 +71,6 @@ CITY = "city"
 VALIDATE = "validate"
 PHONE_INPUT = "phone_input"
 
-
 # Различные сообщения пользователю
 
 GREETING_MESSAGE = (

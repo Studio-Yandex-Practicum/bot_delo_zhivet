@@ -84,7 +84,6 @@ async def add_volunteer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> s
             f"""
 
 
-
         {context.user_data[FEATURES]}
 
 
@@ -116,7 +115,7 @@ async def end_second_level(update: Update, context: ContextTypes.DEFAULT_TYPE) -
 async def ask_user_phone_number(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     """Предложить пользователю ввести свой номер телефона."""
     context.user_data[CURRENT_FEATURE] = update.callback_query.data
-    text = "Укажите свой номер телефона:"
+    text = "Укажите свой телефон:"
     button = [[InlineKeyboardButton(text="Назад", callback_data=BACK)]]
     keyboard = InlineKeyboardMarkup(button)
 
@@ -128,13 +127,15 @@ async def ask_user_phone_number(update: Update, context: ContextTypes.DEFAULT_TY
 
 async def validate_phone(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     user_input = update.message.text
-    validate_phone = phone_number_validate(user_input)
-    if validate_phone is not None:
+    phone = phone_number_validate(user_input)
+    if phone is not None:
         text = (
-            f"Подтвердите свой номер телефона: {user_input}\n"
-            'Если номер не правильный выберите "Указать телефон заново"'
+            f"Подтвердите номер телефона: {user_input}? "
+            'Если номер не правильный, то выберите "Указать телефон заново" и введите его снова.'
         )
+        context.user_data[CURRENT_FEATURE] = SPECIFY_PHONE_PERMISSION
         data = SPECIFY_PHONE_PERMISSION + user_input
+
         buttons = [
             [
                 InlineKeyboardButton(text="Да", callback_data=data),
@@ -148,19 +149,20 @@ async def validate_phone(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         keyboard = InlineKeyboardMarkup(buttons)
 
         await update.message.reply_text(text=text, reply_markup=keyboard)
+
     else:
-        text = "Пожалуйста, введите корректный номер телефона"
+        chat_text = "Пожалуйста, введите корректный номер телефона."
+
         buttons = [
             [
                 InlineKeyboardButton(text="Указать телефон заново", callback_data=PHONE_INPUT),
-            ],
-            [
                 InlineKeyboardButton(text="Назад", callback_data=BACK),
-            ],
+            ]
         ]
+
         keyboard = InlineKeyboardMarkup(buttons)
 
-        await update.message.reply_text(text=text, reply_markup=keyboard)
+        await update.message.reply_text(text=chat_text, reply_markup=keyboard)
 
     return SELECTING_OVER
 
