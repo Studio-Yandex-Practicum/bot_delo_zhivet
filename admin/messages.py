@@ -27,3 +27,34 @@ COMMON_ERROR = "Возникла ошибка. Подробности: {details}
 START_LOGGING = "Запуск логгера"
 STOP_LOGGING = "Завершение работы логгера"
 UNKNOWN_COMMAND = "Неизвестная команда {command}"
+
+# Строковые константы модуля mail.py
+RESET_PASSWORD_SUBJECT = "[Дело живёт] Сброс пароля админки"
+
+# Строковые сообщения модуля views.py
+ALREADY_REGISTRED = '<p>Вы уже зарегистрированы? <a href="{url}">Нажмите здесь, чтобы войти</a></p>'
+BAD_TOKEN = "Недействительный токен"
+MAIL_SEND_SUCCESS = "Сообщение с темой '{subject}' отправлено на адрес '{recipients}'."
+MAIL_SEND_ERROR = "Ошибка отправки сообщения с темой '{subject}' на адрес '{recipients}'. Подробности: {details}"
+RESTORE_PASSWORD_SEND = "На Вашу электронную почту отправлены инструкции по сбросу пароля."
+SUGGEST_REGISTRATION = '<p>У Вас нет учетной записи? <a href="{url}">Нажмите здесь, чтобы зарегистрироваться</a></p>'
+PASSWORD_CHANGED_SUCCESS = "Пароль успешно изменен"
+
+# Строковые сообщения модуля forms.py
+ACCOUNT_LABEL = "Учетная запись"
+EMAIL_LABEL = "Электронная почта"
+PASSWORD_LABEL = "Пароль"
+REPEAT_PASSWORD = "Повторите пароль"
+WRONG_USER = "Неверный пользователь"
+WRONG_PASSWORD = "Неверный пароль"
+ACCOUNT_BUSY = "Пользователь с такой учетной записью уже существует"
+EMAIL_BUSY = "Пользователь с таким адресом электронной почты существует"
+INPUT_EMAIL = "Введите Вашу электронную почту"
+EMAIL_NOT_FOUND = "Пользователь с таким адресом электронной почты не найден"
+DISSALOWED_CHARS_IN_ACCOUNT = "Учетная запись должна содержать только латинские буквы"
+DISSALOWED_CHARS_IN_PASWORD = "Пароль не должен содержать знаки табуляции и пробелы"
+PASSWORD_CONTAINS_ACCOUNT = "Пароль не должен содержать в себе учетную запись независимо от регистра"
+PASSWORD_TOO_LONG = "Пароль не должен быть больше {max_len} символов"
+
+# Строковые сообщения модуля utils.py
+TOKEN_VALIDATION_ERROR = "Не удалось провести валидацию токена {token}. Подробности: {details}"
