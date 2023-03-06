@@ -3,7 +3,8 @@ version: '3.8'
 
 services:
   db:
-    image: postgres:14.5-alpine  #    image: postgis/postgis:14-3.3-alpine
+    image: postgis/postgis:14-3.3-alpine
+    platform: linux/amd64
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     env_file:
@@ -39,20 +40,26 @@ services:
         condition: service_started
     env_file:
       - ./.env
+    volumes:
+      - static_value:/app/admin/static/
+      - ./admin/logs/:/app/admin/logs/
 
   nginx:
     build:
-      context: ./nginx
-      dockerfile: ./Dockerfile_nginx
+      context: ./infrastructure/nginx
+      dockerfile: ./Dockerfile
     restart: unless-stopped
     ports:
       - "80:80"
       - "443:443"
+      - "8080:8080"
     volumes:
-      - ./nginx/delo.conf:/etc/nginx/servers/delo.conf:rw
-      - ./nginx/letsencrypt/:/etc/letsencrypt/:rw
+      - ./infrastructure/nginx/delo-local.conf:/etc/nginx/servers/delo.conf:rw
+      - ./infrastructure/nginx/letsencrypt/:/etc/letsencrypt/:rw
+      - static_value:/var/html/static/
     depends_on:
       - web
 
 volumes:
   postgres_data:
+  static_value:

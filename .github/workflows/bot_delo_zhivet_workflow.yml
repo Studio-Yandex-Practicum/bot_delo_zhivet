@@ -145,6 +145,10 @@ jobs:
             rm .env
             touch .env
             echo TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }} >> .env
+            echo HOST=${{ secrets.HOST }} >> .env
+            echo WEBHOOK_PATH=${{ secrets.WEBHOOK_PATH }} >> .env
+            echo WEBHOOK_DOMAIN=${{ secrets.WEBHOOK_DOMAIN }} >> .env
+            echo WEBHOOK_PORT=${{ secrets.WEBHOOK_PORT }} >> .env
             echo GEOCODER_APIKEY=${{ secrets.GEOCODER_APIKEY }} >> .env
             echo GEOCODER_BASE_URL=${{ secrets.GEOCODER_BASE_URL }} >> .env
             echo MAXIMUM_OBJECTS_FROM_GEOCODER=${{ secrets.MAXIMUM_OBJECTS_FROM_GEOCODER }} >> .env
@@ -163,15 +167,21 @@ jobs:
             echo SUPER_USER_EMAIL=${{ secrets.SUPER_USER_EMAIL }} >> .env
             echo SUPER_USER_PASSWORD=${{ secrets.SUPER_USER_PASSWORD }} >> .env
             echo ADMIN_SECRET_KEY=${{ secrets.ADMIN_SECRET_KEY }} >> .env
-            echo WEBHOOK_DOMAIN=${{ secrets.WEBHOOK_DOMAIN }} >> .env
-            echo WEBHOOK_PORT=${{ secrets.WEBHOOK_PORT }} >> .env
-            echo WEBHOOK_PATH=${{ secrets.WEBHOOK_PATH }} >> .env
             echo AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }} >> .env
             echo AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }} >> .env
             echo AWS_SERVICE_NAME=${{ secrets.AWS_SERVICE_NAME }} >> .env
             echo AWS_ENDPOINT_URL=${{ secrets.AWS_ENDPOINT_URL }} >> .env
             echo AWS_BUCKET_NAME=${{ secrets.AWS_BUCKET_NAME }} >> .env
-            echo HOST=${{ secrets.HOST }} >> .env
+            echo SENTRY_DSN_ADMIN=${{ secrets.SENTRY_DSN_ADMIN }} >> .env
+            echo SENTRY_DSN_BOT=${{ secrets.SENTRY_DSN_BOT }} >> .env
+            echo PASSWORD_RESET_TOKEN_TTL=${{ secrets.PASSWORD_RESET_TOKEN_TTL }} >> .env
+            echo PASSWORD_RESET_TOKEN_ALGORITHM=${{ secrets.PASSWORD_RESET_TOKEN_ALGORITHM }} >> .env
+            echo MAIL_SERVER=${{ secrets.MAIL_SERVER }} >> .env
+            echo MAIL_PORT=${{ secrets.MAIL_PORT }} >> .env
+            echo MAIL_USE_SSL=${{ secrets.MAIL_USE_SSL }} >> .env
+            echo MAIL_USERNAME=${{ secrets.MAIL_USERNAME }} >> .env
+            echo MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }} >> .env
+            echo MAIL_DEBUG=${{ secrets.MAIL_DEBUG }} >> .env
             chmod +x update_nginx_conf.sh
             . ./update_nginx_conf.sh
             docker-compose -f docker-compose-test.yaml up -d
