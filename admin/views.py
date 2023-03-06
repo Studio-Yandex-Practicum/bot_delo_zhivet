@@ -1,10 +1,12 @@
+from threading import Thread
+
 import flask_admin
 import flask_login as login
-from flask import redirect, request, url_for
+from flask import flash, redirect, render_template, request, url_for
 from flask_admin import AdminIndexView, expose, helpers
 from flask_admin.contrib import sqla
+from flask_mail import Mail, Message
 from flask_security import current_user
-from sqlalchemy.orm.attributes import InstrumentedAttribute
 from werkzeug.security import generate_password_hash
 
 from src.core.db.model import Assistance_disabled, Pollution, Staff, User, Volunteer
@@ -12,37 +14,27 @@ from src.core.db.model import Assistance_disabled, Pollution, Staff, User, Volun
 from . import app
 from .config import Config
 from .database import db
-from .forms import LoginForm, RegistrationForm
+from .forms import ForgotForm, LoginForm, PasswordResetForm, RegistrationForm
+from .logger import get_logger
+from .messages import (
+    ALREADY_REGISTRED,
+    BAD_TOKEN,
+    MAIL_SEND_ERROR,
+    MAIL_SEND_SUCCESS,
+    PASSWORD_CHANGED_SUCCESS,
+    RESET_PASSWORD_SUBJECT,
+    RESTORE_PASSWORD_SEND,
+    SUGGEST_REGISTRATION,
+)
+from .utils import (
+    get_readonly_dict,
+    get_reset_password_token,
+    get_table_fields_from_model,
+    get_translated_lables,
+    verify_reset_password_token,
+)
 
-# Словарь для перевода полей
-FIELD_TRANSLATION_RU = {
-    "id": "id",
-    "created_at": "Создан",
-    "updated_at": "Изменен",
-    "telegram_username": "Имя пользователя Telegram",
-    "telegram_id": "ID пользователя Telegram",
-    "is_banned": "Заблокирован",
-    "first_name": "Имя",
-    "last_name": "Фамилия",
-    "city": "Город",
-    "full_address": "Адрес",
-    "radius": "Радиус активности",
-    "has_car": "Есть машина",
-    "latitude": "Широта",
-    "longitude": "Долгота",
-    "phone": "Номер телефона",
-    "birthday": "День рождения",
-    "deleted_at": "Удален",
-    "ticketID": "ID тикета в Яндекс.Трекер",
-    "geometry": "Координаты",
-    "login": "Учетная запись",
-    "email": "Электронная почта",
-    "password": "Пароль",
-    "comment": "Коментарий",
-    "photo": "Фотография",
-    "active": "Включен",
-    "roles": "Роли",
-}
+logger = get_logger(__file__)
 
 
 def init_login():
@@ -56,37 +48,34 @@ def init_login():
 
 init_login()
 
-
-def get_readonly_dict(fields):
-    """
-    Возвращает словарь для установки полей, перечисленных
-    в параметре, в значение readonly для дальнейшей передачи
-    в свойство form_widget_args вью-класса
-    """
-    readonly_fileds = dict()
-    for field in fields:
-        readonly_fileds[field] = {"readonly": True}
-    return readonly_fileds
+mail = Mail(app)
 
 
-def get_translated_lables(fields):
-    """Функция для перевода полей на русский язык"""
-    labels = dict()
-    for field in fields:
-        labels[field] = FIELD_TRANSLATION_RU[field]
-    return labels
+def send_async_email(app, msg):
+    with app.app_context():
+        try:
+            mail.send(msg)
+            logger.info(MAIL_SEND_SUCCESS.format(subject=msg.subject, recipients=msg.recipients))
+        except Exception as e:
+            logger.error(MAIL_SEND_ERROR.format(subject=msg.subject, recipients=msg.recipients, details=str(e)))
 
 
-def get_table_fields_from_model(model):
-    """
-    Функция для извлечения списка полей, отображаемых в админке,
-    из модели
-    """
-    fields = []
-    for field, value in dict(model.__dict__).items():
-        if isinstance(value, InstrumentedAttribute):
-            fields.append(field)
-    return fields
+def send_email(subject, sender, recipients, text_body, html_body):
+    msg = Message(subject, sender=sender, recipients=recipients)
+    msg.body = text_body
+    msg.html = html_body
+    Thread(target=send_async_email, args=(app, msg)).start()
+
+
+def send_password_reset_email(user):
+    token = get_reset_password_token(user)
+    send_email(
+        RESET_PASSWORD_SUBJECT,
+        sender=Config.MAIL_USERNAME,
+        recipients=[user.email],
+        text_body=render_template("emails/reset_email.txt", user=user, token=token),
+        html_body=render_template("emails/reset_email.html", user=user, token=token),
+    )
 
 
 class MyAdminIndexView(AdminIndexView):
@@ -105,11 +94,7 @@ class MyAdminIndexView(AdminIndexView):
 
         if login.current_user.is_authenticated:
             return redirect(url_for(".index"))
-        link = (
-            '<p>У Вас нет учетной записи? <a href="'
-            + url_for(".register_view")
-            + '">Нажмите здесь, чтобы зарегистрироваться</a></p>'
-        )
+        link = SUGGEST_REGISTRATION.format(url=url_for(".register_view"))
         self._template_args["form"] = form
         self._template_args["link"] = link
         return super(MyAdminIndexView, self).index()
@@ -128,7 +113,7 @@ class MyAdminIndexView(AdminIndexView):
 
             login.login_user(user)
             return redirect(url_for(".index"))
-        link = '<p>Вы уже зарегистрированы? <a href="' + url_for(".login_view") + '">Нажмите здесь, чтобы войти</a></p>'
+        link = ALREADY_REGISTRED.format(url=url_for(".login_view"))
         self._template_args["form"] = form
         self._template_args["link"] = link
         return super(MyAdminIndexView, self).index()
@@ -137,6 +122,40 @@ class MyAdminIndexView(AdminIndexView):
     def logout_view(self):
         login.logout_user()
         return redirect(url_for(".index"))
+
+    @expose("/forgot_password/", methods=("GET", "POST"))
+    def forgot_password_view(self):
+        if login.current_user.is_authenticated:
+            return redirect(url_for(".index"))
+        form = ForgotForm(request.form)
+        if helpers.validate_form_on_submit(form):
+            staff = Staff.query.filter_by(email=form.email.data).first()
+            if staff:
+                send_password_reset_email(staff)
+            flash(RESTORE_PASSWORD_SEND)
+            return redirect(url_for(".login_view"))
+        self._template_args["form"] = form
+        self._template_args["link"] = "<p></p>"
+        return super(MyAdminIndexView, self).index()
+
+    @expose("/restore_password/<token>", methods=("GET", "POST"))
+    def reset_password_view(self, token):
+        if login.current_user.is_authenticated:
+            return redirect(url_for(".index"))
+        user = verify_reset_password_token(token)
+        if not user:
+            flash(BAD_TOKEN, "error")
+            return redirect(url_for(".index"))
+        form = PasswordResetForm(request.form)
+        if helpers.validate_form_on_submit(form):
+            user.set_password(form.password.data)
+            db.session.merge(user)
+            db.session.commit()
+            flash(PASSWORD_CHANGED_SUCCESS)
+            return redirect(url_for(".login_view"))
+        self._template_args["form"] = form
+        self._template_args["link"] = "<p>"
+        return super(MyAdminIndexView, self).index()
 
 
 class BaseModelView(sqla.ModelView):
