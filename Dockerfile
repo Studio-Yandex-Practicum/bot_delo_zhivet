@@ -1,12 +1,16 @@
-FROM python:3.11-slim
+FROM python:3.11.2-alpine3.17
 
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+RUN apk update && apk add gcc \
+                          libpq-dev \
+                          libc-dev \
+                          libffi-dev \
+                          --no-cache bash
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
 
 RUN pip install poetry==1.3.2
 
 WORKDIR /app
 COPY . .
-RUN poetry config virtualenvs.create false
-RUN poetry install
-CMD ["poetry", "run", "runbot"]
+RUN poetry config virtualenvs.create false && poetry install --with prod
