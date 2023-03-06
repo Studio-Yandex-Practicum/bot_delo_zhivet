@@ -5,7 +5,7 @@ volumes:
 
 services:
   postgis:
-    image: postgis/postgis:14-3.3-alpine
+    image: postgis/postgis:14-3.3
     container_name: db
     restart: always
     volumes:
