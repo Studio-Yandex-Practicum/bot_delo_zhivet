@@ -67,5 +67,10 @@ def page_not_found(e):
     return render_template("/admin/404.html"), 404
 
 
+@app.errorhandler(403)
+def forbidden(e):
+    return render_template("/admin/403.html"), 403
+
+
 if __name__ == "__main__":
     app.run(debug=True)

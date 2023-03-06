@@ -1,5 +1,6 @@
 import re
 
+from flask import Markup, url_for
 from werkzeug.security import check_password_hash
 from wtforms import fields, form, validators
 
@@ -19,7 +20,6 @@ from .messages import (
     PASSWORD_LABEL,
     PASSWORD_TOO_LONG,
     REPEAT_PASSWORD,
-    WRONG_PASSWORD,
     WRONG_USER,
 )
 
@@ -37,7 +37,14 @@ class LoginForm(form.Form):
             raise validators.ValidationError(WRONG_USER)
 
         if not check_password_hash(user.password, self.password.data):
-            raise validators.ValidationError(WRONG_PASSWORD)
+            raise validators.ValidationError(
+                Markup(
+                    "Неверный пароль"
+                    '<p>Забыли пароль? <a href="'
+                    + url_for(".forgot_password_view")
+                    + '">Нажмите здесь, чтобы восстановить его</a></p>'
+                )
+            )
 
     def get_user(self):
         return db.session.query(Staff).filter_by(login=self.login.data).first()
