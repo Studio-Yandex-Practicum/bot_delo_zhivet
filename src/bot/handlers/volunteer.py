@@ -104,13 +104,6 @@ async def add_volunteer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> s
             )
 
     context.user_data[START_OVER] = False
-    print(
-        f"""
-         {context.user_data}
-
-
-         """
-    )
     return ADDING_VOLUNTEER
 
 

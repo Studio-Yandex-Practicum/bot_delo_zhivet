@@ -18,6 +18,7 @@ from src.core.db.repository.volunteer_repository import crud_volunteer
 from .start import start
 from .state_constants import (
     BACK,
+    CHECK_MARK,
     END,
     FEATURES,
     GEOM,
@@ -34,7 +35,6 @@ from .state_constants import (
     TELEGRAM_ID,
     TELEGRAM_USERNAME,
     TYPING,
-    CHECK_MARK_ghost,
 )
 
 
@@ -42,22 +42,21 @@ async def select_option_to_report_about_pollution(update: Update, context: Conte
     def check_feature(feature):
         return FEATURES in context.user_data and feature in context.user_data[FEATURES]
 
-    text = "Заполните данные о загрязнении"
     buttons = [
         [
             InlineKeyboardButton(
-                text=f"Загрузить фото {check_feature(POLLUTION_FOTO)*CHECK_MARK_ghost}", callback_data=POLLUTION_FOTO
+                text=f"Загрузить фото {CHECK_MARK*check_feature(POLLUTION_FOTO)}", callback_data=POLLUTION_FOTO
             ),
         ],
         [
             InlineKeyboardButton(
-                text=f"Отправить координаты {check_feature(LATITUDE)*CHECK_MARK_ghost}",
+                text=f"Отправить координаты {CHECK_MARK*check_feature(LATITUDE)}",
                 callback_data=POLLUTION_COORDINATES,
             ),
         ],
         [
             InlineKeyboardButton(
-                text=f"Оставить комментарий {check_feature(POLLUTION_COMMENT)*CHECK_MARK_ghost}",
+                text=f"Оставить комментарий {CHECK_MARK*check_feature(POLLUTION_COMMENT)}",
                 callback_data=POLLUTION_COMMENT,
             ),
         ],
@@ -84,7 +83,7 @@ async def select_option_to_report_about_pollution(update: Update, context: Conte
         if update.message is not None:
             await update.message.reply_text(text=SECOND_LEVEL_TEXT, reply_markup=keyboard, parse_mode=ParseMode.HTML)
         else:
-            await update.callback_query.edit_message_caption(
+            await update.callback_query.edit_message_text(
                 text=SECOND_LEVEL_TEXT, reply_markup=keyboard, parse_mode=ParseMode.HTML
             )
 
@@ -136,7 +135,6 @@ async def save_foto(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     user_data = context.user_data
     photo_file = await update.message.photo[-1].get_file()
     date = datetime.now().strftime("%d_%m_%Y_%H_%M_%S")
-    # file_path = f"bot_delo_zhivet/media\\{date}.jpg" # Это я добавил у меня только с таким путем дальше работает код, проверь что у тебя)
     file_path = f"media\\{date}.jpg"
     await photo_file.download_to_drive(custom_path=file_path)
     user_data[FEATURES][POLLUTION_FOTO] = str(file_path)
@@ -202,7 +200,7 @@ async def save_and_exit_pollution(update: Update, context: ContextTypes.DEFAULT_
     return END
 
 
-async def back_to_add_pollution(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def back_to_select_option_to_report_about_pollution(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_data = context.user_data
     user_data[START_OVER] = True
 
