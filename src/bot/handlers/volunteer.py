@@ -98,6 +98,16 @@ async def add_volunteer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> s
         await update.callback_query.answer()
         await update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
     else:
+        print(
+            f"""
+
+
+        {context.user_data[FEATURES]}
+
+
+
+        """
+        )
         if check_data(context.user_data[FEATURES]) is True:
             buttons.append([InlineKeyboardButton(text="Отправить заявку", callback_data=SAVE)])
             keyboard = InlineKeyboardMarkup(buttons)
@@ -306,6 +316,7 @@ async def save_and_exit_volunteer(update: Update, context: ContextTypes.DEFAULT_
     user_data[TELEGRAM_USERNAME] = update.effective_user.username
     user_data[FIRST_NAME] = update.effective_user.first_name
     user_data[LAST_NAME] = update.effective_user.last_name
+    user_data[SPECIFY_PHONE_PERMISSION] = phone
     if SPECIFY_CITY in user_data:
         del user_data[SPECIFY_CITY]
     if user_data[SPECIFY_CAR_AVAILABILITY] == "Да":
