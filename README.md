@@ -88,6 +88,100 @@ https://geoalchemy-2.readthedocs.io/en/latest/alembic.html#interactions-between-
 
 [:arrow_up:Оглавление](#Оглавление)
 ___
+
+## Настройка создания backup db
+
+Чтобы зайти в контейнер, необходимо выполнить команду:
+```bash
+docker exec -it <container id> bash
+```
+
+### 1. Установка wal-g, crontab, wget, nano в докер контейнере postgis:
+```bash
+apt-get update && \
+apt-get install -y cron wget nano && \
+wget https://github.com/wal-g/wal-g/releases/download/v0.2.18/wal-g.linux-amd64.tar.gz && \
+tar -zxvf wal-g.linux-amd64.tar.gz && \
+mv wal-g /usr/local/bin/
+```
+### 2. Создать S3 Object Storage на Yandex.Cloud:
+* создать бакет
+* создать сервисный аккаунт с role _storage.editor_
+* создать новый ключ доступа для сервисного акканута
+
+### 3. Создать файл настроек _.walg.json_ в /var/lib/postgresql/:
+```bash
+nano /var/lib/postgresql/.walg.json
+```
+Заполнить файл данными:
+```bash
+{
+    "WALG_S3_PREFIX": "s3://<bucket_name>",
+    "AWS_ENDPOINT": "https://storage.yandexcloud.net",
+    "AWS_REGION": "ru-central1",
+    "AWS_ACCESS_KEY_ID": "<ACCESS_KEY>",
+    "AWS_SECRET_ACCESS_KEY": "<SECRET_ACCESS_KEY>",
+    "WALG_COMPRESSION_METHOD": "brotli",
+    "WALG_DELTA_MAX_STEPS": "5",
+    "PGDATA": "/var/lib/postgresql/data",
+    "PGHOST": "localhost",
+    "PGPORT": "5432"
+}
+```
+Изменить владельца:
+```bash
+chown postgres: /var/lib/postgresql/.walg.json
+```
+### 4. Создать postgres роль в базе:
+Подключиться к базе:
+```bash
+psql -h /var/run/postgresql -U $POSTGRES_USER -d $POSTGRES_DB
+```
+Создать роль:
+```bash
+ CREATE ROLE postgres WITH SUPERUSER LOGIN PASSWORD 'mypassword';
+```
+### 5. Настроить автоматизированное создание резервных копий:
+```bash
+echo "data_directory = '/var/lib/postgresql/data/'" >> /var/lib/postgresql/data/postgresql.conf && \
+echo "unix_socket_directories = '/var/run/postgresql'" >> /var/lib/postgresql/data/postgresql.conf && \
+echo "wal_level = replica" >> /var/lib/postgresql/data/postgresql.conf && \
+echo "archive_mode = on" >> /var/lib/postgresql/data/postgresql.conf && \
+echo "archive_command = '/usr/local/bin/wal-g wal-push \"%p\" >> /var/log/postgresql/archive_command.log 2>&1' " >> /var/lib/postgresql/data/postgresql.conf && \
+echo "archive_timeout = 3600" >> /var/lib/postgresql/data/postgresql.conf && \
+echo "restore_command = '/usr/local/bin/wal-g wal-fetch \"%f\" \"%p\" >> /var/log/postgresql/restore_command.log 2>&1' " >> /var/lib/postgresql/data/postgresql.conf
+```
+### 6. Создать файл bash скрипта _backup.sh_ в / :
+```bash
+nano /backup.sh
+```
+Заполнить файл:
+```bash
+#!/bin/bash
+su - postgres -c '/usr/local/bin/wal-g backup-push /var/lib/postgresql/data'
+```
+Сделать файл исполняемым:
+```bash
+chmod +x backup.sh
+```
+### 7. Настроить crontab:
+Запуск скрипта будет производиться в 3 часа ночи каждый день.
+```bash
+echo '0 3 * * * /backup.sh >> /var/log/daily-backup.log 2>&1' | crontab -
+```
+Запустить crontab:
+```bash
+service cron start
+```
+Проверить статус:
+```bash
+service cron status 
+```
+### 8. Тест:
+```bash
+su - postgres -c '/usr/local/bin/wal-g backup-push /var/lib/postgresql/data'
+```
+___
 ## Установка pre-commit hook
 Для того чтобы при каждом коммите выполнялись pre-commit проверки, необходимо:
 1. Установить pre-commit
@@ -113,8 +207,6 @@ pre-commit --version
 
 [:arrow_up:Оглавление](#Оглавление)
 
-
-
 ### Установка hook
 
 Установка осуществляется hook командой
@@ -130,6 +222,7 @@ pre-commit install --all
 pre-commit run --all-files
 ```
 ___
+
 ### Подключение системы мониторинга Sentry
 1. Зарегистрируйтесь на платформе:
 https://sentry.io/signup/
@@ -143,6 +236,7 @@ https://sentry.io/signup/
     - Создайте еще один проект, выбрав при этом платформу PYTHON.
     - В настройках проекта перейдите в раздел "Client Keys", скопируйте ключ DSN.
     - Присвойте переменной SENTRY_DSN_BOT в файле .env полученное значение.
+
 ___
 ## Запуск бота
 Переименуйте файл .env.example в .env и заполните его.
