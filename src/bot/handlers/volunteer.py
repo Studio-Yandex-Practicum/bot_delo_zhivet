@@ -20,6 +20,7 @@ from src.bot.handlers.state_constants import (
     LAST_NAME,
     LATITUDE,
     LONGITUDE,
+    PHONE_COMMAND,
     PHONE_INPUT,
     RADIUS_COMMAND,
     SAVE,
@@ -80,16 +81,6 @@ async def add_volunteer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> s
         await update.callback_query.answer()
         await update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
     else:
-        print(
-            f"""
-
-
-        {context.user_data[FEATURES]}
-
-
-
-        """
-        )
         if check_data(context.user_data[FEATURES]) is True:
             buttons.append([InlineKeyboardButton(text="Отправить заявку", callback_data=SAVE)])
             keyboard = InlineKeyboardMarkup(buttons)
@@ -125,44 +116,39 @@ async def ask_user_phone_number(update: Update, context: ContextTypes.DEFAULT_TY
     return VALIDATE
 
 
-async def validate_phone(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
+async def handle_phone_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     user_input = update.message.text
     phone = phone_number_validate(user_input)
-    if phone is not None:
-        text = (
-            f"Подтвердите номер телефона: {user_input}? "
-            'Если номер не правильный, то выберите "Указать телефон заново" и введите его снова.'
-        )
-        context.user_data[CURRENT_FEATURE] = SPECIFY_PHONE_PERMISSION
-        data = SPECIFY_PHONE_PERMISSION + user_input
-
-        buttons = [
-            [
-                InlineKeyboardButton(text="Да", callback_data=data),
-                InlineKeyboardButton(text="Указать телефон заново", callback_data=PHONE_INPUT),
-            ],
-            [
-                InlineKeyboardButton(text="Назад", callback_data=BACK),
-            ],
-        ]
-
-        keyboard = InlineKeyboardMarkup(buttons)
-
-        await update.message.reply_text(text=text, reply_markup=keyboard)
-
-    else:
+    if phone is None:
         chat_text = "Пожалуйста, введите корректный номер телефона."
 
         buttons = [
             [
                 InlineKeyboardButton(text="Указать телефон заново", callback_data=PHONE_INPUT),
+            ],
+            [
                 InlineKeyboardButton(text="Назад", callback_data=BACK),
-            ]
+            ],
         ]
 
         keyboard = InlineKeyboardMarkup(buttons)
 
         await update.message.reply_text(text=chat_text, reply_markup=keyboard)
+    else:
+        text = f"Номер введен правильно?\n{user_input}"
+        context.user_data[CURRENT_FEATURE] = SPECIFY_PHONE_PERMISSION
+
+        data = PHONE_COMMAND + user_input
+        buttons = [
+            [
+                InlineKeyboardButton(text="Да", callback_data=data),
+                InlineKeyboardButton(text="Нет", callback_data=PHONE_INPUT),
+            ]
+        ]
+
+        keyboard = InlineKeyboardMarkup(buttons)
+
+        await update.message.reply_text(text=text, reply_markup=keyboard)
 
     return SELECTING_OVER
 
@@ -212,8 +198,10 @@ async def handle_city_input(update: Update, context: ContextTypes.DEFAULT_TYPE) 
         buttons = [
             [
                 InlineKeyboardButton(text="Указать адрес заново", callback_data=CITY_INPUT),
+            ],
+            [
                 InlineKeyboardButton(text="Назад", callback_data=BACK),
-            ]
+            ],
         ]
 
         keyboard = InlineKeyboardMarkup(buttons)
@@ -290,7 +278,7 @@ async def save_and_exit_volunteer(update: Update, context: ContextTypes.DEFAULT_
     radius = user_data[SPECIFY_ACTIVITY_RADIUS][7:]
     car = user_data[SPECIFY_CAR_AVAILABILITY][4:]
     if SPECIFY_PHONE_PERMISSION in user_data:
-        phone = user_data[SPECIFY_PHONE_PERMISSION][5:]
+        phone = user_data[SPECIFY_PHONE_PERMISSION][6:]
     else:
         phone = "Не указан"
     user_data[GEOM] = f"POINT({user_data[LONGITUDE]} {user_data[LATITUDE]})"

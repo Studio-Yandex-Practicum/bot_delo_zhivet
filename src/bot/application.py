@@ -62,6 +62,7 @@ from .handlers.state_constants import (
     CITY_COMMAND,
     CITY_INPUT,
     CITY_SOCIAL,
+    PHONE_COMMAND,
     PHONE_INPUT,
     POLLUTION_COMMENT,
     POLLUTION_COORDINATES,
@@ -75,7 +76,6 @@ from .handlers.state_constants import (
     SOCIAL_COMMENT,
     SOCIAL_PROBLEM_ADDRESS,
     SOCIAL_PROBLEM_TYPING,
-    SPECIFY_PHONE_PERMISSION,
     TYPING,
     TYPING_CITY,
     TYPING_SOCIAL_CITY,
@@ -87,10 +87,10 @@ from .handlers.volunteer import (
     ask_user_phone_number,
     handle_car_input,
     handle_city_input,
+    handle_phone_input,
     handle_radius_input,
     save_and_exit_volunteer,
     save_input,
-    validate_phone,
 )
 
 
@@ -110,9 +110,9 @@ def create_bot() -> Application:
                 CallbackQueryHandler(save_and_exit_volunteer, pattern="^" + SAVE + "$"),
             ],
             TYPING_CITY: [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_city_input)],
-            VALIDATE: [MessageHandler(filters.TEXT & ~filters.COMMAND, validate_phone)],
+            VALIDATE: [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_phone_input)],
             SELECTING_OVER: [
-                CallbackQueryHandler(save_input, pattern="^" + SPECIFY_PHONE_PERMISSION),
+                CallbackQueryHandler(save_input, pattern="^" + PHONE_COMMAND),
                 CallbackQueryHandler(save_input, pattern="^" + CITY_COMMAND),
                 CallbackQueryHandler(save_input, pattern="^" + RADIUS_COMMAND),
                 CallbackQueryHandler(save_input, pattern="^" + CAR_COMMAND),

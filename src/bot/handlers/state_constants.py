@@ -70,6 +70,7 @@ BACK = "back"
 CITY = "city"
 VALIDATE = "validate"
 PHONE_INPUT = "phone_input"
+PHONE_COMMAND = "phone="
 
 # Различные сообщения пользователю
 

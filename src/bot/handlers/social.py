@@ -98,8 +98,10 @@ async def address_confirmation(update: Update, context: ContextTypes.DEFAULT_TYP
         buttons = [
             [
                 InlineKeyboardButton(text="Указать адрес заново", callback_data=CITY_INPUT),
+            ],
+            [
                 InlineKeyboardButton(text="Назад", callback_data=BACK),
-            ]
+            ],
         ]
 
         keyboard = InlineKeyboardMarkup(buttons)
