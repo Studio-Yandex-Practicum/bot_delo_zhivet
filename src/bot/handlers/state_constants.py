@@ -69,6 +69,9 @@ SLEEP_TIME = 3
 CITY_INPUT = "city_input"
 BACK = "back"
 CITY = "city"
+VALIDATE = "validate"
+PHONE_INPUT = "phone_input"
+PHONE_COMMAND = "phone="
 
 # Различные сообщения пользователю
 

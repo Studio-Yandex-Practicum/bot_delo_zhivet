@@ -22,6 +22,8 @@ from src.bot.handlers.state_constants import (
     LAST_NAME,
     LATITUDE,
     LONGITUDE,
+    PHONE_COMMAND,
+    PHONE_INPUT,
     RADIUS_COMMAND,
     SAVE,
     SECOND_LEVEL_TEXT,
@@ -34,9 +36,11 @@ from src.bot.handlers.state_constants import (
     TELEGRAM_ID,
     TELEGRAM_USERNAME,
     TYPING_CITY,
+    VALIDATE,
     VOLUNTEER,
 )
 from src.bot.service.dadata import get_fields_from_dadata
+from src.bot.service.phone_number import phone_number_validate
 from src.bot.service.save_new_user import check_user_in_db, create_new_user
 from src.bot.service.save_tracker_id import save_tracker_id
 from src.bot.service.volunteer import check_volunteer_in_db, create_volunteer, update_volunteer
@@ -119,23 +123,51 @@ async def end_second_level(update: Update, context: ContextTypes.DEFAULT_TYPE) -
 async def ask_user_phone_number(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     """Предложить пользователю ввести свой номер телефона."""
     context.user_data[CURRENT_FEATURE] = update.callback_query.data
-    text = "Укажите свой номер телефона:"
+    text = "Укажите свой телефон:"
     button = [[InlineKeyboardButton(text="Назад", callback_data=BACK)]]
     keyboard = InlineKeyboardMarkup(button)
 
     await update.callback_query.answer()
     await update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
 
+    return VALIDATE
+
+
+async def handle_phone_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
+    user_input = update.message.text
+    phone = phone_number_validate(user_input)
+    if phone is None:
+        chat_text = "Пожалуйста, введите корректный номер телефона."
+
+        buttons = [
+            [
+                InlineKeyboardButton(text="Указать телефон заново", callback_data=PHONE_INPUT),
+            ],
+            [
+                InlineKeyboardButton(text="Назад", callback_data=BACK),
+            ],
+        ]
+
+        keyboard = InlineKeyboardMarkup(buttons)
+
+        await update.message.reply_text(text=chat_text, reply_markup=keyboard)
+    else:
+        text = f"Номер введен правильно?\n{user_input}"
+        context.user_data[CURRENT_FEATURE] = SPECIFY_PHONE_PERMISSION
+
+        data = PHONE_COMMAND + user_input
+        buttons = [
+            [
+                InlineKeyboardButton(text="Да", callback_data=data),
+                InlineKeyboardButton(text="Нет", callback_data=PHONE_INPUT),
+            ]
+        ]
+
+        keyboard = InlineKeyboardMarkup(buttons)
+
+        await update.message.reply_text(text=text, reply_markup=keyboard)
+
     return SELECTING_OVER
-
-
-async def save_phone(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
-    """Сохранение комментария"""
-    user_data = context.user_data
-    user_data[FEATURES][user_data[CURRENT_FEATURE]] = update.message.text
-    user_data[START_OVER] = True
-
-    return await add_volunteer(update, context)
 
 
 async def ask_for_input_city(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
@@ -183,8 +215,10 @@ async def handle_city_input(update: Update, context: ContextTypes.DEFAULT_TYPE) 
         buttons = [
             [
                 InlineKeyboardButton(text="Указать адрес заново", callback_data=CITY_INPUT),
+            ],
+            [
                 InlineKeyboardButton(text="Назад", callback_data=BACK),
-            ]
+            ],
         ]
 
         keyboard = InlineKeyboardMarkup(buttons)
@@ -262,8 +296,7 @@ async def save_and_exit_volunteer(update: Update, context: ContextTypes.DEFAULT_
     radius = user_data[SPECIFY_ACTIVITY_RADIUS][7:]
     car = user_data[SPECIFY_CAR_AVAILABILITY][4:]
     if SPECIFY_PHONE_PERMISSION in user_data:
-        phone = user_data[SPECIFY_PHONE_PERMISSION]
-        user_data[SPECIFY_PHONE_PERMISSION] = phone
+        phone = user_data[SPECIFY_PHONE_PERMISSION][6:]
     else:
         phone = None
     user_data[GEOM] = f"POINT({user_data[LONGITUDE]} {user_data[LATITUDE]})"
@@ -273,6 +306,7 @@ async def save_and_exit_volunteer(update: Update, context: ContextTypes.DEFAULT_
     user_data[TELEGRAM_USERNAME] = update.effective_user.username
     user_data[FIRST_NAME] = update.effective_user.first_name
     user_data[LAST_NAME] = update.effective_user.last_name
+    user_data[SPECIFY_PHONE_PERMISSION] = phone
     if SPECIFY_CITY in user_data:
         del user_data[SPECIFY_CITY]
     if user_data[SPECIFY_CAR_AVAILABILITY] == "Да":
@@ -331,7 +365,7 @@ async def save_and_exit_volunteer(update: Update, context: ContextTypes.DEFAULT_
     return END
 
 
-async def back_to_add_voluteer(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def back_to_add_volunteer(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_data = context.user_data
     user_data[START_OVER] = True
     context.user_data.pop(ADDRESS_TEMPORARY, None)
