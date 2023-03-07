@@ -37,6 +37,7 @@ from core.config import settings
 from .handlers.common import end_describing, help_command, stop
 from .handlers.participation import make_donation
 from .handlers.pollution import (
+    back_to_select_option_to_report_about_pollution,
     input,
     save_and_exit_pollution,
     save_comment,
@@ -47,6 +48,7 @@ from .handlers.pollution import (
 from .handlers.social import (
     address_confirmation,
     ask_for_input_address,
+    back_to_add_social,
     input_social_data,
     report_about_social_problem,
     save_and_exit_from_social_problem,
@@ -82,6 +84,7 @@ from .handlers.volunteer import (
     add_volunteer,
     ask_for_input_city,
     ask_user_phone_number,
+    back_to_add_voluteer,
     handle_car_input,
     handle_city_input,
     handle_radius_input,
@@ -118,7 +121,7 @@ def create_bot() -> Application:
             CallbackQueryHandler(end_describing, pattern=END_CMD),
             CommandHandler("stop", stop),
             CallbackQueryHandler(ask_for_input_city, pattern=CITY_INPUT),
-            CallbackQueryHandler(add_volunteer, pattern=BACK),
+            CallbackQueryHandler(back_to_add_voluteer, pattern=BACK),
             CallbackQueryHandler(save_phone, pattern=BACK),
         ],
         persistent=True,
@@ -144,7 +147,7 @@ def create_bot() -> Application:
         fallbacks=[
             CallbackQueryHandler(end_describing, pattern=END_CMD),
             CommandHandler("stop", stop),
-            CallbackQueryHandler(select_option_to_report_about_pollution, pattern=BACK),
+            CallbackQueryHandler(back_to_select_option_to_report_about_pollution, pattern=BACK),
         ],
         persistent=True,
         name="add_pollution_conv",
@@ -176,7 +179,7 @@ def create_bot() -> Application:
             CallbackQueryHandler(end_describing, pattern=END_CMD),
             CommandHandler("stop", stop),
             CallbackQueryHandler(ask_for_input_address, pattern=CITY_INPUT),
-            CallbackQueryHandler(report_about_social_problem, pattern=BACK),
+            CallbackQueryHandler(back_to_add_social, pattern=BACK),
         ],
         persistent=True,
         name="add_social_conv",

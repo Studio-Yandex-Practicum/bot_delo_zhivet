@@ -9,6 +9,7 @@ from src.bot.handlers.state_constants import (
     ADDING_VOLUNTEER,
     BACK,
     CAR_COMMAND,
+    CHECK_MARK,
     CITY,
     CITY_COMMAND,
     CITY_INPUT,
@@ -44,6 +45,10 @@ from src.core.db.repository.volunteer_repository import crud_volunteer
 
 async def add_volunteer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     """Меню регистрации волонтёра."""
+
+    def check_feature(feature):
+        return FEATURES in context.user_data and feature in context.user_data[FEATURES]
+
     text = (
         "Для регистрации волонтером вам надо указать:\n"
         "- Свой адрес, можно без квартиры, для удобства расчетов расстояния;\n"
@@ -54,16 +59,27 @@ async def add_volunteer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> s
 
     buttons = [
         [
-            InlineKeyboardButton(text="Указать свой адрес", callback_data=SPECIFY_CITY),
+            InlineKeyboardButton(
+                text=f"Указать свой адрес {CHECK_MARK*check_feature(CITY)}", callback_data=SPECIFY_CITY
+            ),
         ],
         [
-            InlineKeyboardButton(text="Указать радиус активности", callback_data=SPECIFY_ACTIVITY_RADIUS),
+            InlineKeyboardButton(
+                text=f"Указать радиус активности {CHECK_MARK*check_feature(SPECIFY_ACTIVITY_RADIUS)}",
+                callback_data=SPECIFY_ACTIVITY_RADIUS,
+            ),
         ],
         [
-            InlineKeyboardButton(text="Указать наличие автомобиля", callback_data=SPECIFY_CAR_AVAILABILITY),
+            InlineKeyboardButton(
+                text=f"Указать наличие автомобиля {CHECK_MARK*check_feature(SPECIFY_CAR_AVAILABILITY)}",
+                callback_data=SPECIFY_CAR_AVAILABILITY,
+            ),
         ],
         [
-            InlineKeyboardButton(text="Указать номер телефона", callback_data=SPECIFY_PHONE_PERMISSION),
+            InlineKeyboardButton(
+                text=f"Указать номер телефона {CHECK_MARK*check_feature(SPECIFY_PHONE_PERMISSION)}",
+                callback_data=SPECIFY_PHONE_PERMISSION,
+            ),
         ],
         [
             InlineKeyboardButton(text="Назад", callback_data=str(END)),
@@ -307,8 +323,17 @@ async def save_and_exit_volunteer(update: Update, context: ContextTypes.DEFAULT_
         description=description,
     )
     await save_tracker_id(crud_volunteer, tracker.key, user_data[TELEGRAM_ID], session)
+    context.user_data.pop(FEATURES, None)
+    context.user_data.pop(CURRENT_FEATURE, None)
     await start(update, context)
     return END
+
+
+async def back_to_add_voluteer(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_data = context.user_data
+    user_data[START_OVER] = True
+
+    return await add_volunteer(update, context)
 
 
 def check_data(user_data):
