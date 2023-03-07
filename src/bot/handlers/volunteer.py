@@ -7,6 +7,7 @@ from src.bot.handlers.start import start
 from src.bot.handlers.state_constants import (
     ACTIVITY_RADIUS,
     ADDING_VOLUNTEER,
+    ADDRESS_TEMPORARY,
     BACK,
     CAR_COMMAND,
     CHECK_MARK,
@@ -160,7 +161,7 @@ async def handle_city_input(update: Update, context: ContextTypes.DEFAULT_TYPE) 
             'Если адрес не правильный, то выберите "Нет" и укажите более подробный вариант адреса, '
             "а мы постараемся определить его правильно!"
         )
-        context.user_data[FEATURES] |= address
+        context.user_data[ADDRESS_TEMPORARY] = address
 
         buttons = [
             [
@@ -242,11 +243,12 @@ async def handle_car_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -
 async def save_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     """Сохранение данных в контексте."""
 
-    city = update.callback_query.data
+    current_feature_value = update.callback_query.data
 
     user_data = context.user_data
+    user_data[FEATURES] |= context.user_data.pop(ADDRESS_TEMPORARY, {})
 
-    user_data[FEATURES][user_data[CURRENT_FEATURE]] = city
+    user_data[FEATURES][user_data[CURRENT_FEATURE]] = current_feature_value
 
     user_data[START_OVER] = True
 
@@ -332,6 +334,7 @@ async def save_and_exit_volunteer(update: Update, context: ContextTypes.DEFAULT_
 async def back_to_add_voluteer(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_data = context.user_data
     user_data[START_OVER] = True
+    context.user_data.pop(ADDRESS_TEMPORARY, None)
 
     return await add_volunteer(update, context)
 
