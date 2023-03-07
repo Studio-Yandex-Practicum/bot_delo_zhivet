@@ -1,7 +1,9 @@
 import os
 import sys
 
+import sentry_sdk
 from flask import Flask, current_app, redirect, render_template, url_for
+from sentry_sdk.integrations.flask import FlaskIntegration
 
 from .config import Config
 from .database import create_roles_and_superuser, db, get_not_existing_required_tables
@@ -38,6 +40,16 @@ def create_app():
     return app
 
 
+if Config.SENTRY_DSN_ADMIN:
+    sentry_sdk.init(
+        dsn=Config.SENTRY_DSN_ADMIN,
+        integrations=[
+            FlaskIntegration(),
+        ],
+        traces_sample_rate=1.0,
+        environment="admin",
+    )
+
 app = create_app()
 create_roles_and_superuser()
 
@@ -47,17 +59,17 @@ def index():
     return redirect(url_for("admin.index"))
 
 
-@app.route("/admin/static/<path:p>")
-def static_redirect(p):
-    return redirect("/static/" + p)
-
-
 from . import views  # noqa
 
 
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template("/admin/404.html"), 404
+
+
+@app.errorhandler(403)
+def forbidden(e):
+    return render_template("/admin/403.html"), 403
 
 
 if __name__ == "__main__":

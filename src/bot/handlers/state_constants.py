@@ -47,6 +47,7 @@ CURRENT_FEATURE = "current_feature"
 CURRENT_LEVEL = "current_level"
 CITY_COMMAND = "CITY="
 CITY_SOCIAL = "SOCIAL_CITY="
+ADDRESS_TEMPORARY = "address_temporary"
 RADIUS_COMMAND = "RADIUS="
 CAR_COMMAND = "CAR="
 POLLUTION_FOTO = "photo"
@@ -86,6 +87,8 @@ SECOND_LEVEL_TEXT = (
     "Понял-принял! Укажите информацию для остальных пунктов или нажмите на кнопку "
     "<b>Отправить заявку</b> (она появится, когда всё будет заполнено):"
 )
+
+CHECK_MARK = "\U00002705"  # Эмодзи галочки
 
 HELP_TEXT = (
     "«Дело Живёт» помогает волонтёрам узнать, где требуется их помощь и организует локальные команды "
