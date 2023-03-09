@@ -90,12 +90,10 @@ https://geoalchemy-2.readthedocs.io/en/latest/alembic.html#interactions-between-
 ___
 
 ## Настройка создания backup db
-
 Чтобы зайти в контейнер, необходимо выполнить команду:
 ```bash
 docker exec -it <container id> bash
 ```
-
 ### 1. Установка wal-g, crontab, wget, nano в докер контейнере postgis:
 ```bash
 apt-get update && \
@@ -111,14 +109,11 @@ mv wal-g /usr/local/bin/
 
 ### 3. Создать файл настроек _.walg.json_ в /var/lib/postgresql/:
 ```bash
-nano /var/lib/postgresql/.walg.json
-```
-Заполнить файл данными:
-```bash
+cat > /var/lib/postgresql/.walg.json << EOF
 {
     "WALG_S3_PREFIX": "s3://<bucket_name>",
     "AWS_ENDPOINT": "https://storage.yandexcloud.net",
-    "AWS_REGION": "ru-central1",
+    "AWS_REGION":"ru-central1",
     "AWS_ACCESS_KEY_ID": "<ACCESS_KEY>",
     "AWS_SECRET_ACCESS_KEY": "<SECRET_ACCESS_KEY>",
     "WALG_COMPRESSION_METHOD": "brotli",
@@ -127,6 +122,7 @@ nano /var/lib/postgresql/.walg.json
     "PGHOST": "localhost",
     "PGPORT": "5432"
 }
+EOF
 ```
 Изменить владельца:
 ```bash
@@ -137,9 +133,9 @@ chown postgres: /var/lib/postgresql/.walg.json
 ```bash
 psql -h /var/run/postgresql -U $POSTGRES_USER -d $POSTGRES_DB
 ```
-Создать роль:
+Создать роль _postgres_:
 ```bash
- CREATE ROLE postgres WITH SUPERUSER LOGIN PASSWORD 'mypassword';
+CREATE ROLE postgres WITH SUPERUSER LOGIN PASSWORD 'mypassword';
 ```
 ### 5. Настроить автоматизированное создание резервных копий:
 ```bash
@@ -151,24 +147,23 @@ echo "archive_command = '/usr/local/bin/wal-g wal-push \"%p\" >> /var/log/postgr
 echo "archive_timeout = 3600" >> /var/lib/postgresql/data/postgresql.conf && \
 echo "restore_command = '/usr/local/bin/wal-g wal-fetch \"%f\" \"%p\" >> /var/log/postgresql/restore_command.log 2>&1' " >> /var/lib/postgresql/data/postgresql.conf
 ```
-### 6. Создать файл bash скрипта _backup.sh_ в / :
+Перезагружаем конфиг через отправку SIGHUP сигнала всем процессам БД:
 ```bash
-nano /backup.sh
+killall -s HUP postgres
 ```
-Заполнить файл:
+### 6. Настроить crontab:
+Открыть редактор crontab:
 ```bash
-#!/bin/bash
-su - postgres -c '/usr/local/bin/wal-g backup-push /var/lib/postgresql/data'
+crontab -e
 ```
-Сделать файл исполняемым:
+Скопировать строки ниже в редактор. Запуск скрипта будет производиться в 3 часа ночи каждый день.
+Также будут удаляться копии созданные ранее 30 дней. 
 ```bash
-chmod +x backup.sh
+0 3 * * * su - postgres -c '/usr/local/bin/wal-g backup-push /var/lib/postgresql/data' >> /var/log/postgresql/walg_backup.log 2>&1
+0 3 * * * su - postgres -c '/usr/local/bin/wal-g delete before FIND_FULL $(date -d "-30 days" "+\%FT\%TZ") --confirm' >> /var/log/postgresql/walg_delete.log 2>&1
 ```
-### 7. Настроить crontab:
-Запуск скрипта будет производиться в 3 часа ночи каждый день.
-```bash
-echo '0 3 * * * /backup.sh >> /var/log/daily-backup.log 2>&1' | crontab -
-```
+Логи будут сохранены в /var/log/postgresql/walg_backup.log и /var/log/postgresql/walg_delete.log.
+
 Запустить crontab:
 ```bash
 service cron start
@@ -177,7 +172,12 @@ service cron start
 ```bash
 service cron status 
 ```
-### 8. Тест:
+### 7. Восстановление базы данных:
+Cкачать и разархивировать последнюю резервную копию.
+```bash
+su - postgres -c '/usr/local/bin/wal-g backup-fetch /var/lib/postgresql/data LATEST'
+```
+### 8. Тест создания backup:
 ```bash
 su - postgres -c '/usr/local/bin/wal-g backup-push /var/lib/postgresql/data'
 ```

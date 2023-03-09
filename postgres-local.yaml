@@ -1,14 +1,12 @@
-version: '3.8'
+version: '3.3'
 
 volumes:
   postgis_local_data:
 
 services:
   postgis-local:
-    platform: linux/amd64
     container_name: postgis-local
     image: postgis/postgis:14-3.3
-    container_name: db
     restart: always
     volumes:
       - postgis_local_data:/var/lib/postgresql/data/
