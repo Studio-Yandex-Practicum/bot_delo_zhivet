@@ -6,6 +6,7 @@ from telegram.constants import ParseMode
 from telegram.ext import ContextTypes
 
 from src.api.tracker import client
+from src.bot.handlers.common import end_describing
 from src.bot.service.pollution import create_new_pollution, download_to_object_storage
 from src.bot.service.save_new_user import check_user_in_db, create_new_user
 from src.bot.service.save_tracker_id import save_tracker_id
@@ -176,8 +177,7 @@ async def save_and_exit_pollution(update: Update, context: ContextTypes.DEFAULT_
     if not old_user:
         await create_new_user(user, session)
     if old_user and old_user.is_banned:
-        await start(update, context)
-        return END
+        return await end_describing(update, context)
     await create_new_pollution(user_data, session)
     volunteers = await crud_volunteer.get_volunteers_by_point(longitude, latitude, session)
     summary = f"{user[TELEGRAM_USERNAME]} - {latitude}, {longitude}"
@@ -195,9 +195,7 @@ async def save_and_exit_pollution(update: Update, context: ContextTypes.DEFAULT_
     )
     os.remove(file_path)
     await save_tracker_id(crud_pollution, tracker.key, user_data[TELEGRAM_ID], session)
-    context.user_data.pop(FEATURES)
-    await start(update, context)
-    return END
+    return await end_describing(update, context)
 
 
 async def back_to_select_option_to_report_about_pollution(update: Update, context: ContextTypes.DEFAULT_TYPE):
