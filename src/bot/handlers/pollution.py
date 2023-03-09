@@ -18,6 +18,7 @@ from src.core.db.repository.volunteer_repository import crud_volunteer
 from .start import start
 from .state_constants import (
     BACK,
+    CHECK_MARK,
     END,
     FEATURES,
     GEOM,
@@ -38,16 +39,26 @@ from .state_constants import (
 
 
 async def select_option_to_report_about_pollution(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
-    text = "Заполните данные о загрязнении"
+    def check_feature(feature):
+        return FEATURES in context.user_data and feature in context.user_data[FEATURES]
+
     buttons = [
         [
-            InlineKeyboardButton(text="Загрузить фото", callback_data=POLLUTION_FOTO),
+            InlineKeyboardButton(
+                text=f"Загрузить фото {CHECK_MARK*check_feature(POLLUTION_FOTO)}", callback_data=POLLUTION_FOTO
+            ),
         ],
         [
-            InlineKeyboardButton(text="Отправить координаты", callback_data=POLLUTION_COORDINATES),
+            InlineKeyboardButton(
+                text=f"Отправить координаты {CHECK_MARK*check_feature(LATITUDE)}",
+                callback_data=POLLUTION_COORDINATES,
+            ),
         ],
         [
-            InlineKeyboardButton(text="Оставить комментарий", callback_data=POLLUTION_COMMENT),
+            InlineKeyboardButton(
+                text=f"Оставить комментарий {CHECK_MARK*check_feature(POLLUTION_COMMENT)}",
+                callback_data=POLLUTION_COMMENT,
+            ),
         ],
         [
             InlineKeyboardButton(text="Назад", callback_data=str(END)),
@@ -72,7 +83,7 @@ async def select_option_to_report_about_pollution(update: Update, context: Conte
         if update.message is not None:
             await update.message.reply_text(text=SECOND_LEVEL_TEXT, reply_markup=keyboard, parse_mode=ParseMode.HTML)
         else:
-            await update.callback_query.edit_message_caption(
+            await update.callback_query.edit_message_text(
                 text=SECOND_LEVEL_TEXT, reply_markup=keyboard, parse_mode=ParseMode.HTML
             )
 
@@ -184,8 +195,16 @@ async def save_and_exit_pollution(update: Update, context: ContextTypes.DEFAULT_
     )
     os.remove(file_path)
     await save_tracker_id(crud_pollution, tracker.key, user_data[TELEGRAM_ID], session)
+    context.user_data.pop(FEATURES)
     await start(update, context)
     return END
+
+
+async def back_to_select_option_to_report_about_pollution(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_data = context.user_data
+    user_data[START_OVER] = True
+
+    return await select_option_to_report_about_pollution(update, context)
 
 
 def check_data(user_data):
