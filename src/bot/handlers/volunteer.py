@@ -152,11 +152,10 @@ async def handle_phone_input(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
         await update.message.reply_text(text=chat_text, reply_markup=keyboard)
     else:
-        phone_number = format_numbers(user_input)
-        text = f"Проверьте введённый номер:\n{phone_number}"
+        text = f"Проверьте введённый номер:\n{format_numbers(phone)}"
         context.user_data[CURRENT_FEATURE] = SPECIFY_PHONE_PERMISSION
 
-        data = PHONE_COMMAND + user_input
+        data = PHONE_COMMAND + phone
         buttons = [
             [
                 InlineKeyboardButton(text="Верно", callback_data=data),
