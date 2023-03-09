@@ -210,8 +210,8 @@ async def handle_car_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     context.user_data[CURRENT_FEATURE] = update.callback_query.data
     buttons = [
         [
-            InlineKeyboardButton(text="Да", callback_data=CAR_COMMAND + "Yes"),
-            InlineKeyboardButton(text="Нет", callback_data=CAR_COMMAND + "No"),
+            InlineKeyboardButton(text="Да", callback_data=CAR_COMMAND + "Да"),
+            InlineKeyboardButton(text="Нет", callback_data=CAR_COMMAND + "Нет"),
         ],
         [InlineKeyboardButton(text="Назад", callback_data=BACK)],
     ]
@@ -245,21 +245,21 @@ async def save_and_exit_volunteer(update: Update, context: ContextTypes.DEFAULT_
     car = user_data[SPECIFY_CAR_AVAILABILITY][4:]
     if SPECIFY_PHONE_PERMISSION in user_data:
         phone = user_data[SPECIFY_PHONE_PERMISSION]
+        user_data[SPECIFY_PHONE_PERMISSION] = phone
     else:
-        phone = "Не указан"
+        phone = None
     user_data[GEOM] = f"POINT({user_data[LONGITUDE]} {user_data[LATITUDE]})"
     user_data[SPECIFY_ACTIVITY_RADIUS] = int(radius) * 1000
     user_data[SPECIFY_CAR_AVAILABILITY] = car
-    user_data[SPECIFY_PHONE_PERMISSION] = phone
     user_data[TELEGRAM_ID] = update.effective_user.id
     user_data[TELEGRAM_USERNAME] = update.effective_user.username
     user_data[FIRST_NAME] = update.effective_user.first_name
     user_data[LAST_NAME] = update.effective_user.last_name
     if SPECIFY_CITY in user_data:
         del user_data[SPECIFY_CITY]
-    if user_data[SPECIFY_CAR_AVAILABILITY] == "Yes":
+    if user_data[SPECIFY_CAR_AVAILABILITY] == "Да":
         user_data[SPECIFY_CAR_AVAILABILITY] = True
-    else:
+    elif user_data[SPECIFY_CAR_AVAILABILITY] == "Нет":
         user_data[SPECIFY_CAR_AVAILABILITY] = False
     user = {}
     user[TELEGRAM_ID] = user_data[TELEGRAM_ID]
@@ -276,6 +276,7 @@ async def save_and_exit_volunteer(update: Update, context: ContextTypes.DEFAULT_
     if old_volunteer:
         if (
             old_volunteer.full_address == user_data["full_address"]
+            and old_volunteer.telegram_username == user_data[TELEGRAM_USERNAME]
             and old_volunteer.has_car == user_data[SPECIFY_CAR_AVAILABILITY]
             and old_volunteer.radius == int(radius) * 1000
             and old_volunteer.phone == phone
@@ -294,9 +295,12 @@ async def save_and_exit_volunteer(update: Update, context: ContextTypes.DEFAULT_
     Ник в телеграмме: {user_name}
     Адрес: {user_data['full_address']}
     Наличие машины: {car}
-    Радиус выезда: {radius}
-    Номер телефона: {phone}
+    Радиус выезда: {radius} км
     """
+    if phone is None:
+        description += "Номер телефона: Не указан"
+    else:
+        description += f"Номер телефона: {phone}"
     tracker = client.issues.create(
         queue=VOLUNTEER,
         summary=summary,
