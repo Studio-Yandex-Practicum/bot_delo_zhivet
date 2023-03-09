@@ -7,8 +7,7 @@ services:
   postgis-local:
     platform: linux/amd64
     container_name: postgis-local
-    image: postgis/postgis:14-3.3
-    container_name: db
+    image: postgis/postgis:14-3.3-alpine
     restart: always
     volumes:
       - postgis_local_data:/var/lib/postgresql/data/
