@@ -70,6 +70,7 @@ from .handlers.state_constants import (
     POLLUTION_COORDINATES,
     POLLUTION_FOTO,
     RADIUS_COMMAND,
+    RETURN_DATA,
     SAVE,
     SELECTING_ACTION,
     SELECTING_FEATURE,
@@ -151,6 +152,8 @@ def create_bot() -> Application:
         fallbacks=[
             CallbackQueryHandler(end_describing, pattern=END_CMD),
             CommandHandler("stop", stop),
+            # CallbackQueryHandler(select_option_to_report_about_pollution, pattern=RETURN_DATA),
+            CallbackQueryHandler(input, pattern=RETURN_DATA),
             CallbackQueryHandler(back_to_select_option_to_report_about_pollution, pattern=BACK),
         ],
         persistent=True,

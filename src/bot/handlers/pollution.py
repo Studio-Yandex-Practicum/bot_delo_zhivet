@@ -19,6 +19,7 @@ from .start import start
 from .state_constants import (
     BACK,
     CHECK_MARK,
+    CURRENT_FEATURE,
     END,
     FEATURES,
     GEOM,
@@ -28,6 +29,7 @@ from .state_constants import (
     POLLUTION_COMMENT,
     POLLUTION_COORDINATES,
     POLLUTION_FOTO,
+    RETURN_DATA,
     SAVE,
     SECOND_LEVEL_TEXT,
     SELECTING_FEATURE,
@@ -101,33 +103,58 @@ async def end_second_level(update: Update, context: ContextTypes.DEFAULT_TYPE) -
 
 async def input(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Добавление информации"""
-    if POLLUTION_FOTO == update.callback_query.data:
-        text = "Загрузите фотографию"
-    elif POLLUTION_COMMENT == update.callback_query.data:
-        text = "Напишите, если что-то важно знать об обнаруженной проблеме:"
-    elif POLLUTION_COORDINATES == update.callback_query.data:
-        text = (
-            "Отправьте геопозицию, для этого:\n"
-            "1. Нажмите на значок в виде «скрепки», находится справа от поля ввода;\n"
-            "2. В открывшемся меню выберите «Геопозиция»;\n"
-            "3. Выберете место на карте и нажмите «Отправить геопозицию»."
-        )
-    button = [[InlineKeyboardButton(text="Назад", callback_data=BACK)]]
-    keyboard = InlineKeyboardMarkup(button)
+    if update.callback_query.data != RETURN_DATA:
+        if POLLUTION_FOTO == update.callback_query.data:
+            text = "Загрузите фотографию"
+            context.user_data[CURRENT_FEATURE] = update.callback_query.data
+        elif POLLUTION_COMMENT == update.callback_query.data:
+            text = "Напишите, если что-то важно знать об обнаруженной проблеме:"
+            context.user_data[CURRENT_FEATURE] = update.callback_query.data
+        elif POLLUTION_COORDINATES == update.callback_query.data:
+            context.user_data[CURRENT_FEATURE] = update.callback_query.data
+            text = (
+                "Отправьте геопозицию, для этого:\n"
+                "1. Нажмите на значок в виде «скрепки», находится справа от поля ввода;\n"
+                "2. В открывшемся меню выберите «Геопозиция»;\n"
+                "3. Выберете место на карте и нажмите «Отправить геопозицию»."
+            )
+        elif update.callback_query.data:
+            print("**!!**")
+            print(update.callback_query.data)
+            print('**!!""')
+        button = [[InlineKeyboardButton(text="Назад", callback_data=BACK)]]
+        keyboard = InlineKeyboardMarkup(button)
 
-    await update.callback_query.answer()
-    await update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
+        await update.callback_query.answer()
+        await update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
 
-    return TYPING
+        return TYPING
+    else:
+        print("else после false даных")
 
 
 async def save_comment(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     """Сохранение комментария"""
     user_data = context.user_data
-    user_data[FEATURES][POLLUTION_COMMENT] = update.message.text
-    user_data[START_OVER] = True
+    if context.user_data[CURRENT_FEATURE] == POLLUTION_COMMENT:
+        user_data[FEATURES][POLLUTION_COMMENT] = update.message.text
+        user_data[START_OVER] = True
 
-    return await select_option_to_report_about_pollution(update, context)
+        return await select_option_to_report_about_pollution(update, context)
+    else:
+        chat_text = "Вы ввели некорректные данные"
+        buttons = [
+            [
+                InlineKeyboardButton(text="Указать данные заново", callback_data=RETURN_DATA),
+            ],
+            [
+                InlineKeyboardButton(text="Назад", callback_data=BACK),
+            ],
+        ]
+
+        keyboard = InlineKeyboardMarkup(buttons)
+
+        await update.message.reply_text(text=chat_text, reply_markup=keyboard)
 
 
 async def save_foto(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
