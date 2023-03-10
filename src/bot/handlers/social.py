@@ -4,7 +4,6 @@ from telegram.constants import ParseMode
 from telegram.ext import ContextTypes
 
 from api.tracker import client
-from bot.handlers.start import start
 from bot.handlers.state_constants import (
     ADDRESS_TEMPORARY,
     BACK,
@@ -32,6 +31,7 @@ from bot.handlers.state_constants import (
     TYPING_SOCIAL_CITY,
 )
 from bot.service.dadata import get_fields_from_dadata
+from src.bot.handlers.common import end_describing
 from src.bot.service.assistance_disabled import create_new_social
 from src.bot.service.save_new_user import check_user_in_db, create_new_user
 from src.bot.service.save_tracker_id import save_tracker_id
@@ -200,8 +200,7 @@ async def save_and_exit_from_social_problem(update: Update, context: ContextType
     if not old_user:
         await create_new_user(user, session)
     if old_user and old_user.is_banned:
-        await start(update, context)
-        return END
+        return await end_describing(update, context)
     await create_new_social(user_data, session)
     volunteers = await crud_volunteer.get_volunteers_by_point(user_data[LONGITUDE], user_data[LATITUDE], session)
     city = await crud_assistance_disabled.get_full_address_by_telegram_id(user_data[TELEGRAM_ID], session)
@@ -216,10 +215,7 @@ async def save_and_exit_from_social_problem(update: Update, context: ContextType
         description=description,
     )
     await save_tracker_id(crud_assistance_disabled, tracker.key, user_data[TELEGRAM_ID], session)
-    context.user_data.pop(FEATURES, None)
-    context.user_data.pop(CURRENT_FEATURE, None)
-    await start(update, context)
-    return END
+    return await end_describing(update, context)
 
 
 async def back_to_add_social(update: Update, context: ContextTypes.DEFAULT_TYPE):
