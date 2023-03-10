@@ -151,7 +151,6 @@ def create_bot() -> Application:
         fallbacks=[
             CallbackQueryHandler(end_describing, pattern=END_CMD),
             CommandHandler("stop", stop),
-            # CallbackQueryHandler(select_option_to_report_about_pollution, pattern=RETURN_DATA),
             CallbackQueryHandler(input, pattern=POLLUTION_COMMENT),
             CallbackQueryHandler(input, pattern=POLLUTION_COORDINATES),
             CallbackQueryHandler(input, pattern=POLLUTION_FOTO),
