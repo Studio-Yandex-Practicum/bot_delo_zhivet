@@ -115,7 +115,7 @@ cat > /var/lib/postgresql/.walg.json << EOF
     "AWS_REGION":"ru-central1",
     "AWS_ACCESS_KEY_ID": "<ACCESS_KEY>",
     "AWS_SECRET_ACCESS_KEY": "<SECRET_ACCESS_KEY>",
-    "WALG_COMPRESSION_METHOD": "brotli", #zstd
+    "WALG_COMPRESSION_METHOD": "brotli",
     "WALG_DELTA_MAX_STEPS": "5",
     "PGDATA": "/var/lib/postgresql/data",
     "PGHOST": "localhost",
