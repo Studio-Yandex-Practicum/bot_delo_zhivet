@@ -27,6 +27,7 @@ SELECTING_OVER = "selecting_city"
 
 # Состояния диалога Получение Телефонного номера
 SPECIFY_PHONE_PERMISSION = "phone"
+RETURN_DATA = "return_data"
 
 
 # Meta состояния

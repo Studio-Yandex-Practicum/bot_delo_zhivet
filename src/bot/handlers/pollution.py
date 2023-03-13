@@ -20,6 +20,7 @@ from .start import start
 from .state_constants import (
     BACK,
     CHECK_MARK,
+    CURRENT_FEATURE,
     END,
     FEATURES,
     GEOM,
@@ -104,9 +105,12 @@ async def input(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Добавление информации"""
     if POLLUTION_FOTO == update.callback_query.data:
         text = "Загрузите фотографию"
+        context.user_data[CURRENT_FEATURE] = update.callback_query.data
     elif POLLUTION_COMMENT == update.callback_query.data:
         text = "Напишите, если что-то важно знать об обнаруженной проблеме:"
+        context.user_data[CURRENT_FEATURE] = update.callback_query.data
     elif POLLUTION_COORDINATES == update.callback_query.data:
+        context.user_data[CURRENT_FEATURE] = update.callback_query.data
         text = (
             "Отправьте геопозицию, для этого:\n"
             "1. Нажмите на значок в виде «скрепки», находится справа от поля ввода;\n"
@@ -125,33 +129,78 @@ async def input(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def save_comment(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     """Сохранение комментария"""
     user_data = context.user_data
-    user_data[FEATURES][POLLUTION_COMMENT] = update.message.text
-    user_data[START_OVER] = True
+    if context.user_data[CURRENT_FEATURE] == POLLUTION_COMMENT:
+        user_data[FEATURES][POLLUTION_COMMENT] = update.message.text
+        user_data[START_OVER] = True
 
-    return await select_option_to_report_about_pollution(update, context)
+        return await select_option_to_report_about_pollution(update, context)
+    else:
+        chat_text = "Вы ввели некорректные данные, возможно вы хотели добавить комментарий?"
+        buttons = [
+            [
+                InlineKeyboardButton(text="Перейти к добавлению комментария", callback_data=POLLUTION_COMMENT),
+            ],
+            [
+                InlineKeyboardButton(text="Назад", callback_data=BACK),
+            ],
+        ]
+
+        keyboard = InlineKeyboardMarkup(buttons)
+
+        await update.message.reply_text(text=chat_text, reply_markup=keyboard)
 
 
 async def save_foto(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     """Сохранение фотографии"""
     user_data = context.user_data
-    photo_file = await update.message.photo[-1].get_file()
-    date = datetime.now().strftime("%d_%m_%Y_%H_%M_%S")
-    file_path = f"media\\{date}.jpg"
-    await photo_file.download_to_drive(custom_path=file_path)
-    user_data[FEATURES][POLLUTION_FOTO] = str(file_path)
-    user_data[START_OVER] = True
+    if context.user_data[CURRENT_FEATURE] == POLLUTION_FOTO:
+        photo_file = await update.message.photo[-1].get_file()
+        date = datetime.now().strftime("%d_%m_%Y_%H_%M_%S")
+        file_path = f"media\\{date}.jpg"
+        await photo_file.download_to_drive(custom_path=file_path)
+        user_data[FEATURES][POLLUTION_FOTO] = str(file_path)
+        user_data[START_OVER] = True
 
-    return await select_option_to_report_about_pollution(update, context)
+        return await select_option_to_report_about_pollution(update, context)
+    else:
+        chat_text = "Вы ввели некорректные данные, возможно вы хотели добавить фотографию?"
+        buttons = [
+            [
+                InlineKeyboardButton(text="Перейти к добавлению фотографии", callback_data=POLLUTION_FOTO),
+            ],
+            [
+                InlineKeyboardButton(text="Назад", callback_data=BACK),
+            ],
+        ]
+
+        keyboard = InlineKeyboardMarkup(buttons)
+
+        await update.message.reply_text(text=chat_text, reply_markup=keyboard)
 
 
 async def save_location(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     """Сохранение локации"""
     user_data = context.user_data
-    user_data[FEATURES][LONGITUDE] = update.message.location.longitude
-    user_data[FEATURES][LATITUDE] = update.message.location.latitude
-    user_data[START_OVER] = True
+    if context.user_data[CURRENT_FEATURE] == POLLUTION_COORDINATES:
+        user_data[FEATURES][LONGITUDE] = update.message.location.longitude
+        user_data[FEATURES][LATITUDE] = update.message.location.latitude
+        user_data[START_OVER] = True
 
-    return await select_option_to_report_about_pollution(update, context)
+        return await select_option_to_report_about_pollution(update, context)
+    else:
+        chat_text = "Вы ввели некорректные данные, возможно вы хотели добавить коррдинаты?"
+        buttons = [
+            [
+                InlineKeyboardButton(text="Перейти к добавлению координат", callback_data=POLLUTION_COORDINATES),
+            ],
+            [
+                InlineKeyboardButton(text="Назад", callback_data=BACK),
+            ],
+        ]
+
+        keyboard = InlineKeyboardMarkup(buttons)
+
+        await update.message.reply_text(text=chat_text, reply_markup=keyboard)
 
 
 async def save_and_exit_pollution(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
