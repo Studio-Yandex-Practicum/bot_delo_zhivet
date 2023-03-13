@@ -94,13 +94,13 @@ ___
 ```bash
 docker exec -it <container id> bash
 ```
-### 1. Установка wal-g, crontab, wget, nano в докер контейнере postgis:
+### 1. Установка wal-g и зависимости в докер контейнере postgis:
 ```bash
-apt-get update && \
-apt-get install -y cron wget nano && \
-wget https://github.com/wal-g/wal-g/releases/download/v0.2.18/wal-g.linux-amd64.tar.gz && \
-tar -zxvf wal-g.linux-amd64.tar.gz && \
-mv wal-g /usr/local/bin/
+apk add --update --no-cache brotli-dev coreutils git go musl-dev gcc make && \
+git clone https://github.com/wal-g/wal-g.git && cd wal-g && \
+go mod vendor && \
+export USE_BROTLI=1 && \
+make pg_install && mv /wal-g/wal-g /usr/local/bin
 ```
 ### 2. Создать S3 Object Storage на Yandex.Cloud:
 * создать бакет
@@ -116,7 +116,7 @@ cat > /var/lib/postgresql/.walg.json << EOF
     "AWS_REGION":"ru-central1",
     "AWS_ACCESS_KEY_ID": "<ACCESS_KEY>",
     "AWS_SECRET_ACCESS_KEY": "<SECRET_ACCESS_KEY>",
-    "WALG_COMPRESSION_METHOD": "brotli",
+    "WALG_COMPRESSION_METHOD": "brotli", #zstd
     "WALG_DELTA_MAX_STEPS": "5",
     "PGDATA": "/var/lib/postgresql/data",
     "PGHOST": "localhost",
@@ -133,19 +133,32 @@ chown postgres: /var/lib/postgresql/.walg.json
 ```bash
 psql -h /var/run/postgresql -U $POSTGRES_USER -d $POSTGRES_DB
 ```
-Создать роль _postgres_:
+Проверить существующие роли:
+```bash
+\du
+```
+Создать роль _postgres_, если ее нет в списке:
 ```bash
 CREATE ROLE postgres WITH SUPERUSER LOGIN PASSWORD 'mypassword';
 ```
-### 5. Настроить автоматизированное создание резервных копий:
+Если роль в списке есть, проверить параметры доступа(Superuser, login). Добавить артибут:
 ```bash
-echo "data_directory = '/var/lib/postgresql/data/'" >> /var/lib/postgresql/data/postgresql.conf && \
+ALTER ROLE postgres SUPERUSER LOGIN;
+```
+### 5.Cоздать папку для логов и настроить автоматизированное создание резервных копий:
+```bash
+mkdir /var/log/postgresql && chown postgres: /var/log/postgresql
+```
+```bash
 echo "unix_socket_directories = '/var/run/postgresql'" >> /var/lib/postgresql/data/postgresql.conf && \
 echo "wal_level = replica" >> /var/lib/postgresql/data/postgresql.conf && \
 echo "archive_mode = on" >> /var/lib/postgresql/data/postgresql.conf && \
-echo "archive_command = '/usr/local/bin/wal-g wal-push \"%p\" >> /var/log/postgresql/archive_command.log 2>&1' " >> /var/lib/postgresql/data/postgresql.conf && \
-echo "archive_timeout = 3600" >> /var/lib/postgresql/data/postgresql.conf && \
-echo "restore_command = '/usr/local/bin/wal-g wal-fetch \"%f\" \"%p\" >> /var/log/postgresql/restore_command.log 2>&1' " >> /var/lib/postgresql/data/postgresql.conf
+echo "archive_timeout = 3600" >> /var/lib/postgresql/data/postgresql.conf
+```
+Добавить параметры AWS_ACCESS_KEY_ID и AWS_SECRET_ACCESS_KEY в achive и restore command:
+```bash
+echo "archive_command = 'env AWS_ACCESS_KEY_ID=<ACCESS_KEY> AWS_SECRET_ACCESS_KEY=<SECRET_ACCESS_KEY> /usr/local/bin/wal-g wal-push \"%p\" >> /var/log/postgresql/archive_command.log 2>&1'" >> /var/lib/postgresql/data/postgresql.conf && \
+echo "restore_command = 'env AWS_ACCESS_KEY_ID=<ACCESS_KEY> AWS_SECRET_ACCESS_KEY=<SECRET_ACCESS_KEY> /usr/local/bin/wal-g wal-fetch \"%f\" \"%p\" >> /var/log/postgresql/restore_command.log 2>&1'" >> /var/lib/postgresql/data/postgresql.conf
 ```
 Перезагружаем конфиг через отправку SIGHUP сигнала всем процессам БД:
 ```bash
@@ -166,11 +179,7 @@ crontab -e
 
 Запустить crontab:
 ```bash
-service cron start
-```
-Проверить статус:
-```bash
-service cron status 
+/usr/sbin/crond -b
 ```
 ### 7. Восстановление базы данных:
 Cкачать и разархивировать последнюю резервную копию.
