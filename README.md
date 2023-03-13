@@ -88,7 +88,6 @@ https://geoalchemy-2.readthedocs.io/en/latest/alembic.html#interactions-between-
 
 [:arrow_up:Оглавление](#Оглавление)
 ___
-
 ## Настройка создания backup db
 Чтобы зайти в контейнер, необходимо выполнить команду:
 ```bash
@@ -191,6 +190,7 @@ su - postgres -c '/usr/local/bin/wal-g backup-fetch /var/lib/postgresql/data LAT
 su - postgres -c '/usr/local/bin/wal-g backup-push /var/lib/postgresql/data'
 ```
 ___
+
 ## Установка pre-commit hook
 Для того чтобы при каждом коммите выполнялись pre-commit проверки, необходимо:
 1. Установить pre-commit
@@ -216,6 +216,8 @@ pre-commit --version
 
 [:arrow_up:Оглавление](#Оглавление)
 
+
+
 ### Установка hook
 
 Установка осуществляется hook командой
@@ -231,7 +233,6 @@ pre-commit install --all
 pre-commit run --all-files
 ```
 ___
-
 ### Подключение системы мониторинга Sentry
 1. Зарегистрируйтесь на платформе:
 https://sentry.io/signup/
@@ -245,7 +246,6 @@ https://sentry.io/signup/
     - Создайте еще один проект, выбрав при этом платформу PYTHON.
     - В настройках проекта перейдите в раздел "Client Keys", скопируйте ключ DSN.
     - Присвойте переменной SENTRY_DSN_BOT в файле .env полученное значение.
-
 ___
 ## Запуск бота
 Переименуйте файл .env.example в .env и заполните его.

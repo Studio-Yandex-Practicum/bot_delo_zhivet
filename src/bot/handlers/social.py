@@ -6,7 +6,9 @@ from telegram.ext import ContextTypes
 from api.tracker import client
 from bot.handlers.start import start
 from bot.handlers.state_constants import (
+    ADDRESS_TEMPORARY,
     BACK,
+    CHECK_MARK,
     CITY,
     CITY_INPUT,
     CITY_SOCIAL,
@@ -79,7 +81,7 @@ async def address_confirmation(update: Update, context: ContextTypes.DEFAULT_TYP
             'Если адрес не правильный, то выберите "Нет" и укажите более подробный вариант адреса, '
             "а мы постараемся определить его правильно!"
         )
-        context.user_data[FEATURES] |= address
+        context.user_data[ADDRESS_TEMPORARY] = address
 
         buttons = [
             [
@@ -98,8 +100,10 @@ async def address_confirmation(update: Update, context: ContextTypes.DEFAULT_TYP
         buttons = [
             [
                 InlineKeyboardButton(text="Указать адрес заново", callback_data=CITY_INPUT),
+            ],
+            [
                 InlineKeyboardButton(text="Назад", callback_data=BACK),
-            ]
+            ],
         ]
 
         keyboard = InlineKeyboardMarkup(buttons)
@@ -123,6 +127,7 @@ async def save_social_address_input(update: Update, context: ContextTypes.DEFAUL
     city = update.callback_query.data
 
     user_data = context.user_data
+    user_data[FEATURES] |= context.user_data.pop(ADDRESS_TEMPORARY, {})
     user_data[FEATURES][user_data[CURRENT_FEATURE]] = city
 
     user_data[START_OVER] = True
@@ -131,12 +136,20 @@ async def save_social_address_input(update: Update, context: ContextTypes.DEFAUL
 
 
 async def report_about_social_problem(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
+    def check_feature(feature):
+        return FEATURES in context.user_data and feature in context.user_data[FEATURES]
+
     text = "Заполните данные об обращении"
     buttons = [
         [
-            InlineKeyboardButton(text="Указать адрес", callback_data=SOCIAL_ADDRESS),
+            InlineKeyboardButton(text=f"Указать адрес {CHECK_MARK*check_feature(CITY)}", callback_data=SOCIAL_ADDRESS),
         ],
-        [InlineKeyboardButton(text="Оставить контакты и комментарий", callback_data=SOCIAL_COMMENT)],
+        [
+            InlineKeyboardButton(
+                text=f"Оставить контакты и комментарий {CHECK_MARK*check_feature(SOCIAL_COMMENT)}",
+                callback_data=SOCIAL_COMMENT,
+            )
+        ],
         [
             InlineKeyboardButton(text="Назад", callback_data=str(END)),
         ],
@@ -203,8 +216,18 @@ async def save_and_exit_from_social_problem(update: Update, context: ContextType
         description=description,
     )
     await save_tracker_id(crud_assistance_disabled, tracker.key, user_data[TELEGRAM_ID], session)
+    context.user_data.pop(FEATURES, None)
+    context.user_data.pop(CURRENT_FEATURE, None)
     await start(update, context)
     return END
+
+
+async def back_to_add_social(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_data = context.user_data
+    user_data[START_OVER] = True
+    context.user_data.pop(ADDRESS_TEMPORARY, None)
+
+    return await report_about_social_problem(update, context)
 
 
 def check_data(user_data):
