@@ -263,7 +263,7 @@ class PolutionModelView(BaseModelView):
 
 admin = flask_admin.Admin(
     app,
-    "Бот 'Дело живёт'",
+    "Бот «Дело живёт»",
     index_view=MyAdminIndexView(name="Главная"),
     base_template="my_master.html",
     template_mode=Config.BOOTSTRAP_VERSION,
