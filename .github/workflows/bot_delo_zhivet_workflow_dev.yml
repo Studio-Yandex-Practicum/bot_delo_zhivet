@@ -1,0 +1,193 @@
+name: Deploy on dev server
+
+on:
+  push:
+    branches:
+#      - develop
+#      - master
+      - feature/workflow_update
+
+env:
+#    BRANCH: 'refs/heads/develop'
+    BRANCH: 'refs/heads/feature/workflow_update'
+
+jobs:
+  tests:
+    name: Testing
+    runs-on: gh-runner-1
+    strategy:
+      matrix:
+        python-version: [ "3.10", "3.11" ]
+
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install poetry
+        run: |
+          pip install pipx
+          pipx install poetry==1.3.2 --force
+
+      - name: Validate the structure of the pyproject.toml
+        run: |
+          poetry check
+
+      - name: Verify that poetry.lock is consistent with pyproject.toml
+        run: poetry lock --check
+
+      - name: Install dependencies
+        run: |
+          poetry install --with test
+
+      - name: Test with flake8 - bot
+        run: |
+          poetry run python -m flake8
+
+  build_and_push_to_docker_hub:
+    name: Build and push Docker image to Docker Hub
+    runs-on: gh-runner-1
+    needs: tests
+
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push a bot&admin image to Docker Hub
+        if: github.ref == env.BRANCH
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: Dockerfile
+          push: true
+          no-cache: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/delo_zhivet_bot_and_admin:latest
+
+      - name: Build and push a nginx image to Docker Hub
+        if: github.ref == env.BRANCH
+        uses: docker/build-push-action@v3
+        with:
+          context: ./infrastructure/nginx
+          file: ./infrastructure/nginx/Dockerfile
+          push: true
+          no-cache: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/delo_zhivet_nginx:latest
+          build-args: |
+            NGINX_CONFIG=default.conf
+
+  deploy:
+    name: Deploy
+    runs-on: gh-runner-1
+    needs: build_and_push_to_docker_hub
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+
+      - name: Copy files for deploy
+        if: github.ref == env.BRANCH
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          passphrase: ${{ secrets.SERVER_PASSPHRASE }}
+          source: "infrastructure/*,!infrastructure/archive/*,!infrastructure/nginx/delo.conf"
+          target: "~/dev"
+          overwrite: true
+          strip_components: 1
+
+      - name: Copy file for nginx
+        if: github.ref == env.BRANCH
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          passphrase: ${{ secrets.SERVER_PASSPHRASE }}
+          source: "infrastructure/nginx"
+          target: "~/dev"
+          overwrite: true
+
+      - name: Executing remote ssh commands to deploy
+        if: github.ref == env.BRANCH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          passphrase: ${{ secrets.SERVER_PASSPHRASE }}
+          script: |
+            cd ~/dev
+            docker-compose -f docker-compose-test.yaml stop
+            docker-compose -f docker-compose-test.yaml rm -fs web
+            docker-compose -f docker-compose-test.yaml rm -fs bot
+            docker-compose -f docker-compose-test.yaml rm -fs nginx
+            docker image rm -f ${{ secrets.DOCKERHUB_USERNAME }}/delo_zhivet_bot_and_admin:latest
+            docker image rm -f ${{ secrets.DOCKERHUB_USERNAME }}/delo_zhivet_nginx:latest
+            docker image pull -q ${{ secrets.DOCKERHUB_USERNAME }}/delo_zhivet_bot_and_admin:latest
+            docker image pull -q ${{ secrets.DOCKERHUB_USERNAME }}/delo_zhivet_nginx:latest
+            rm .env
+            touch .env
+            echo TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }} >> .env
+            echo HOST=${{ secrets.HOST }} >> .env
+            echo WEBHOOK_PATH=${{ secrets.WEBHOOK_PATH }} >> .env
+            echo WEBHOOK_DOMAIN=${{ secrets.WEBHOOK_DOMAIN }} >> .env
+            echo WEBHOOK_PORT=${{ secrets.WEBHOOK_PORT }} >> .env
+            echo GEOCODER_APIKEY=${{ secrets.GEOCODER_APIKEY }} >> .env
+            echo GEOCODER_BASE_URL=${{ secrets.GEOCODER_BASE_URL }} >> .env
+            echo MAXIMUM_OBJECTS_FROM_GEOCODER=${{ secrets.MAXIMUM_OBJECTS_FROM_GEOCODER }} >> .env
+            echo POSTGRES_DB=${{ secrets.POSTGRES_DB }} >> .env
+            echo POSTGRES_USER=${{ secrets.POSTGRES_USER }} >> .env
+            echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env
+            echo DB_HOST=${{ secrets.DB_HOST }} >> .env
+            echo DB_PORT=${{ secrets.DB_PORT }} >> .env
+            echo OAUTH_TOKEN=${{ secrets.OAUTH_TOKEN }} >> .env
+            echo ORG_ID=${{ secrets.ORG_ID }} >> .env
+            echo DADATA_TOKEN=${{ secrets.DADATA_TOKEN }} >> .env
+            echo DADATA_SECRET=${{ secrets.DADATA_SECRET }} >> .env
+            echo FLASK_APP=${{ secrets.FLASK_APP }} >> .env
+            echo FLASK_DEBUG=${{ secrets.FLASK_DEBUG }} >> .env
+            echo SUPER_USER_LOGIN=${{ secrets.SUPER_USER_LOGIN }} >> .env
+            echo SUPER_USER_EMAIL=${{ secrets.SUPER_USER_EMAIL }} >> .env
+            echo SUPER_USER_PASSWORD=${{ secrets.SUPER_USER_PASSWORD }} >> .env
+            echo ADMIN_SECRET_KEY=${{ secrets.ADMIN_SECRET_KEY }} >> .env
+            echo AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }} >> .env
+            echo AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }} >> .env
+            echo AWS_SERVICE_NAME=${{ secrets.AWS_SERVICE_NAME }} >> .env
+            echo AWS_ENDPOINT_URL=${{ secrets.AWS_ENDPOINT_URL }} >> .env
+            echo AWS_BUCKET_NAME=${{ secrets.AWS_BUCKET_NAME }} >> .env
+            echo SENTRY_DSN_ADMIN=${{ secrets.SENTRY_DSN_ADMIN }} >> .env
+            echo SENTRY_DSN_BOT=${{ secrets.SENTRY_DSN_BOT }} >> .env
+            echo PASSWORD_RESET_TOKEN_TTL=${{ secrets.PASSWORD_RESET_TOKEN_TTL }} >> .env
+            echo PASSWORD_RESET_TOKEN_ALGORITHM=${{ secrets.PASSWORD_RESET_TOKEN_ALGORITHM }} >> .env
+            echo MAIL_SERVER=${{ secrets.MAIL_SERVER }} >> .env
+            echo MAIL_PORT=${{ secrets.MAIL_PORT }} >> .env
+            echo MAIL_USE_SSL=${{ secrets.MAIL_USE_SSL }} >> .env
+            echo MAIL_USERNAME=${{ secrets.MAIL_USERNAME }} >> .env
+            echo MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }} >> .env
+            echo MAIL_DEBUG=${{ secrets.MAIL_DEBUG }} >> .env
+            echo HOST_NAME=${{ secrets.DEV_HOST_NAME }} >> .env
+            echo CERTBOT_EMAIL=${{ secrets.DEV_CERTBOT_EMAIL }} >> .env
+            chmod +x update_nginx_conf.sh
+            . ./update_nginx_conf.sh
+            docker-compose -f docker-compose-test.yaml up -d
+            chmod +x update_certificate.sh
+            . ./update_certificate.sh
+            docker-compose -f docker-compose-test.yaml exec bot alembic upgrade head
+            docker-compose -f docker-compose-test.yaml exec web python admin/manage.py collectstatic --static_folder static --overwrite
