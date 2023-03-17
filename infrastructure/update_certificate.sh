@@ -2,7 +2,7 @@
 
 source .env && export HOST_NAME && export CERTBOT_EMAIL
 
-readonly LETSENCRYPT_DIRECTORY=/root/test/nginx/letsencrypt
+readonly LETSENCRYPT_DIRECTORY=/root/delozhivet/nginx/letsencrypt
 
 # Проверяем, запущен ли контейнер nginx в Docker Compose
 if docker-compose -f docker-compose-test.yaml ps | grep -q "nginx"; then

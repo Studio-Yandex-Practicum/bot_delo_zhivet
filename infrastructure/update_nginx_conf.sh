@@ -12,9 +12,9 @@ readonly CERTBOT_STR="managed by Certbot"
 readonly REBOOT_CONF_TRUE="REBOOT_CONF=TRUE"
 
 # Путь до файла из репозитория
-readonly SRC_FILE=~/test/infrastructure/nginx/delo.conf
+readonly SRC_FILE=~/delozhivet/infrastructure/nginx/delo.conf
 # Путь до копии файла
-readonly MAIN_FILE=~/test/nginx/delo.conf
+readonly MAIN_FILE=~/delozhivet/nginx/delo.conf
 
 if [ -e "$MAIN_FILE" ] && grep -q "$CERTBOT_STR" "$MAIN_FILE"; then
   echo "The value '$CERTBOT_STR' is found in $MAIN_FILE."
