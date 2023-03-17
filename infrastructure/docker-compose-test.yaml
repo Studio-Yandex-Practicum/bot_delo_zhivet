@@ -43,6 +43,8 @@ services:
   nginx:
     image: vasilekx/delo_zhivet_nginx:latest
     restart: unless-stopped
+    depends_on:
+      - web
     ports:
       - "80:80"
       - "443:443"
@@ -50,8 +52,9 @@ services:
       - ./nginx/delo.conf:/etc/nginx/servers/delo.conf:rw
       - ./nginx/letsencrypt/:/etc/letsencrypt/:rw
       - static_value:/var/html/static/
-    depends_on:
-      - web
+    env_file:
+      - ./.env
+    command: /bin/sh -c "envsubst < /etc/nginx/servers/delo.conf > /etc/nginx/servers/delo.conf && crond -b && nginx -g 'daemon off;'"
 
 
 volumes:
