@@ -14,7 +14,7 @@ env:
 jobs:
   tests:
     name: Testing
-    runs-on: gh-runner-1
+    runs-on: ubuntu-latest # gh-runner-1
     strategy:
       matrix:
         python-version: [ "3.10", "3.11" ]
@@ -50,7 +50,7 @@ jobs:
 
   build_and_push_to_docker_hub:
     name: Build and push Docker image to Docker Hub
-    runs-on: gh-runner-1
+    runs-on: ubuntu-latest
     needs: tests
 
     steps:
@@ -93,7 +93,7 @@ jobs:
 
   deploy:
     name: Deploy
-    runs-on: gh-runner-1
+    runs-on: ubuntu-latest
     needs: build_and_push_to_docker_hub
     steps:
       - name: Check out the repo

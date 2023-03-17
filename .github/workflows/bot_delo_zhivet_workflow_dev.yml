@@ -14,7 +14,7 @@ env:
 jobs:
   tests:
     name: Testing
-    runs-on: gh-runner-1
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version: [ "3.10", "3.11" ]
@@ -50,7 +50,7 @@ jobs:
 
   build_and_push_to_docker_hub:
     name: Build and push Docker image to Docker Hub
-    runs-on: gh-runner-1
+    runs-on: ubuntu-latest
     needs: tests
 
     steps:
@@ -93,7 +93,7 @@ jobs:
 
   deploy:
     name: Deploy
-    runs-on: gh-runner-1
+    runs-on: ubuntu-latest
     needs: build_and_push_to_docker_hub
     steps:
       - name: Check out the repo
@@ -172,16 +172,16 @@ jobs:
             echo AWS_SERVICE_NAME=${{ secrets.AWS_SERVICE_NAME }} >> .env
             echo AWS_ENDPOINT_URL=${{ secrets.AWS_ENDPOINT_URL }} >> .env
             echo AWS_BUCKET_NAME=${{ secrets.AWS_BUCKET_NAME }} >> .env
-            echo SENTRY_DSN_ADMIN=${{ secrets.SENTRY_DSN_ADMIN }} >> .env
-            echo SENTRY_DSN_BOT=${{ secrets.SENTRY_DSN_BOT }} >> .env
-            echo PASSWORD_RESET_TOKEN_TTL=${{ secrets.PASSWORD_RESET_TOKEN_TTL }} >> .env
-            echo PASSWORD_RESET_TOKEN_ALGORITHM=${{ secrets.PASSWORD_RESET_TOKEN_ALGORITHM }} >> .env
-            echo MAIL_SERVER=${{ secrets.MAIL_SERVER }} >> .env
-            echo MAIL_PORT=${{ secrets.MAIL_PORT }} >> .env
-            echo MAIL_USE_SSL=${{ secrets.MAIL_USE_SSL }} >> .env
-            echo MAIL_USERNAME=${{ secrets.MAIL_USERNAME }} >> .env
-            echo MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }} >> .env
-            echo MAIL_DEBUG=${{ secrets.MAIL_DEBUG }} >> .env
+            echo SENTRY_DSN_ADMIN=${{ secrets.DEV_SENTRY_DSN_ADMIN }} >> .env
+            echo SENTRY_DSN_BOT=${{ secrets.DEV_SENTRY_DSN_BOT }} >> .env
+            echo PASSWORD_RESET_TOKEN_TTL=${{ secrets.DEV_PASSWORD_RESET_TOKEN_TTL }} >> .env
+            echo PASSWORD_RESET_TOKEN_ALGORITHM=${{ secrets.DEV_PASSWORD_RESET_TOKEN_ALGORITHM }} >> .env
+            echo MAIL_SERVER=${{ secrets.DEV_MAIL_SERVER }} >> .env
+            echo MAIL_PORT=${{ secrets.DEV_MAIL_PORT }} >> .env
+            echo MAIL_USE_SSL=${{ secrets.DEV_MAIL_USE_SSL }} >> .env
+            echo MAIL_USERNAME=${{ secrets.DEV_MAIL_USERNAME }} >> .env
+            echo MAIL_PASSWORD=${{ secrets.DEV_MAIL_PASSWORD }} >> .env
+            echo MAIL_DEBUG=${{ secrets.DEV_MAIL_DEBUG }} >> .env
             echo HOST_NAME=${{ secrets.DEV_HOST_NAME }} >> .env
             echo CERTBOT_EMAIL=${{ secrets.DEV_CERTBOT_EMAIL }} >> .env
             chmod +x update_nginx_conf.sh
