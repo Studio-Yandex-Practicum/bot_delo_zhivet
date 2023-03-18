@@ -184,6 +184,7 @@ jobs:
             echo MAIL_DEBUG=${{ secrets.DEV_MAIL_DEBUG }} >> .env
             echo HOST_NAME=${{ secrets.DEV_HOST_NAME }} >> .env
             echo CERTBOT_EMAIL=${{ secrets.DEV_CERTBOT_EMAIL }} >> .env
+            echo PROJECT_FOLDER_NAME=${{ vars.PROJECT_FOLDER_NAME }} >> .env
             chmod +x update_nginx_conf.sh
             . ./update_nginx_conf.sh
             docker-compose -f docker-compose-test.yaml up -d

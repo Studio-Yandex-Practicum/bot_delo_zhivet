@@ -1,8 +1,9 @@
 #!/bin/bash
 
-source .env && export HOST_NAME && export CERTBOT_EMAIL
+source .env && export HOST_NAME && export CERTBOT_EMAIL && export PROJECT_FOLDER_NAME
 
-readonly LETSENCRYPT_DIRECTORY=/root/delozhivet/nginx/letsencrypt
+readonly LETSENCRYPT_DIRECTORY=~/$PROJECT_FOLDER_NAME/nginx/letsencrypt
+echo "test LETSENCRYPT_DIRECTORY - $LETSENCRYPT_DIRECTORY"
 
 # Проверяем, запущен ли контейнер nginx в Docker Compose
 if docker-compose -f docker-compose-test.yaml ps | grep -q "nginx"; then
@@ -25,7 +26,7 @@ else
     echo "Directory $LETSENCRYPT_DIRECTORY does not exist, is empty or NEED_REBOOT_CONF_TRUE is TRUE."
     echo "Run certbot. Dry run!"
     # if [ $? -ne 0 ]; then
-    docker-compose -f docker-compose-test.yaml exec nginx certbot certonly --dry-run --nginx --non-interactive --email ${CERTBOT_EMAIL} --agree-tos --no-eff-email -d ${HOST_NAME}
+    docker-compose -f docker-compose-test.yaml exec nginx certbot certonly --dry-run --nginx --non-interactive --email "${CERTBOT_EMAIL}" --agree-tos --no-eff-email -d "${HOST_NAME}"
     # echo "Run certbot. Install a certificate in your current webserver!"
     # Install a certificate in your current webserver!
     # docker-compose -f docker-compose-test.yaml exec nginx certbot --nginx --non-interactive --email ${CERTBOT_EMAIL} --agree-tos --no-eff-email -d ${HOST_NAME}
