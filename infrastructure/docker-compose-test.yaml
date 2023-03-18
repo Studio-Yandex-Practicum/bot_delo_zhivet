@@ -50,11 +50,12 @@ services:
       - "443:443"
     volumes:
       - ./nginx/delo.conf:/etc/nginx/servers/delo.conf:rw
+      - ./nginx/delo.temp:/etc/nginx/conf.d/delo.temp
       - ./nginx/letsencrypt/:/etc/letsencrypt/:rw
       - static_value:/var/html/static/
     env_file:
       - ./.env
-    command: /bin/sh -c "envsubst < /etc/nginx/servers/delo.conf > /etc/nginx/servers/delo.conf && crond -b && nginx -g 'daemon off;'"
+    command: /bin/sh -c "envsubst '$${HOST_NAME} $${WEBHOOK_PATH}' < /etc/nginx/conf.d/delo.temp > /etc/nginx/servers/delo.conf && crond -b && nginx -g 'daemon off;'"
 
 
 volumes:

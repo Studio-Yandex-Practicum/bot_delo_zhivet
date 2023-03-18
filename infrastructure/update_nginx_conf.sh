@@ -15,6 +15,7 @@ readonly REBOOT_CONF_TRUE="REBOOT_CONF=TRUE"
 readonly SRC_FILE=~/delozhivet/infrastructure/nginx/delo.conf
 # Путь до копии файла
 readonly MAIN_FILE=~/delozhivet/nginx/delo.conf
+readonly TEMP_MAIN_FILE=~/delozhivet/nginx/delo.temp
 
 if [ -e "$MAIN_FILE" ] && grep -q "$CERTBOT_STR" "$MAIN_FILE"; then
   echo "The value '$CERTBOT_STR' is found in $MAIN_FILE."
@@ -30,5 +31,7 @@ if [ -e "$MAIN_FILE" ] && grep -q "$CERTBOT_STR" "$MAIN_FILE"; then
 else
   echo -e "Value '$CERTBOT_STR' not found in $MAIN_FILE or file does not exist.\nCopying $SRC_FILE to $MAIN_FILE."
   cp -f "$SRC_FILE" "$MAIN_FILE"
+  echo -e "Copying $MAIN_FILE to $TEMP_MAIN_FILE."
+  cp -f "$MAIN_FILE" "$TEMP_MAIN_FILE"
   export NEED_REBOOT_CONF_TRUE="TRUE"
 fi

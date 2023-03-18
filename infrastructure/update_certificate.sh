@@ -23,12 +23,12 @@ then
 else
     echo "Value NEED_REBOOT_CONF_TRUE=$NEED_REBOOT_CONF_TRUE"
     echo "Directory $LETSENCRYPT_DIRECTORY does not exist, is empty or NEED_REBOOT_CONF_TRUE is TRUE."
-    # echo "Run certbot. Dry run!"
+    echo "Run certbot. Dry run!"
     # if [ $? -ne 0 ]; then
-    # docker-compose -f docker-compose-test.yaml exec nginx certbot certonly --dry-run --nginx --non-interactive --email ${CERTBOT_EMAIL} --agree-tos --no-eff-email -d ${HOST_NAME}
-    echo "Run certbot. Install a certificate in your current webserver!"
+    docker-compose -f docker-compose-test.yaml exec nginx certbot certonly --dry-run --nginx --non-interactive --email ${CERTBOT_EMAIL} --agree-tos --no-eff-email -d ${HOST_NAME}
+    # echo "Run certbot. Install a certificate in your current webserver!"
     # Install a certificate in your current webserver!
-    docker-compose -f docker-compose-test.yaml exec nginx certbot --nginx --non-interactive --email ${CERTBOT_EMAIL} --agree-tos --no-eff-email -d ${HOST_NAME}
+    # docker-compose -f docker-compose-test.yaml exec nginx certbot --nginx --non-interactive --email ${CERTBOT_EMAIL} --agree-tos --no-eff-email -d ${HOST_NAME}
     if [ $? -ne 0 ]; then
         # Код возврата не равен нулю, команда завершилась с ошибкой
         echo "Failed to run certbot, removing  all files of the $LETSENCRYPT_DIRECTORY directory."
