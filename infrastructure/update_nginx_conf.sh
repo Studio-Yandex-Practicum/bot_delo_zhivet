@@ -25,6 +25,12 @@ if [ -e "$MAIN_FILE" ] && grep -q "$CERTBOT_STR" "$MAIN_FILE"; then
   if [ "$RELOAD_NGINX_CONFIG" = "$TRUE" ]; then
         echo "The env RELOAD_NGINX_CONFIG is $TRUE."
         echo "The certificate 'Let’s Encrypt' must be reloaded."
+        #
+        echo -e "Copying $SRC_FILE to $MAIN_FILE."
+        cp -f "$SRC_FILE" "$MAIN_FILE"
+        echo -e "Copying $MAIN_FILE to $TEMP_MAIN_FILE."
+        cp -f "$MAIN_FILE" "$TEMP_MAIN_FILE"
+        #
         export NEED_RELOAD_NGINX_CONFIG=$TRUE
     else
         echo "The env RELOAD_NGINX_CONFIG is $FALSE."

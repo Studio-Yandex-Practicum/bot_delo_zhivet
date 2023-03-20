@@ -3,6 +3,8 @@
 source .env && export HOST_NAME && export CERTBOT_EMAIL && export PROJECT_FOLDER_PATH
 
 readonly LETSENCRYPT_DIRECTORY=$PROJECT_FOLDER_PATH/nginx/letsencrypt
+readonly MAIN_FILE=$PROJECT_FOLDER_PATH/nginx/delo.conf
+readonly TEMP_MAIN_FILE=$PROJECT_FOLDER_PATH/nginx/delo.temp
 readonly TRUE="True"
 readonly FALSE="False"
 
@@ -38,11 +40,13 @@ else
 #        exit 1
     else
         echo "Successfully received certificate."
-        docker-compose -f docker-compose.yaml exec nginx nginx -s reload
         echo "Reloaded the nginx configuration."
+        docker-compose -f docker-compose.yaml exec nginx nginx -s reload
+        echo -e "Copying $MAIN_FILE to $TEMP_MAIN_FILE."
+        cp -f "$MAIN_FILE" "$TEMP_MAIN_FILE"
         echo "Set NEED_RELOAD_NGINX_CONFIG=$FALSE"
         export NEED_RELOAD_NGINX_CONFIG=$FALSE
         echo "Restart service containers."
-        docker-compose -f docker-compose.yaml restart
+        # docker-compose -f docker-compose.yaml restart
     fi
 fi
