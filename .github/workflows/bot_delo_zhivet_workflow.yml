@@ -3,12 +3,12 @@ name: Deploy
 on:
   push:
     branches:
-      - develop
-#      - master
+#      - develop
+      - master
 #      - feature/testing_environment
 
 env:
-    BRANCH: 'refs/heads/develop'
+    BRANCH: 'refs/heads/master'
     #    BRANCH: 'refs/heads/feature/testing_environment'
 
 jobs:
