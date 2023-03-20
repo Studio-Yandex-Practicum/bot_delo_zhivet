@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source .env && export PROJECT_FOLDER_PATH
+
 # Проверяем, запущен ли контейнер nginx в Docker Compose
 if docker-compose -f docker-compose-test.yaml ps | grep -q "nginx"; then
     echo "Container nginx is running."
@@ -12,10 +14,10 @@ readonly CERTBOT_STR="managed by Certbot"
 readonly REBOOT_CONF_TRUE="REBOOT_CONF=TRUE"
 
 # Путь до файла из репозитория
-readonly SRC_FILE=~/delozhivet/infrastructure/nginx/delo.conf
+readonly SRC_FILE=$PROJECT_FOLDER_PATH/infrastructure/nginx/delo.conf
 # Путь до копии файла
-readonly MAIN_FILE=~/delozhivet/nginx/delo.conf
-readonly TEMP_MAIN_FILE=~/delozhivet/nginx/delo.temp
+readonly MAIN_FILE=$PROJECT_FOLDER_PATH/nginx/delo.conf
+readonly TEMP_MAIN_FILE=$PROJECT_FOLDER_PATH/nginx/delo.temp
 
 if [ -e "$MAIN_FILE" ] && grep -q "$CERTBOT_STR" "$MAIN_FILE"; then
   echo "The value '$CERTBOT_STR' is found in $MAIN_FILE."

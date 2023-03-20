@@ -109,7 +109,7 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           passphrase: ${{ secrets.SERVER_PASSPHRASE }}
           source: "infrastructure/*,!infrastructure/archive/*,!infrastructure/nginx/delo.conf"
-          target: "~/delozhivet"
+          target: ${{ env.PROJECT_FOLDER_PATH }}
           overwrite: true
           strip_components: 1
 
@@ -122,7 +122,7 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           passphrase: ${{ secrets.SERVER_PASSPHRASE }}
           source: "infrastructure/nginx"
-          target: "~/delozhivet"
+          target: ${{ env.PROJECT_FOLDER_PATH }}
           overwrite: true
 
       - name: Executing remote ssh commands to deploy
@@ -134,7 +134,7 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           passphrase: ${{ secrets.SERVER_PASSPHRASE }}
           script: |
-            cd ~/${{ vars.PROJECT_FOLDER_NAME }}
+            cd ${{ env.PROJECT_FOLDER_PATH }}
             docker-compose -f docker-compose-test.yaml stop
             docker-compose -f docker-compose-test.yaml rm -fs web
             docker-compose -f docker-compose-test.yaml rm -fs bot

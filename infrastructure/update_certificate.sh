@@ -1,9 +1,8 @@
 #!/bin/bash
 
-source .env && export HOST_NAME && export CERTBOT_EMAIL && export PROJECT_FOLDER_NAME
+source .env && export HOST_NAME && export CERTBOT_EMAIL && export PROJECT_FOLDER_PATH
 
-readonly LETSENCRYPT_DIRECTORY=~/$PROJECT_FOLDER_NAME/nginx/letsencrypt
-echo "test LETSENCRYPT_DIRECTORY - $LETSENCRYPT_DIRECTORY"
+readonly LETSENCRYPT_DIRECTORY=$PROJECT_FOLDER_PATH/nginx/letsencrypt
 
 # Проверяем, запущен ли контейнер nginx в Docker Compose
 if docker-compose -f docker-compose-test.yaml ps | grep -q "nginx"; then
