@@ -135,10 +135,10 @@ jobs:
           passphrase: ${{ secrets.DEV_SERVER_PASSPHRASE }}
           script: |
             cd ${{ env.PROJECT_FOLDER_PATH }}
-            docker-compose -f docker-compose-test.yaml stop
-            docker-compose -f docker-compose-test.yaml rm -fs web
-            docker-compose -f docker-compose-test.yaml rm -fs bot
-            docker-compose -f docker-compose-test.yaml rm -fs nginx
+            docker-compose -f docker-compose.yaml stop
+            docker-compose -f docker-compose.yaml rm -fs web
+            docker-compose -f docker-compose.yaml rm -fs bot
+            docker-compose -f docker-compose.yaml rm -fs nginx
             docker image rm -f ${{ secrets.DEV_DOCKERHUB_USERNAME }}/delo_zhivet_bot_and_admin:latest
             docker image rm -f ${{ secrets.DEV_DOCKERHUB_USERNAME }}/delo_zhivet_nginx:latest
             docker image pull -q ${{ secrets.DEV_DOCKERHUB_USERNAME }}/delo_zhivet_bot_and_admin:latest
@@ -189,8 +189,8 @@ jobs:
             echo RELOAD_NGINX_CONFIG=${{ vars.RELOAD_NGINX_CONFIG }} >> .env
             chmod +x update_nginx_conf.sh
             . ./update_nginx_conf.sh
-            docker-compose -f docker-compose-test.yaml up -d
+            docker-compose -f docker-compose.yaml up -d
             chmod +x update_certificate.sh
             . ./update_certificate.sh
-            docker-compose -f docker-compose-test.yaml exec bot alembic upgrade head
-            docker-compose -f docker-compose-test.yaml exec web python admin/manage.py collectstatic --static_folder static --overwrite
+            docker-compose -f docker-compose.yaml exec bot alembic upgrade head
+            docker-compose -f docker-compose.yaml exec web python admin/manage.py collectstatic --static_folder static --overwrite

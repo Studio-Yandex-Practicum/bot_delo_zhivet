@@ -3,7 +3,7 @@
 source .env && export PROJECT_FOLDER_PATH && export RELOAD_NGINX_CONFIG
 
 # Проверяем, запущен ли контейнер nginx в Docker Compose
-if docker-compose -f docker-compose-test.yaml ps | grep -q "nginx"; then
+if docker-compose -f docker-compose.yaml ps | grep -q "nginx"; then
     echo "Container nginx is running."
     exit 1 # Выходим из скрипта с кодом ошибки
 else
@@ -11,10 +11,6 @@ else
 fi
 
 readonly CERTBOT_STR="managed by Certbot"
-# readonly REBOOT_CONF_TRUE="REBOOT_CONF=TRUE"
-# NEED_REBOOT_CONF_TRUE -> NEED_RELOAD_NGINX_CONFIG
-# $RELOAD_NGINX_CONFIG
-
 # Путь до файла из репозитория
 readonly SRC_FILE=$PROJECT_FOLDER_PATH/infrastructure/nginx/delo.conf
 # Путь до копии файла
@@ -26,7 +22,6 @@ readonly FALSE="False"
 
 if [ -e "$MAIN_FILE" ] && grep -q "$CERTBOT_STR" "$MAIN_FILE"; then
   echo "The value '$CERTBOT_STR' is found in $MAIN_FILE."
-#  if grep -q "$REBOOT_CONF_TRUE" "$SRC_FILE"; then
   if [ "$RELOAD_NGINX_CONFIG" = "$TRUE" ]; then
         echo "The env RELOAD_NGINX_CONFIG is $TRUE."
         echo "The certificate 'Let’s Encrypt' must be reloaded."
