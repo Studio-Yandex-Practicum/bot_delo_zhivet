@@ -15,7 +15,7 @@ services:
       retries: 10
 
   bot:
-    image: vasilekx/delo_zhivet_bot_and_admin:latest
+    image: delozhivet/delo_zhivet_bot_and_admin:latest
     command: ["poetry", "run", "runbot"]
     restart: always
     depends_on:
@@ -27,7 +27,7 @@ services:
       - persistence_data:/app/persistence_data/
 
   web:
-    image: vasilekx/delo_zhivet_bot_and_admin:latest
+    image: delozhivet/delo_zhivet_bot_and_admin:latest
     command: ["gunicorn", "--bind", "0.0.0.0:5000", "--access-logfile=-", "manage:app"]
     restart: always
     depends_on:
@@ -41,7 +41,7 @@ services:
       - static_value:/app/admin/static/
 
   nginx:
-    image: vasilekx/delo_zhivet_nginx:latest
+    image: delozhivet/delo_zhivet_nginx:latest
     restart: unless-stopped
     depends_on:
       - web

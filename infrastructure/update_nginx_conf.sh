@@ -28,11 +28,11 @@ if [ -e "$MAIN_FILE" ] && grep -q "$CERTBOT_STR" "$MAIN_FILE"; then
   echo "The value '$CERTBOT_STR' is found in $MAIN_FILE."
 #  if grep -q "$REBOOT_CONF_TRUE" "$SRC_FILE"; then
   if [ "$RELOAD_NGINX_CONFIG" = "$TRUE" ]; then
-        echo "The env '$RELOAD_NGINX_CONFIG' is $TRUE."
+        echo "The env RELOAD_NGINX_CONFIG is $TRUE."
         echo "The certificate 'Let’s Encrypt' must be reloaded."
         export NEED_RELOAD_NGINX_CONFIG=$TRUE
     else
-        echo "The env '$RELOAD_NGINX_CONFIG' is $FALSE."
+        echo "The env RELOAD_NGINX_CONFIG is $FALSE."
         echo "The certificate 'Let’s Encrypt' must not be reloaded."
         export NEED_RELOAD_NGINX_CONFIG=$FALSE
   fi

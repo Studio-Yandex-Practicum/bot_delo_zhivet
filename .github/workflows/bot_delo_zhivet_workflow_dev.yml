@@ -67,8 +67,8 @@ jobs:
       - name: Login to Docker Hub
         uses: docker/login-action@v2
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          username: ${{ secrets.DEV_DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DEV_DOCKERHUB_TOKEN }}
 
       - name: Build and push a bot&admin image to Docker Hub
         if: github.ref == env.BRANCH
@@ -78,7 +78,7 @@ jobs:
           file: Dockerfile
           push: true
           no-cache: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/delo_zhivet_bot_and_admin:latest
+          tags: ${{ secrets.DEV_DOCKERHUB_USERNAME }}/delo_zhivet_bot_and_admin:latest
 
       - name: Build and push a nginx image to Docker Hub
         if: github.ref == env.BRANCH
@@ -88,7 +88,7 @@ jobs:
           file: ./infrastructure/nginx/Dockerfile
           push: true
           no-cache: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/delo_zhivet_nginx:latest
+          tags: ${{ secrets.DEV_DOCKERHUB_USERNAME }}/delo_zhivet_nginx:latest
           build-args: |
             NGINX_CONFIG=default.conf
 
@@ -104,10 +104,10 @@ jobs:
         if: github.ref == env.BRANCH
         uses: appleboy/scp-action@master
         with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          passphrase: ${{ secrets.SERVER_PASSPHRASE }}
+          host: ${{ secrets.DEV_SERVER_HOST }}
+          username: ${{ secrets.DEV_SERVER_USER }}
+          key: ${{ secrets.DEV_SERVER_SSH_KEY }}
+          passphrase: ${{ secrets.DEV_SERVER_PASSPHRASE }}
           source: "infrastructure/*,!infrastructure/archive/*,!infrastructure/nginx/delo.conf"
           target: ${{ env.PROJECT_FOLDER_PATH }}
           overwrite: true
@@ -117,10 +117,10 @@ jobs:
         if: github.ref == env.BRANCH
         uses: appleboy/scp-action@master
         with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          passphrase: ${{ secrets.SERVER_PASSPHRASE }}
+          host: ${{ secrets.DEV_SERVER_HOST }}
+          username: ${{ secrets.DEV_SERVER_USER }}
+          key: ${{ secrets.DEV_SERVER_SSH_KEY }}
+          passphrase: ${{ secrets.DEV_SERVER_PASSPHRASE }}
           source: "infrastructure/nginx"
           target: ${{ env.PROJECT_FOLDER_PATH }}
           overwrite: true
@@ -129,50 +129,50 @@ jobs:
         if: github.ref == env.BRANCH
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          passphrase: ${{ secrets.SERVER_PASSPHRASE }}
+          host: ${{ secrets.DEV_SERVER_HOST }}
+          username: ${{ secrets.DEV_SERVER_USER }}
+          key: ${{ secrets.DEV_SERVER_SSH_KEY }}
+          passphrase: ${{ secrets.DEV_SERVER_PASSPHRASE }}
           script: |
             cd ${{ env.PROJECT_FOLDER_PATH }}
             docker-compose -f docker-compose-test.yaml stop
             docker-compose -f docker-compose-test.yaml rm -fs web
             docker-compose -f docker-compose-test.yaml rm -fs bot
             docker-compose -f docker-compose-test.yaml rm -fs nginx
-            docker image rm -f ${{ secrets.DOCKERHUB_USERNAME }}/delo_zhivet_bot_and_admin:latest
-            docker image rm -f ${{ secrets.DOCKERHUB_USERNAME }}/delo_zhivet_nginx:latest
-            docker image pull -q ${{ secrets.DOCKERHUB_USERNAME }}/delo_zhivet_bot_and_admin:latest
-            docker image pull -q ${{ secrets.DOCKERHUB_USERNAME }}/delo_zhivet_nginx:latest
+            docker image rm -f ${{ secrets.DEV_DOCKERHUB_USERNAME }}/delo_zhivet_bot_and_admin:latest
+            docker image rm -f ${{ secrets.DEV_DOCKERHUB_USERNAME }}/delo_zhivet_nginx:latest
+            docker image pull -q ${{ secrets.DEV_DOCKERHUB_USERNAME }}/delo_zhivet_bot_and_admin:latest
+            docker image pull -q ${{ secrets.DEV_DOCKERHUB_USERNAME }}/delo_zhivet_nginx:latest
             rm .env
             touch .env
-            echo TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }} >> .env
-            echo HOST=${{ secrets.HOST }} >> .env
-            echo WEBHOOK_PATH=${{ secrets.WEBHOOK_PATH }} >> .env
-            echo WEBHOOK_DOMAIN=${{ secrets.WEBHOOK_DOMAIN }} >> .env
-            echo WEBHOOK_PORT=${{ secrets.WEBHOOK_PORT }} >> .env
-            echo GEOCODER_APIKEY=${{ secrets.GEOCODER_APIKEY }} >> .env
-            echo GEOCODER_BASE_URL=${{ secrets.GEOCODER_BASE_URL }} >> .env
-            echo MAXIMUM_OBJECTS_FROM_GEOCODER=${{ secrets.MAXIMUM_OBJECTS_FROM_GEOCODER }} >> .env
-            echo POSTGRES_DB=${{ secrets.POSTGRES_DB }} >> .env
-            echo POSTGRES_USER=${{ secrets.POSTGRES_USER }} >> .env
-            echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env
-            echo DB_HOST=${{ secrets.DB_HOST }} >> .env
-            echo DB_PORT=${{ secrets.DB_PORT }} >> .env
-            echo OAUTH_TOKEN=${{ secrets.OAUTH_TOKEN }} >> .env
-            echo ORG_ID=${{ secrets.ORG_ID }} >> .env
-            echo DADATA_TOKEN=${{ secrets.DADATA_TOKEN }} >> .env
-            echo DADATA_SECRET=${{ secrets.DADATA_SECRET }} >> .env
-            echo FLASK_APP=${{ secrets.FLASK_APP }} >> .env
-            echo FLASK_DEBUG=${{ secrets.FLASK_DEBUG }} >> .env
-            echo SUPER_USER_LOGIN=${{ secrets.SUPER_USER_LOGIN }} >> .env
-            echo SUPER_USER_EMAIL=${{ secrets.SUPER_USER_EMAIL }} >> .env
-            echo SUPER_USER_PASSWORD=${{ secrets.SUPER_USER_PASSWORD }} >> .env
-            echo ADMIN_SECRET_KEY=${{ secrets.ADMIN_SECRET_KEY }} >> .env
-            echo AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }} >> .env
-            echo AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }} >> .env
-            echo AWS_SERVICE_NAME=${{ secrets.AWS_SERVICE_NAME }} >> .env
-            echo AWS_ENDPOINT_URL=${{ secrets.AWS_ENDPOINT_URL }} >> .env
-            echo AWS_BUCKET_NAME=${{ secrets.AWS_BUCKET_NAME }} >> .env
+            echo TELEGRAM_BOT_TOKEN=${{ secrets.DEV_TELEGRAM_BOT_TOKEN }} >> .env
+            echo HOST=${{ secrets.DEV_HOST }} >> .env
+            echo WEBHOOK_PATH=${{ secrets.DEV_WEBHOOK_PATH }} >> .env
+            echo WEBHOOK_DOMAIN=${{ secrets.DEV_WEBHOOK_DOMAIN }} >> .env
+            echo WEBHOOK_PORT=${{ secrets.DEV_WEBHOOK_PORT }} >> .env
+            echo GEOCODER_APIKEY=${{ secrets.DEV_GEOCODER_APIKEY }} >> .env
+            echo GEOCODER_BASE_URL=${{ secrets.DEV_GEOCODER_BASE_URL }} >> .env
+            echo MAXIMUM_OBJECTS_FROM_GEOCODER=${{ secrets.DEV_MAXIMUM_OBJECTS_FROM_GEOCODER }} >> .env
+            echo POSTGRES_DB=${{ secrets.DEV_POSTGRES_DB }} >> .env
+            echo POSTGRES_USER=${{ secrets.DEV_POSTGRES_USER }} >> .env
+            echo POSTGRES_PASSWORD=${{ secrets.DEV_POSTGRES_PASSWORD }} >> .env
+            echo DB_HOST=${{ secrets.DEV_DB_HOST }} >> .env
+            echo DB_PORT=${{ secrets.DEV_DB_PORT }} >> .env
+            echo OAUTH_TOKEN=${{ secrets.DEV_OAUTH_TOKEN }} >> .env
+            echo ORG_ID=${{ secrets.DEV_ORG_ID }} >> .env
+            echo DADATA_TOKEN=${{ secrets.DEV_DADATA_TOKEN }} >> .env
+            echo DADATA_SECRET=${{ secrets.DEV_DADATA_SECRET }} >> .env
+            echo FLASK_APP=${{ secrets.DEV_FLASK_APP }} >> .env
+            echo FLASK_DEBUG=${{ secrets.DEV_FLASK_DEBUG }} >> .env
+            echo SUPER_USER_LOGIN=${{ secrets.DEV_SUPER_USER_LOGIN }} >> .env
+            echo SUPER_USER_EMAIL=${{ secrets.DEV_SUPER_USER_EMAIL }} >> .env
+            echo SUPER_USER_PASSWORD=${{ secrets.DEV_SUPER_USER_PASSWORD }} >> .env
+            echo ADMIN_SECRET_KEY=${{ secrets.DEV_ADMIN_SECRET_KEY }} >> .env
+            echo AWS_ACCESS_KEY_ID=${{ secrets.DEV_AWS_ACCESS_KEY_ID }} >> .env
+            echo AWS_SECRET_ACCESS_KEY=${{ secrets.DEV_AWS_SECRET_ACCESS_KEY }} >> .env
+            echo AWS_SERVICE_NAME=${{ secrets.DEV_AWS_SERVICE_NAME }} >> .env
+            echo AWS_ENDPOINT_URL=${{ secrets.DEV_AWS_ENDPOINT_URL }} >> .env
+            echo AWS_BUCKET_NAME=${{ secrets.DEV_AWS_BUCKET_NAME }} >> .env
             echo SENTRY_DSN_ADMIN=${{ secrets.DEV_SENTRY_DSN_ADMIN }} >> .env
             echo SENTRY_DSN_BOT=${{ secrets.DEV_SENTRY_DSN_BOT }} >> .env
             echo PASSWORD_RESET_TOKEN_TTL=${{ secrets.DEV_PASSWORD_RESET_TOKEN_TTL }} >> .env
@@ -185,7 +185,6 @@ jobs:
             echo MAIL_DEBUG=${{ secrets.DEV_MAIL_DEBUG }} >> .env
             echo HOST_NAME=${{ secrets.DEV_HOST_NAME }} >> .env
             echo CERTBOT_EMAIL=${{ secrets.DEV_CERTBOT_EMAIL }} >> .env
-            echo PROJECT_FOLDER_NAME=${{ vars.PROJECT_FOLDER_NAME }} >> .env
             echo PROJECT_FOLDER_PATH=${{ env.PROJECT_FOLDER_PATH }} >> .env
             echo RELOAD_NGINX_CONFIG=${{ vars.RELOAD_NGINX_CONFIG }} >> .env
             chmod +x update_nginx_conf.sh
