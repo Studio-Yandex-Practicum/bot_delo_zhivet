@@ -10,6 +10,7 @@ on:
 env:
 #    BRANCH: 'refs/heads/develop'
     BRANCH: 'refs/heads/feature/workflow_update'
+    PROJECT_FOLDER_PATH: ~/${{ vars.PROJECT_FOLDER_NAME }}
 
 jobs:
   tests:
@@ -133,7 +134,7 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           passphrase: ${{ secrets.SERVER_PASSPHRASE }}
           script: |
-            cd ~/delozhivet
+            cd ~/${{ vars.PROJECT_FOLDER_NAME }}
             docker-compose -f docker-compose-test.yaml stop
             docker-compose -f docker-compose-test.yaml rm -fs web
             docker-compose -f docker-compose-test.yaml rm -fs bot
@@ -185,6 +186,7 @@ jobs:
             echo HOST_NAME=${{ secrets.DEV_HOST_NAME }} >> .env
             echo CERTBOT_EMAIL=${{ secrets.DEV_CERTBOT_EMAIL }} >> .env
             echo PROJECT_FOLDER_NAME=${{ vars.PROJECT_FOLDER_NAME }} >> .env
+            echo PROJECT_FOLDER_PATH=${{ env.PROJECT_FOLDER_PATH }} >> .env
             chmod +x update_nginx_conf.sh
             . ./update_nginx_conf.sh
             docker-compose -f docker-compose-test.yaml up -d
