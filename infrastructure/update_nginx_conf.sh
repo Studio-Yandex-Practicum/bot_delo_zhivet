@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source .env && export PROJECT_FOLDER_PATH
+source .env && export PROJECT_FOLDER_PATH && export RELOAD_NGINX_CONFIG
 
 # Проверяем, запущен ли контейнер nginx в Docker Compose
 if docker-compose -f docker-compose-test.yaml ps | grep -q "nginx"; then
@@ -11,29 +11,36 @@ else
 fi
 
 readonly CERTBOT_STR="managed by Certbot"
-readonly REBOOT_CONF_TRUE="REBOOT_CONF=TRUE"
+# readonly REBOOT_CONF_TRUE="REBOOT_CONF=TRUE"
+# NEED_REBOOT_CONF_TRUE -> NEED_RELOAD_NGINX_CONFIG
+# $RELOAD_NGINX_CONFIG
 
 # Путь до файла из репозитория
 readonly SRC_FILE=$PROJECT_FOLDER_PATH/infrastructure/nginx/delo.conf
 # Путь до копии файла
 readonly MAIN_FILE=$PROJECT_FOLDER_PATH/nginx/delo.conf
+# Путь до копии MAIN_FILE, нужен для динамического конфигурирования nginx
 readonly TEMP_MAIN_FILE=$PROJECT_FOLDER_PATH/nginx/delo.temp
+readonly TRUE="True"
+readonly FALSE="False"
 
 if [ -e "$MAIN_FILE" ] && grep -q "$CERTBOT_STR" "$MAIN_FILE"; then
   echo "The value '$CERTBOT_STR' is found in $MAIN_FILE."
-  if grep -q "$REBOOT_CONF_TRUE" "$SRC_FILE"; then
-        echo "The value '$REBOOT_CONF_TRUE' is found in $SRC_FILE."
-        echo "The certificate must be reloaded."
-        export NEED_REBOOT_CONF_TRUE="TRUE"
+#  if grep -q "$REBOOT_CONF_TRUE" "$SRC_FILE"; then
+  if [ "$RELOAD_NGINX_CONFIG" = "$TRUE" ]; then
+        echo "The env '$RELOAD_NGINX_CONFIG' is $TRUE."
+        echo "The certificate 'Let’s Encrypt' must be reloaded."
+        export NEED_RELOAD_NGINX_CONFIG=$TRUE
     else
-        echo "The value '$REBOOT_CONF_TRUE' is not found in $SRC_FILE."
-        echo "The certificate must not be reloaded."
-        export NEED_REBOOT_CONF_TRUE="FALSE"
+        echo "The env '$RELOAD_NGINX_CONFIG' is $FALSE."
+        echo "The certificate 'Let’s Encrypt' must not be reloaded."
+        export NEED_RELOAD_NGINX_CONFIG=$FALSE
   fi
 else
-  echo -e "Value '$CERTBOT_STR' not found in $MAIN_FILE or file does not exist.\nCopying $SRC_FILE to $MAIN_FILE."
+  echo -e "Value '$CERTBOT_STR' not found in $MAIN_FILE or file does not exist."
+  echo -e "Copying $SRC_FILE to $MAIN_FILE."
   cp -f "$SRC_FILE" "$MAIN_FILE"
   echo -e "Copying $MAIN_FILE to $TEMP_MAIN_FILE."
   cp -f "$MAIN_FILE" "$TEMP_MAIN_FILE"
-  export NEED_REBOOT_CONF_TRUE="TRUE"
+  export NEED_RELOAD_NGINX_CONFIG=$TRUE
 fi

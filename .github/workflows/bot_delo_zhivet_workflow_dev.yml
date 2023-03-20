@@ -187,6 +187,7 @@ jobs:
             echo CERTBOT_EMAIL=${{ secrets.DEV_CERTBOT_EMAIL }} >> .env
             echo PROJECT_FOLDER_NAME=${{ vars.PROJECT_FOLDER_NAME }} >> .env
             echo PROJECT_FOLDER_PATH=${{ env.PROJECT_FOLDER_PATH }} >> .env
+            echo RELOAD_NGINX_CONFIG=${{ vars.RELOAD_NGINX_CONFIG }} >> .env
             chmod +x update_nginx_conf.sh
             . ./update_nginx_conf.sh
             docker-compose -f docker-compose-test.yaml up -d
