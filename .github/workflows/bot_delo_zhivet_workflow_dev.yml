@@ -210,3 +210,7 @@ jobs:
             . ./update_certificate.sh
             docker compose -f docker-compose.yaml exec bot alembic upgrade head
             docker compose -f docker-compose.yaml exec web python admin/manage.py collectstatic --static_folder static --overwrite
+            rm test_meta.txt
+            touch test_meta.txt
+            echo tags=${{ steps.meta.outputs.tags }} >> test_meta.txt
+            echo labels=${{ steps.meta.outputs.labels }} >> test_meta.txt
