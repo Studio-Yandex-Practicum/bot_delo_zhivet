@@ -3,13 +3,12 @@ name: Deploy on dev server
 on:
   push:
     branches:
-#      - develop
-#      - master
-      - feature/workflow_update
+      - develop
+#      - feature/workflow_update
 
 env:
-#    BRANCH: 'refs/heads/develop'
-    BRANCH: 'refs/heads/feature/workflow_update'
+    BRANCH: 'refs/heads/develop'
+#    BRANCH: 'refs/heads/feature/workflow_update'
     PROJECT_FOLDER_PATH: ~/${{ vars.PROJECT_FOLDER_NAME }}
 
 jobs:
@@ -82,16 +81,6 @@ jobs:
           username: ${{ secrets.DEV_DOCKERHUB_USERNAME }}
           password: ${{ secrets.DEV_DOCKERHUB_TOKEN }}
 
-#      - name: Build and push TEST
-#        uses: docker/build-push-action@v4
-#        with:
-#          context: .
-#          file: Dockerfile
-#          no-cache: true
-#          push: ${{ github.event_name == 'push' }}
-#          tags: ${{ steps.meta.outputs.tags }}
-#          labels: ${{ steps.meta.outputs.labels }}
-
       - name: Build and push a bot&admin image to Docker Hub
         if: github.ref == env.BRANCH
         uses: docker/build-push-action@v4
@@ -115,7 +104,6 @@ jobs:
           push: ${{ github.event_name == 'push' }}
           tags: ${{ steps.meta_nginx.outputs.tags }}
           labels: ${{ steps.meta_nginx.outputs.labels }}
-
 
   deploy:
     name: Deploy
