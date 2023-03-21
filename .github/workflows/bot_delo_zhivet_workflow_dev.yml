@@ -64,11 +64,17 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      - name: Docker meta
-        id: meta
+      - name: Docker meta delo_zhivet_bot_and_admin
+        id: meta_bot_and_admin
         uses: docker/metadata-action@v4
         with:
           images: ${{ secrets.DEV_DOCKERHUB_USERNAME }}/delo_zhivet_bot_and_admin
+
+      - name: Docker meta delo_zhivet_nginx
+        id: meta_nginx
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ secrets.DEV_DOCKERHUB_USERNAME }}/delo_zhivet_nginx
 
       - name: Login to Docker Hub
         uses: docker/login-action@v2
@@ -76,30 +82,15 @@ jobs:
           username: ${{ secrets.DEV_DOCKERHUB_USERNAME }}
           password: ${{ secrets.DEV_DOCKERHUB_TOKEN }}
 
-      - name: Build and push TEST
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          file: Dockerfile
-          no-cache: true
-          push: ${{ github.event_name == 'push' }}
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-
-      - name: Executing remote ssh commands to deploy TEST
-        if: github.ref == env.BRANCH
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.DEV_SERVER_HOST }}
-          username: ${{ secrets.DEV_SERVER_USER }}
-          key: ${{ secrets.DEV_SERVER_SSH_KEY }}
-          passphrase: ${{ secrets.DEV_SERVER_PASSPHRASE }}
-          script: |
-            cd ${{ env.PROJECT_FOLDER_PATH }}
-            rm test_meta.txt
-            touch test_meta.txt
-            echo tags=${{ steps.meta.outputs.tags }} >> test_meta.txt
-            echo labels=${{ steps.meta.outputs.labels }} >> test_meta.txt
+#      - name: Build and push TEST
+#        uses: docker/build-push-action@v4
+#        with:
+#          context: .
+#          file: Dockerfile
+#          no-cache: true
+#          push: ${{ github.event_name == 'push' }}
+#          tags: ${{ steps.meta.outputs.tags }}
+#          labels: ${{ steps.meta.outputs.labels }}
 
       - name: Build and push a bot&admin image to Docker Hub
         if: github.ref == env.BRANCH
@@ -107,9 +98,10 @@ jobs:
         with:
           context: .
           file: Dockerfile
-          push: true
           no-cache: true
-          tags: ${{ secrets.DEV_DOCKERHUB_USERNAME }}/delo_zhivet_bot_and_admin:latest
+          push: ${{ github.event_name == 'push' }}
+          tags: ${{ steps.meta_bot_and_admin.outputs.tags }}
+          labels: ${{ steps.meta_bot_and_admin.outputs.labels }}
 
       - name: Build and push a nginx image to Docker Hub
         if: github.ref == env.BRANCH
@@ -117,11 +109,13 @@ jobs:
         with:
           context: ./infrastructure/nginx
           file: ./infrastructure/nginx/Dockerfile
-          push: true
           no-cache: true
-          tags: ${{ secrets.DEV_DOCKERHUB_USERNAME }}/delo_zhivet_nginx:latest
           build-args: |
             NGINX_CONFIG=default.conf
+          push: ${{ github.event_name == 'push' }}
+          tags: ${{ steps.meta_nginx.outputs.tags }}
+          labels: ${{ steps.meta_nginx.outputs.labels }}
+
 
   deploy:
     name: Deploy
@@ -170,10 +164,10 @@ jobs:
             docker compose -f docker-compose.yaml rm -fs web
             docker compose -f docker-compose.yaml rm -fs bot
             docker compose -f docker-compose.yaml rm -fs nginx
-            docker image rm -f ${{ secrets.DEV_DOCKERHUB_USERNAME }}/delo_zhivet_bot_and_admin:latest
-            docker image rm -f ${{ secrets.DEV_DOCKERHUB_USERNAME }}/delo_zhivet_nginx:latest
-            docker image pull -q ${{ secrets.DEV_DOCKERHUB_USERNAME }}/delo_zhivet_bot_and_admin:latest
-            docker image pull -q ${{ secrets.DEV_DOCKERHUB_USERNAME }}/delo_zhivet_nginx:latest
+            docker image rm -f ${{ secrets.DEV_DOCKERHUB_USERNAME }}/delo_zhivet_bot_and_admin:${{ vars.DEV_DOCKER_TAG }}
+            docker image rm -f ${{ secrets.DEV_DOCKERHUB_USERNAME }}/delo_zhivet_nginx:${{ vars.DEV_DOCKER_TAG }}
+            docker image pull -q ${{ secrets.DEV_DOCKERHUB_USERNAME }}/delo_zhivet_bot_and_admin:${{ vars.DEV_DOCKER_TAG }}
+            docker image pull -q ${{ secrets.DEV_DOCKERHUB_USERNAME }}/delo_zhivet_nginx:${{ vars.DEV_DOCKER_TAG }}
             rm .env
             touch .env
             echo TELEGRAM_BOT_TOKEN=${{ secrets.DEV_TELEGRAM_BOT_TOKEN }} >> .env
@@ -218,6 +212,7 @@ jobs:
             echo CERTBOT_EMAIL=${{ secrets.DEV_CERTBOT_EMAIL }} >> .env
             echo PROJECT_FOLDER_PATH=${{ env.PROJECT_FOLDER_PATH }} >> .env
             echo RELOAD_NGINX_CONFIG=${{ vars.RELOAD_NGINX_CONFIG }} >> .env
+            echo DOCKER_TAG=${{ vars.DEV_DOCKER_TAG }} >> .env
             chmod +x update_nginx_conf.sh
             . ./update_nginx_conf.sh
             docker compose -f docker-compose.yaml up -d

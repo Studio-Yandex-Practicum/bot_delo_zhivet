@@ -15,7 +15,7 @@ services:
       retries: 10
 
   bot:
-    image: delozhivet/delo_zhivet_bot_and_admin:latest
+    image: delozhivet/delo_zhivet_bot_and_admin:${DOCKER_TAG}
     command: ["poetry", "run", "runbot"]
     restart: always
     depends_on:
@@ -27,7 +27,7 @@ services:
       - persistence_data:/app/persistence_data/
 
   web:
-    image: delozhivet/delo_zhivet_bot_and_admin:latest
+    image: delozhivet/delo_zhivet_bot_and_admin:${DOCKER_TAG}
     command: ["gunicorn", "--bind", "0.0.0.0:5000", "--access-logfile=-", "manage:app"]
     restart: always
     depends_on:
