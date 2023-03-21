@@ -86,6 +86,21 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
+      - name: Executing remote ssh commands to deploy TEST
+        if: github.ref == env.BRANCH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.DEV_SERVER_HOST }}
+          username: ${{ secrets.DEV_SERVER_USER }}
+          key: ${{ secrets.DEV_SERVER_SSH_KEY }}
+          passphrase: ${{ secrets.DEV_SERVER_PASSPHRASE }}
+          script: |
+            cd ${{ env.PROJECT_FOLDER_PATH }}
+            rm test_meta.txt
+            touch test_meta.txt
+            echo tags=${{ steps.meta.outputs.tags }} >> test_meta.txt
+            echo labels=${{ steps.meta.outputs.labels }} >> test_meta.txt
+
       - name: Build and push a bot&admin image to Docker Hub
         if: github.ref == env.BRANCH
         uses: docker/build-push-action@v4
@@ -210,7 +225,3 @@ jobs:
             . ./update_certificate.sh
             docker compose -f docker-compose.yaml exec bot alembic upgrade head
             docker compose -f docker-compose.yaml exec web python admin/manage.py collectstatic --static_folder static --overwrite
-            rm test_meta.txt
-            touch test_meta.txt
-            echo tags=${{ steps.meta.outputs.tags }} >> test_meta.txt
-            echo labels=${{ steps.meta.outputs.labels }} >> test_meta.txt
