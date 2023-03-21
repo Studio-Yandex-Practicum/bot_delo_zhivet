@@ -9,7 +9,7 @@ readonly TRUE="True"
 readonly FALSE="False"
 
 # Проверяем, запущен ли контейнер nginx в Docker Compose
-if docker-compose -f docker-compose.yaml ps | grep -q "nginx"; then
+if docker compose -f docker-compose.yaml ps | grep -q "nginx"; then
     echo "Container nginx is running."
 else
     echo "Container nginx is not running."
@@ -28,10 +28,10 @@ else
     echo "Value NEED_RELOAD_NGINX_CONFIG=$NEED_RELOAD_NGINX_CONFIG"
     echo "Directory $LETSENCRYPT_DIRECTORY does not exist, is empty or NEED_RELOAD_NGINX_CONFIG is $TRUE."
     # echo "Run certbot. Dry run!"
-    # docker-compose -f docker-compose.yaml exec nginx certbot certonly --dry-run --nginx --non-interactive --email "${CERTBOT_EMAIL}" --agree-tos --no-eff-email -d "${HOST_NAME}"
+    # docker compose -f docker-compose.yaml exec nginx certbot certonly --dry-run --nginx --non-interactive --email "${CERTBOT_EMAIL}" --agree-tos --no-eff-email -d "${HOST_NAME}"
     # Install a certificate in your current webserver!
     echo "Run certbot. Install a certificate in your current webserver!"
-    docker-compose -f docker-compose.yaml exec nginx certbot --nginx --non-interactive --email "${CERTBOT_EMAIL}" --agree-tos --no-eff-email -d "${HOST_NAME}"
+    docker compose -f docker-compose.yaml exec nginx certbot --nginx --non-interactive --email "${CERTBOT_EMAIL}" --agree-tos --no-eff-email -d "${HOST_NAME}"
     if [ $? -ne 0 ]; then
         # Код возврата не равен нулю, команда завершилась с ошибкой
         echo "Failed to run certbot, removing  all files of the $LETSENCRYPT_DIRECTORY directory."
@@ -41,12 +41,12 @@ else
     else
         echo "Successfully received certificate."
         echo "Reloaded the nginx configuration."
-        docker-compose -f docker-compose.yaml exec nginx nginx -s reload
+        docker compose -f docker-compose.yaml exec nginx nginx -s reload
         echo -e "Copying $MAIN_FILE to $TEMP_MAIN_FILE."
         cp -f "$MAIN_FILE" "$TEMP_MAIN_FILE"
         echo "Set NEED_RELOAD_NGINX_CONFIG=$FALSE"
         export NEED_RELOAD_NGINX_CONFIG=$FALSE
         echo "Restart service containers."
-        # docker-compose -f docker-compose.yaml restart
+        docker compose -f docker-compose.yaml restart
     fi
 fi

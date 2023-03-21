@@ -3,7 +3,7 @@
 source .env && export PROJECT_FOLDER_PATH && export RELOAD_NGINX_CONFIG
 
 # Проверяем, запущен ли контейнер nginx в Docker Compose
-if docker-compose -f docker-compose.yaml ps | grep -q "nginx"; then
+if docker compose -f docker-compose.yaml ps | grep -q "nginx"; then
     echo "Container nginx is running."
     exit 1 # Выходим из скрипта с кодом ошибки
 else
