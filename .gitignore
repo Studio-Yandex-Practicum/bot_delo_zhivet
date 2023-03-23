@@ -1,3 +1,8 @@
+admin/static/*
+!admin/static/.gitkeep
+admin/logs/
+# admin/templates/
+
 ### Python template
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -161,7 +166,7 @@ cython_debug/
 .idea/
 
 # Media and Static Django
-/media
+/media/*.jpg
 /staticfiles
 
 # Logs Django
@@ -176,3 +181,5 @@ cython_debug/
 
 .vscode/
 *.code-workspace
+
+bot_persistence_data

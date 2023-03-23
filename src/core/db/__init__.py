@@ -1,1 +1,1 @@
-from .model import Assistance_disabled, Member, Pollution, Report, Request, Shift, Task, User, Volunteer  # noqa
+from .model import Assistance_disabled, Pollution, Role, Staff, User, Volunteer, roles_users  # noqa

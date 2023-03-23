@@ -5,39 +5,34 @@ from bot.handlers.state_constants import (
     ADDING_ECO_TASK,
     ADDING_SOCIAL_TASK,
     ADDING_VOLUNTEER,
-    END,
-    MAKING_DONATION,
+    GREETING_MESSAGE,
     SELECTING_ACTION,
     START_OVER,
     TOP_LEVEL_MENU_TEXT,
 )
 
-GREETING_MESSAGE = (
-    'Привет, {username}. Я бот экологического проекта "Дело живёт".'
-    " Я могу принять заявку на помощь, или зарегистрировать тебя волонтером."
-    " Выбери необходимое действие."
-)
-
-BYE_MESSAGE = "До свидания, {username}. Возвращайся в любой момент." 'Фонд "Дело живёт" ждёт тебя.'
-
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     """Выбор действия: Добавление проблемы/регистрация волонтера."""
     text = TOP_LEVEL_MENU_TEXT
-
+    # Если пользователь отправляет именно КОМАНДУ старт, то очищаем его данные
+    if update.message:
+        context.user_data.clear()
+        await context.application.persistence.drop_user_data(update.message.from_user["id"])
     buttons = [
         [
-            InlineKeyboardButton(text="Стать волонтером", callback_data=ADDING_VOLUNTEER),
-            InlineKeyboardButton(text="Сделать пожертвование", callback_data=MAKING_DONATION),
-        ],
-        [
-            InlineKeyboardButton(text="Сообщить об эко проблеме", callback_data=ADDING_ECO_TASK),
+            InlineKeyboardButton(text="Сообщить об экологической проблеме", callback_data=ADDING_ECO_TASK),
         ],
         [
             InlineKeyboardButton(text="Сообщить о социальной проблеме", callback_data=ADDING_SOCIAL_TASK),
         ],
         [
-            InlineKeyboardButton(text="Готово", callback_data=END),
+            InlineKeyboardButton(text="Стать волонтером", callback_data=ADDING_VOLUNTEER),
+        ],
+        [
+            InlineKeyboardButton(
+                text="Сделать пожертвование", url="https://delozhivet.ru/campaign/pomoch-delo-zhivet/"
+            ),
         ],
     ]
     keyboard = InlineKeyboardMarkup(buttons)
@@ -46,7 +41,10 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     if not context.user_data.get(START_OVER):
         user = update.message.from_user
         username = user["username"]
-        text = GREETING_MESSAGE.format(username=username)
+        if username:
+            text = f"Привет, {username}! " + GREETING_MESSAGE
+        else:
+            text = "Привет! " + GREETING_MESSAGE
         await update.message.reply_text(text=text, reply_markup=keyboard)
     else:
         await update.callback_query.answer()
