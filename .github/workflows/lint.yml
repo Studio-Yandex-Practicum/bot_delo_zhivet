@@ -9,7 +9,7 @@ on:
 jobs:
   lint-black:
     name: Black code formatter
-    runs-on: gh-runner-1
+    runs-on: ubuntu-latest
 
     steps:
       - name: Check out repo
@@ -23,7 +23,7 @@ jobs:
 
   lint-flake:
     name: Check PEP8 codestyle
-    runs-on: gh-runner-1
+    runs-on: ubuntu-latest
 
     steps:
       - name: Check out repo
@@ -35,7 +35,6 @@ jobs:
           python-version: "3.x"
 
       - name: Install poetry
-        # run: curl -sSL https://install.python-poetry.org | python3 -
         run: |
           pip install pipx
           pipx install poetry==1.3.2

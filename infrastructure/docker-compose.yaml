@@ -15,7 +15,7 @@ services:
       retries: 10
 
   bot:
-    image: vasilekx/delo_zhivet_bot_and_admin:latest
+    image: delozhivet/delo_zhivet_bot_and_admin:${DOCKER_TAG}
     command: ["poetry", "run", "runbot"]
     restart: always
     depends_on:
@@ -27,7 +27,7 @@ services:
       - persistence_data:/app/persistence_data/
 
   web:
-    image: vasilekx/delo_zhivet_bot_and_admin:latest
+    image: delozhivet/delo_zhivet_bot_and_admin:${DOCKER_TAG}
     command: ["gunicorn", "--bind", "0.0.0.0:5000", "--access-logfile=-", "manage:app"]
     restart: always
     depends_on:
@@ -41,17 +41,21 @@ services:
       - static_value:/app/admin/static/
 
   nginx:
-    image: vasilekx/delo_zhivet_nginx:latest
+    image: delozhivet/delo_zhivet_nginx:latest
     restart: unless-stopped
+    depends_on:
+      - web
     ports:
       - "80:80"
       - "443:443"
     volumes:
       - ./nginx/delo.conf:/etc/nginx/servers/delo.conf:rw
+      - ./nginx/delo.temp:/etc/nginx/conf.d/delo.temp
       - ./nginx/letsencrypt/:/etc/letsencrypt/:rw
       - static_value:/var/html/static/
-    depends_on:
-      - web
+    env_file:
+      - ./.env
+    command: /bin/sh -c "envsubst '$${HOST_NAME} $${WEBHOOK_PATH}' < /etc/nginx/conf.d/delo.temp > /etc/nginx/servers/delo.conf && crond -b && nginx -g 'daemon off;'"
 
 
 volumes:
