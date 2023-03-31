@@ -31,7 +31,7 @@ class Volunteer(Base):
     telegram_username = Column(String(100), nullable=True)
     first_name = Column(String(100), nullable=True)
     last_name = Column(String(100), nullable=True)
-    phone = Column(String(13), unique=True, nullable=True)
+    phone = Column(String(13), nullable=True)
     birthday = Column(Date, nullable=True)
     deleted_at = Column(DateTime(timezone=True))
     is_banned = Column(Boolean, default=False)
