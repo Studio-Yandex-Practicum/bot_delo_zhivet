@@ -245,7 +245,6 @@ async def save_and_exit_pollution(update: Update, context: ContextTypes.DEFAULT_
     await save_tracker_id(crud_pollution, tracker.key, user_data[TELEGRAM_ID], session)
 
 
-
 async def back_to_select_option_to_report_about_pollution(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_data = context.user_data
     user_data[START_OVER] = True

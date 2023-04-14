@@ -216,9 +216,6 @@ async def save_and_exit_from_social_problem(update: Update, context: ContextType
     await save_tracker_id(crud_assistance_disabled, tracker.key, user_data[TELEGRAM_ID], session)
 
 
-
-
-
 async def back_to_add_social(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_data = context.user_data
     user_data[START_OVER] = True
