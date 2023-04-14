@@ -203,7 +203,7 @@ async def save_location(update: Update, context: ContextTypes.DEFAULT_TYPE) -> s
         await update.message.reply_text(text=chat_text, reply_markup=keyboard)
 
 
-async def save_and_exit_pollution(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
+async def save_and_exit_pollution(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Сохранение данных в базу"""
     context.user_data[START_OVER] = True
     user_data = context.user_data[FEATURES]
@@ -226,7 +226,7 @@ async def save_and_exit_pollution(update: Update, context: ContextTypes.DEFAULT_
     if not old_user:
         await create_new_user(user, session)
     if old_user and old_user.is_banned:
-        return await end_describing(update, context)
+        return
     await create_new_pollution(user_data, session)
     volunteers = await crud_volunteer.get_volunteers_by_point(longitude, latitude, session)
     summary = f"{user[TELEGRAM_USERNAME]} - {latitude}, {longitude}"
@@ -244,7 +244,7 @@ async def save_and_exit_pollution(update: Update, context: ContextTypes.DEFAULT_
     )
     os.remove(file_path)
     await save_tracker_id(crud_pollution, tracker.key, user_data[TELEGRAM_ID], session)
-    return await end_describing(update, context)
+
 
 
 async def back_to_select_option_to_report_about_pollution(update: Update, context: ContextTypes.DEFAULT_TYPE):

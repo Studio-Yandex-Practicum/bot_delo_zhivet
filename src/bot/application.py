@@ -39,7 +39,6 @@ from .handlers.participation import make_donation
 from .handlers.pollution import (
     back_to_select_option_to_report_about_pollution,
     input,
-    save_and_exit_pollution,
     save_comment,
     save_foto,
     save_location,
@@ -51,7 +50,6 @@ from .handlers.social import (
     back_to_add_social,
     input_social_data,
     report_about_social_problem,
-    save_and_exit_from_social_problem,
     save_social_address_input,
     save_social_problem_data,
 )
@@ -92,9 +90,9 @@ from .handlers.volunteer import (
     handle_city_input,
     handle_phone_input,
     handle_radius_input,
-    save_and_exit_volunteer,
     save_input,
 )
+from .tasks import save_social_problem, save_pollution, save_volunteer
 
 
 def create_bot() -> Application:
@@ -110,7 +108,7 @@ def create_bot() -> Application:
                 CallbackQueryHandler(ask_for_input_city, pattern=SPECIFY_CITY_CMD),
                 CallbackQueryHandler(handle_radius_input, pattern=SPECIFY_ACTIVITY_RADIUS_CMD),
                 CallbackQueryHandler(handle_car_input, pattern=SPECIFY_CAR_AVAILABILITY_CMD),
-                CallbackQueryHandler(save_and_exit_volunteer, pattern="^" + SAVE + "$"),
+                CallbackQueryHandler(save_volunteer, pattern="^" + SAVE + "$"),
             ],
             TYPING_CITY: [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_city_input)],
             VALIDATE: [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_phone_input)],
@@ -140,7 +138,7 @@ def create_bot() -> Application:
                 CallbackQueryHandler(input, pattern="^" + POLLUTION_COMMENT + "$"),
                 CallbackQueryHandler(input, pattern="^" + POLLUTION_COORDINATES + "$"),
                 CallbackQueryHandler(input, pattern="^" + POLLUTION_FOTO + "$"),
-                CallbackQueryHandler(save_and_exit_pollution, pattern="^" + SAVE + "$"),
+                CallbackQueryHandler(save_pollution, pattern="^" + SAVE + "$"),
             ],
             TYPING: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, save_comment),
@@ -172,7 +170,7 @@ def create_bot() -> Application:
             SELECTING_FEATURE: [
                 CallbackQueryHandler(ask_for_input_address, pattern="^" + SOCIAL_ADDRESS + "$"),
                 CallbackQueryHandler(input_social_data, pattern="^" + SOCIAL_COMMENT + "$"),
-                CallbackQueryHandler(save_and_exit_from_social_problem, pattern="^" + SAVE + "$"),
+                CallbackQueryHandler(save_social_problem, pattern="^" + SAVE + "$"),
             ],
             SOCIAL_PROBLEM_TYPING: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, save_social_problem_data),

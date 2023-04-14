@@ -295,7 +295,7 @@ async def save_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     return await add_volunteer(update, context)
 
 
-async def save_and_exit_volunteer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
+async def save_and_exit_volunteer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Сохранение данных в базу и отправка в трекер"""
     context.user_data[START_OVER] = True
     user_data = context.user_data[FEATURES]
@@ -328,7 +328,7 @@ async def save_and_exit_volunteer(update: Update, context: ContextTypes.DEFAULT_
     if not old_user:
         await create_new_user(user, session)
     if old_user and old_user.is_banned:
-        return await end_describing(update, context)
+        return
     old_volunteer = await check_volunteer_in_db(user_data[TELEGRAM_ID], session)
     old_ticket_id = None
     if old_volunteer:
@@ -339,7 +339,7 @@ async def save_and_exit_volunteer(update: Update, context: ContextTypes.DEFAULT_
             and old_volunteer.radius == int(radius) * 1000
             and old_volunteer.phone == phone
         ):
-            return await end_describing(update, context)
+            return
         else:
             old_ticket_id = old_volunteer.ticketID
             await update_volunteer(old_volunteer, user_data, session)
@@ -367,7 +367,6 @@ async def save_and_exit_volunteer(update: Update, context: ContextTypes.DEFAULT_
         description=description,
     )
     await save_tracker_id(crud_volunteer, tracker.key, user_data[TELEGRAM_ID], session)
-    return await end_describing(update, context)
 
 
 async def back_to_add_volunteer(update: Update, context: ContextTypes.DEFAULT_TYPE):
