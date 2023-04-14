@@ -31,7 +31,6 @@ from bot.handlers.state_constants import (
     TYPING_SOCIAL_CITY,
 )
 from bot.service.dadata import get_fields_from_dadata
-from src.bot.handlers.common import end_describing
 from src.bot.service.assistance_disabled import create_new_social
 from src.bot.service.save_new_user import check_user_in_db, create_new_user
 from src.bot.service.save_tracker_id import save_tracker_id

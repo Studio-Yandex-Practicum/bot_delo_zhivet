@@ -6,7 +6,6 @@ from telegram.constants import ParseMode
 from telegram.ext import ContextTypes
 
 from src.api.tracker import client
-from src.bot.handlers.common import end_describing
 from src.bot.service.pollution import create_new_pollution, download_to_object_storage
 from src.bot.service.save_new_user import check_user_in_db, create_new_user
 from src.bot.service.save_tracker_id import save_tracker_id

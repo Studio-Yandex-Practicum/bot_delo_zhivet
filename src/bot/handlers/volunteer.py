@@ -3,7 +3,6 @@ from telegram.constants import ParseMode
 from telegram.ext import ContextTypes
 
 from src.api.tracker import client
-from src.bot.handlers.common import end_describing
 from src.bot.handlers.start import start
 from src.bot.handlers.state_constants import (
     ACTIVITY_RADIUS,
