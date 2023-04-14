@@ -4,6 +4,7 @@ from sqlalchemy import TIMESTAMP, Column, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import declarative_base, declared_attr, scoped_session, sessionmaker
+from sqlalchemy.pool import NullPool
 
 from src.core.config import settings
 
@@ -34,7 +35,7 @@ database_url = (
     f"{settings.POSTGRES_PASSWORD}@{settings.DB_HOST}:"
     f"{settings.DB_PORT}/{settings.POSTGRES_DB}"
 )
-engine = create_async_engine(database_url)
+engine = create_async_engine(database_url, poolclass=NullPool)
 db_session = scoped_session(
     sessionmaker(
         autocommit=False,

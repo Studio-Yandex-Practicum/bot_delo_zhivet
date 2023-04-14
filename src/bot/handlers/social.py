@@ -180,19 +180,21 @@ async def report_about_social_problem(update: Update, context: ContextTypes.DEFA
     return SELECTING_FEATURE
 
 
-async def save_and_exit_from_social_problem(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def save_and_exit_from_social_problem(
+        user_id: int,
+        username: str,
+        user_data,
+) -> None:
     """Сохранение данных в базу и отправка в трекер"""
-    context.user_data[START_OVER] = True
-    user_data = context.user_data[FEATURES]
     user_data[GEOM] = f"POINT({user_data[LONGITUDE]} {user_data[LATITUDE]})"
-    user_data[TELEGRAM_ID] = update.effective_user.id
+    user_data[TELEGRAM_ID] = user_id
     if SOCIAL_ADDRESS in user_data:
         del user_data[SOCIAL_ADDRESS]
     if CITY_INPUT in user_data:
         del user_data[CITY_INPUT]
     user = {}
     user[TELEGRAM_ID] = user_data[TELEGRAM_ID]
-    user[TELEGRAM_USERNAME] = update.effective_user.username
+    user[TELEGRAM_USERNAME] = username
     session_generator = get_async_session()
     session = await session_generator.asend(None)
     old_user = await check_user_in_db(user_data[TELEGRAM_ID], session)

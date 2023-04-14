@@ -294,10 +294,14 @@ async def save_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     return await add_volunteer(update, context)
 
 
-async def save_and_exit_volunteer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def save_and_exit_volunteer(
+        user_id: int,
+        username: str,
+        first_name: str,
+        last_name: str,
+        user_data,
+) -> None:
     """Сохранение данных в базу и отправка в трекер"""
-    context.user_data[START_OVER] = True
-    user_data = context.user_data[FEATURES]
     radius = user_data[SPECIFY_ACTIVITY_RADIUS][7:]
     car = user_data[SPECIFY_CAR_AVAILABILITY][4:]
     if SPECIFY_PHONE_PERMISSION in user_data:
@@ -307,10 +311,10 @@ async def save_and_exit_volunteer(update: Update, context: ContextTypes.DEFAULT_
     user_data[GEOM] = f"POINT({user_data[LONGITUDE]} {user_data[LATITUDE]})"
     user_data[SPECIFY_ACTIVITY_RADIUS] = int(radius) * 1000
     user_data[SPECIFY_CAR_AVAILABILITY] = car
-    user_data[TELEGRAM_ID] = update.effective_user.id
-    user_data[TELEGRAM_USERNAME] = update.effective_user.username
-    user_data[FIRST_NAME] = update.effective_user.first_name
-    user_data[LAST_NAME] = update.effective_user.last_name
+    user_data[TELEGRAM_ID] = user_id
+    user_data[TELEGRAM_USERNAME] = username
+    user_data[FIRST_NAME] = first_name
+    user_data[LAST_NAME] = last_name
     user_data[SPECIFY_PHONE_PERMISSION] = phone
     if SPECIFY_CITY in user_data:
         del user_data[SPECIFY_CITY]
