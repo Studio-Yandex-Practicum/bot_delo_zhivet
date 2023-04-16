@@ -65,11 +65,19 @@ ___
 ```bash
 docker-compose -f postgres-local.yaml up -d --build
 ```
-Если есть чьи-то миграции в проекте, до применяем их
+Если есть чьи-то миграции в проекте, то применяем их
 ```bash
 alembic upgrade head
 ```
 Если производятся изменения в моделях:
+
+**Каждую новую autogenerate-миграцию необходимо проверить перед применением по доке:**
+https://geoalchemy-2.readthedocs.io/en/latest/alembic.html#interactions-between-alembic-and-geoalchemy-2
+в том числе проверить выполнение следующих правил:remove the create_index statement in the upgrade() function.
+1. remove the `drop_index` statement in the `downgrade()` function.
+1. remove the `create_index` statement in the `upgrade()` function.
+
+
 ```bash
 alembic stamp head
 ```
@@ -82,9 +90,6 @@ alembic revision --autogenerate -m "you_migration_name"
 ```bash
 alembic upgrade head
 ```
-Если в модели появляется новое поле типа geoalchemy2.types.Geography,
-необходимо проверить autogenerate-миграцию перед применением по доке:
-https://geoalchemy-2.readthedocs.io/en/latest/alembic.html#interactions-between-alembic-and-geoalchemy-2
 
 [:arrow_up:Оглавление](#Оглавление)
 ___
