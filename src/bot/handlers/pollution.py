@@ -7,7 +7,7 @@ from telegram.ext import ContextTypes
 
 from src.api.tracker import client
 from src.bot.handlers.common import end_describing
-from src.bot.service.pollution import create_new_pollution, download_to_object_storage
+from src.bot.service.pollution import create_new_pollution, download_to_object_storage, resize_downloaded_image
 from src.bot.service.save_new_user import check_user_in_db, create_new_user
 from src.bot.service.save_tracker_id import save_tracker_id
 from src.bot.service.volunteer import volunteers_description
@@ -160,6 +160,7 @@ async def save_foto(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
         await photo_file.download_to_drive(custom_path=file_path)
         user_data[FEATURES][POLLUTION_FOTO] = str(file_path)
         user_data[START_OVER] = True
+        await resize_downloaded_image(file_path)
 
         return await select_option_to_report_about_pollution(update, context)
     else:

@@ -1,6 +1,7 @@
 from typing import Optional
 
 import boto3
+from PIL import Image
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -38,3 +39,15 @@ async def download_to_object_storage(file_path: str):
         endpoint_url=settings.AWS_ENDPOINT_URL,
     )
     s3.upload_file(file_path, settings.AWS_BUCKET_NAME, file_path[6:])
+
+
+async def resize_downloaded_image(file_path):
+    """Функция сжатия загружаемого изображения для экономии места."""
+    image = Image.open(file_path)
+    width, height = image.size
+    TARGET_WIDTH = 100
+    coefficient = width / 100
+    new_height = height / coefficient
+    resize_image = image.resize((int(TARGET_WIDTH), int(new_height)), Image.ANTIALIAS)
+    resize_image.save(file_path, quality=50)
+    return resize_image

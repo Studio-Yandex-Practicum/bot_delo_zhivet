@@ -57,6 +57,7 @@ uvicorn = "^0.20.0"
 greenlet = "^2.0.2"
 flask-mail = "^0.9.1"
 pyjwt = "^2.6.0"
+pillow = "^9.5.0"
 
 [tool.poetry.group.prod]
 optional = true
