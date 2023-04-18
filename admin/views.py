@@ -252,6 +252,13 @@ class AssistanceDisabledModelView(BaseModelView):
     column_labels = get_translated_lables(all_columns)
     can_edit = False
 
+    def is_accessible(self):
+        return (
+            current_user.is_active
+            and current_user.is_authenticated
+            and (current_user.has_role("superuser") or current_user.has_role("admin"))
+        )
+
 
 class PolutionModelView(BaseModelView):
     """Вью-класс загрязнения"""
@@ -259,6 +266,13 @@ class PolutionModelView(BaseModelView):
     all_columns = get_table_fields_from_model(Pollution)
     column_labels = get_translated_lables(all_columns)
     can_edit = False
+
+    def is_accessible(self):
+        return (
+            current_user.is_active
+            and current_user.is_authenticated
+            and (current_user.has_role("superuser") or current_user.has_role("admin"))
+        )
 
 
 admin = flask_admin.Admin(
