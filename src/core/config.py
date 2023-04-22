@@ -24,8 +24,9 @@ class Settings(BaseSettings):
     SENTRY_DSN_BOT: str = None
 
     # Celery
-    celery_broker_url: str | None = "redis://redis:6379"
-    celery_result_backend: str | None = "redis://redis:6379"
+    redis_host: str | None = "redis"
+    redis_port: str | None = "6379"
+    celery_connect_string = 'redis://{}:{}/0'
 
     class Config:
         env_file = ".env"
