@@ -12,5 +12,17 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 RUN pip install poetry==1.3.2
 
 WORKDIR /app
-COPY . .
+
+COPY ./pyproject.toml .
+
+COPY ./poetry.lock .
+
+COPY ./README.md .
+
+RUN mkdir "src"
+
+RUN echo "import this" > src/main.py
+
 RUN poetry config virtualenvs.create false && poetry install --with prod
+
+COPY . .
