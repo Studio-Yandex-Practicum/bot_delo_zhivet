@@ -144,8 +144,9 @@ def create_bot() -> Application:
             ],
             TYPING: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, save_comment),
-                MessageHandler(filters.PHOTO & ~filters.COMMAND, save_foto),
                 MessageHandler(filters.LOCATION & ~filters.COMMAND, save_location),
+                MessageHandler(filters.PHOTO & ~filters.COMMAND, save_foto),
+                MessageHandler(filters.ATTACHMENT & ~filters.COMMAND, save_foto),
             ],
         },
         fallbacks=[

@@ -45,9 +45,8 @@ async def resize_downloaded_image(file_path):
     """Функция сжатия загружаемого изображения для экономии места."""
     image = Image.open(file_path)
     width, height = image.size
-    TARGET_WIDTH = 100
-    coefficient = width / 100
-    new_height = height / coefficient
-    resize_image = image.resize((int(TARGET_WIDTH), int(new_height)), Image.ANTIALIAS)
-    resize_image.save(file_path, quality=50)
-    return resize_image
+    target_width = 1000
+    coefficient = width / target_width
+    target_height = height / coefficient
+    resize_image = image.resize((int(target_width), int(target_height)))
+    return resize_image.save(file_path, optimize=True, quality=95)
