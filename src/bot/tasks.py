@@ -11,10 +11,20 @@ from src.bot.handlers.social import save_and_exit_from_social_problem
 from src.bot.handlers.pollution import save_and_exit_pollution
 from src.bot.handlers.volunteer import save_and_exit_volunteer
 
+celery_result_backend = settings.celery_connect_string.format(
+    host := settings.redis_host,
+    port := settings.redis_port,
+)
+
+celery_broker_url = settings.celery_connect_string.format(
+    host := settings.redis_host,
+    port := settings.redis_port,
+)
+
 celery = Celery(
     main='delo_zhivet',
-    backend=settings.celery_result_backend,
-    broker=settings.celery_broker_url,
+    backend=celery_result_backend,
+    broker=celery_broker_url,
 )
 
 
