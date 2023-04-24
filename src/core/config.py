@@ -23,6 +23,11 @@ class Settings(BaseSettings):
     AWS_BUCKET_NAME: str
     SENTRY_DSN_BOT: str = None
 
+    # Celery
+    redis_host: str | None = "redis"
+    redis_port: str | None = "6379"
+    celery_connect_string = 'redis://{}:{}/0'
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"

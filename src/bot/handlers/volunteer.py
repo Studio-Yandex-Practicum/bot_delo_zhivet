@@ -3,7 +3,6 @@ from telegram.constants import ParseMode
 from telegram.ext import ContextTypes
 
 from src.api.tracker import client
-from src.bot.handlers.common import end_describing
 from src.bot.handlers.start import start
 from src.bot.handlers.state_constants import (
     ACTIVITY_RADIUS,
@@ -295,10 +294,14 @@ async def save_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     return await add_volunteer(update, context)
 
 
-async def save_and_exit_volunteer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
+async def save_and_exit_volunteer(
+        user_id: int,
+        username: str,
+        first_name: str,
+        last_name: str,
+        user_data,
+) -> None:
     """Сохранение данных в базу и отправка в трекер"""
-    context.user_data[START_OVER] = True
-    user_data = context.user_data[FEATURES]
     radius = user_data[SPECIFY_ACTIVITY_RADIUS][7:]
     car = user_data[SPECIFY_CAR_AVAILABILITY][4:]
     if SPECIFY_PHONE_PERMISSION in user_data:
@@ -308,10 +311,10 @@ async def save_and_exit_volunteer(update: Update, context: ContextTypes.DEFAULT_
     user_data[GEOM] = f"POINT({user_data[LONGITUDE]} {user_data[LATITUDE]})"
     user_data[SPECIFY_ACTIVITY_RADIUS] = int(radius) * 1000
     user_data[SPECIFY_CAR_AVAILABILITY] = car
-    user_data[TELEGRAM_ID] = update.effective_user.id
-    user_data[TELEGRAM_USERNAME] = update.effective_user.username
-    user_data[FIRST_NAME] = update.effective_user.first_name
-    user_data[LAST_NAME] = update.effective_user.last_name
+    user_data[TELEGRAM_ID] = user_id
+    user_data[TELEGRAM_USERNAME] = username
+    user_data[FIRST_NAME] = first_name
+    user_data[LAST_NAME] = last_name
     user_data[SPECIFY_PHONE_PERMISSION] = phone
     if SPECIFY_CITY in user_data:
         del user_data[SPECIFY_CITY]
@@ -328,7 +331,7 @@ async def save_and_exit_volunteer(update: Update, context: ContextTypes.DEFAULT_
     if not old_user:
         await create_new_user(user, session)
     if old_user and old_user.is_banned:
-        return await end_describing(update, context)
+        return
     old_volunteer = await check_volunteer_in_db(user_data[TELEGRAM_ID], session)
     old_ticket_id = None
     if old_volunteer:
@@ -339,7 +342,7 @@ async def save_and_exit_volunteer(update: Update, context: ContextTypes.DEFAULT_
             and old_volunteer.radius == int(radius) * 1000
             and old_volunteer.phone == phone
         ):
-            return await end_describing(update, context)
+            return
         else:
             old_ticket_id = old_volunteer.ticketID
             await update_volunteer(old_volunteer, user_data, session)
@@ -367,7 +370,6 @@ async def save_and_exit_volunteer(update: Update, context: ContextTypes.DEFAULT_
         description=description,
     )
     await save_tracker_id(crud_volunteer, tracker.key, user_data[TELEGRAM_ID], session)
-    return await end_describing(update, context)
 
 
 async def back_to_add_volunteer(update: Update, context: ContextTypes.DEFAULT_TYPE):

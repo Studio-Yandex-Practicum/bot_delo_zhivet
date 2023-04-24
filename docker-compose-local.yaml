@@ -10,16 +10,25 @@ services:
     env_file:
       - ./.env
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:?err} -d ${POSTGRES_DB:?err}"]
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:?err} -d ${POSTGRES_DB:?err}" ]
       timeout: 10s
       interval: 1s
       retries: 10
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:alpine
+    volumes:
+      - redis_data:/data
 
   bot:
     build:
       context: .
       dockerfile: ./Dockerfile
-    command: ["poetry", "run", "runbot"]
+    volumes:
+      - media_data:/app/media/
+    command: bash -c "alembic upgrade head && poetry run runbot"
     restart: always
     depends_on:
       db:
@@ -31,7 +40,7 @@ services:
     build:
       context: .
       dockerfile: ./Dockerfile
-    command: ["gunicorn", "--bind", "0.0.0.0:5000", "--access-logfile=-", "manage:app"]
+    command: [ "gunicorn", "--bind", "0.0.0.0:5000", "--access-logfile=-", "manage:app" ]
     restart: always
     depends_on:
       db:
@@ -43,6 +52,38 @@ services:
     volumes:
       - static_value:/app/admin/static/
       - ./admin/logs/:/app/admin/logs/
+
+  celery:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    volumes:
+      - media_data:/app/media/
+    command: [ "celery", "-A", "src.bot.tasks", "worker" ]
+    depends_on:
+      db:
+        condition: service_healthy
+      bot:
+        condition: service_started
+      redis:
+        condition: service_started
+
+  flower:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    command: [ "celery", "-A", "src.bot.tasks", "flower" ]
+    ports:
+      - "5555:5555"
+    depends_on:
+      db:
+        condition: service_healthy
+      bot:
+        condition: service_started
+      redis:
+        condition: service_started
+      celery:
+        condition: service_started
 
   nginx:
     build:
@@ -60,6 +101,10 @@ services:
     depends_on:
       - web
 
+
+
 volumes:
   postgres_data:
   static_value:
+  media_data:
+  redis_data:

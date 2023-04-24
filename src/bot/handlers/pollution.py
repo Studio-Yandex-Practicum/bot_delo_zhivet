@@ -1,12 +1,12 @@
 import os
 from datetime import datetime
+from pathlib import Path
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.constants import ParseMode
 from telegram.ext import ContextTypes
 
 from src.api.tracker import client
-from src.bot.handlers.common import end_describing
 from src.bot.service.pollution import create_new_pollution, download_to_object_storage
 from src.bot.service.save_new_user import check_user_in_db, create_new_user
 from src.bot.service.save_tracker_id import save_tracker_id
@@ -156,7 +156,7 @@ async def save_foto(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     if context.user_data[CURRENT_FEATURE] == POLLUTION_FOTO:
         photo_file = await update.message.photo[-1].get_file()
         date = datetime.now().strftime("%d_%m_%Y_%H_%M_%S")
-        file_path = f"media\\{date}.jpg"
+        file_path = str(Path.cwd() / "media" / f"{date}.jpg")
         await photo_file.download_to_drive(custom_path=file_path)
         user_data[FEATURES][POLLUTION_FOTO] = str(file_path)
         user_data[START_OVER] = True
@@ -203,11 +203,13 @@ async def save_location(update: Update, context: ContextTypes.DEFAULT_TYPE) -> s
         await update.message.reply_text(text=chat_text, reply_markup=keyboard)
 
 
-async def save_and_exit_pollution(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
+async def save_and_exit_pollution(
+        user_id: int,
+        username: str,
+        user_data,
+) -> None:
     """Сохранение данных в базу"""
-    context.user_data[START_OVER] = True
-    user_data = context.user_data[FEATURES]
-    user_data[TELEGRAM_ID] = update.effective_user.id
+    user_data[TELEGRAM_ID] = user_id
     user_data[GEOM] = f"POINT({user_data[LONGITUDE]} {user_data[LATITUDE]})"
     file_path = user_data[POLLUTION_FOTO]
     latitude = user_data[LATITUDE]
@@ -218,7 +220,7 @@ async def save_and_exit_pollution(update: Update, context: ContextTypes.DEFAULT_
         comment = "Комментариев не оставили"
     user = {}
     user[TELEGRAM_ID] = user_data[TELEGRAM_ID]
-    user[TELEGRAM_USERNAME] = update.effective_user.username
+    user[TELEGRAM_USERNAME] = username
     await download_to_object_storage(file_path)
     session_generator = get_async_session()
     session = await session_generator.asend(None)
@@ -226,7 +228,7 @@ async def save_and_exit_pollution(update: Update, context: ContextTypes.DEFAULT_
     if not old_user:
         await create_new_user(user, session)
     if old_user and old_user.is_banned:
-        return await end_describing(update, context)
+        return
     await create_new_pollution(user_data, session)
     volunteers = await crud_volunteer.get_volunteers_by_point(longitude, latitude, session)
     summary = f"{user[TELEGRAM_USERNAME]} - {latitude}, {longitude}"
@@ -244,7 +246,6 @@ async def save_and_exit_pollution(update: Update, context: ContextTypes.DEFAULT_
     )
     os.remove(file_path)
     await save_tracker_id(crud_pollution, tracker.key, user_data[TELEGRAM_ID], session)
-    return await end_describing(update, context)
 
 
 async def back_to_select_option_to_report_about_pollution(update: Update, context: ContextTypes.DEFAULT_TYPE):
