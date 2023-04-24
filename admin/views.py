@@ -166,36 +166,19 @@ class BaseModelView(sqla.ModelView):
     page_size = 10
 
     def is_accessible(self):
-        return current_user.is_active and current_user.is_authenticated and current_user.has_role("admin")
+        return (
+            current_user.is_active
+            and current_user.is_authenticated
+            and (current_user.has_role("superuser") or current_user.has_role("admin"))
+        )
 
 
-class SuperuserModelView(BaseModelView):
-    """Вью-класс суперпользователя"""
-
-    column_exclude_list = ("password",)
-    form_excluded_columns = ("password",)
-
-    def is_accessible(self):
-        return current_user.is_active and current_user.is_authenticated and current_user.has_role("superuser")
-
-
-class StaffModelView(SuperuserModelView):
-    """Вью-класс администраторов"""
-
-    all_columns = get_table_fields_from_model(Staff)
-    column_labels = get_translated_lables(all_columns)
-    form_columns = (
-        "login",
-        "roles",
-        "active",
-    )
-    form_widget_args = {"login": {"readonly": True}}
-
-
-class UserModelView(SuperuserModelView):
+class UserModelView(BaseModelView):
     """Вью-класс пользователей"""
 
     all_columns = get_table_fields_from_model(User)
+    column_exclude_list = ("password",)
+    form_excluded_columns = ("password",)
     column_labels = get_translated_lables(all_columns)
     form_columns = (
         "telegram_username",
@@ -204,12 +187,23 @@ class UserModelView(SuperuserModelView):
     form_widget_args = {"telegram_username": {"readonly": True}}
     column_searchable_list = ("telegram_username",)
 
+
+class StaffModelView(BaseModelView):
+    """Вью-класс администраторов"""
+
+    all_columns = get_table_fields_from_model(Staff)
+    column_exclude_list = ("password",)
+    form_excluded_columns = ("password",)
+    column_labels = get_translated_lables(all_columns)
+    form_columns = (
+        "login",
+        "roles",
+        "active",
+    )
+    form_widget_args = {"login": {"readonly": True}}
+
     def is_accessible(self):
-        return (
-            current_user.is_active
-            and current_user.is_authenticated
-            and (current_user.has_role("superuser") or current_user.has_role("admin"))
-        )
+        return current_user.is_active and current_user.is_authenticated and current_user.has_role("superuser")
 
 
 class VolunteerModelView(BaseModelView):
@@ -235,14 +229,6 @@ class VolunteerModelView(BaseModelView):
     )
     column_exclude_list = ("geometry",)
     column_searchable_list = ("telegram_username",)
-    get_table_fields_from_model(Volunteer)
-
-    def is_accessible(self):
-        return (
-            current_user.is_active
-            and current_user.is_authenticated
-            and (current_user.has_role("superuser") or current_user.has_role("admin"))
-        )
 
 
 class AssistanceDisabledModelView(BaseModelView):
