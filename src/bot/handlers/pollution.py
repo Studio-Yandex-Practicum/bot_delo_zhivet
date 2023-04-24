@@ -1,5 +1,6 @@
 import os
 from datetime import datetime
+from pathlib import Path
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.constants import ParseMode
@@ -155,7 +156,7 @@ async def save_foto(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     if context.user_data[CURRENT_FEATURE] == POLLUTION_FOTO:
         photo_file = await update.message.photo[-1].get_file()
         date = datetime.now().strftime("%d_%m_%Y_%H_%M_%S")
-        file_path = f"media\\{date}.jpg"
+        file_path = str(Path.cwd() / "media" / f"{date}.jpg")
         await photo_file.download_to_drive(custom_path=file_path)
         user_data[FEATURES][POLLUTION_FOTO] = str(file_path)
         user_data[START_OVER] = True

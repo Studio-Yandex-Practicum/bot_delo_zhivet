@@ -26,6 +26,8 @@ services:
     build:
       context: .
       dockerfile: ./Dockerfile
+    volumes:
+      - media_data:/app/media/
     command: bash -c "alembic upgrade head && poetry run runbot"
     restart: always
     depends_on:
@@ -55,6 +57,8 @@ services:
     build:
       context: .
       dockerfile: ./Dockerfile
+    volumes:
+      - media_data:/app/media/
     command: [ "celery", "-A", "src.bot.tasks", "worker" ]
     depends_on:
       db:
@@ -102,4 +106,5 @@ services:
 volumes:
   postgres_data:
   static_value:
+  media_data:
   redis_data:
