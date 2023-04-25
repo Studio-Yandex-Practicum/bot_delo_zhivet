@@ -172,6 +172,11 @@ DB_HOST=db
 docker-compose -f docker-compose-local.yaml up -d --build
 ```
 
+3. Установить миграции
+```bash
+docker compose -f docker-compose-local.yaml exec bot poetry run alembic upgrade head
+```
+
 ### 3. Запуск Flask-admin
 Если виртуальное окружение активно и все контейнеры из `docker-compose-local.yaml` запущены или запущен `postgres-local.yaml`
 1. Проверить .env-файл, значение `DB_HOST` должно быть `localhost`
