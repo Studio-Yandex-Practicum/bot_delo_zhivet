@@ -64,38 +64,6 @@ your@device:~/your_project_pwd/bot_delo_zhivet$ poetry shell
 poetry env list
 ```
 
-## Запуск базы и применение миграций на локальной машине
-Сначала поднимаем контейнер с базой Postgres
-```bash
-docker-compose -f postgres-local.yaml up -d --build
-```
-Если есть чьи-то миграции в проекте, то применяем их
-```bash
-alembic upgrade head
-```
-Если производятся изменения в моделях:
-
-**Каждую новую autogenerate-миграцию необходимо проверить перед применением по доке:**
-https://geoalchemy-2.readthedocs.io/en/latest/alembic.html#interactions-between-alembic-and-geoalchemy-2
-в том числе проверить выполнение следующих правил:remove the create_index statement in the upgrade() function.
-1. remove the `drop_index` statement in the `downgrade()` function.
-1. remove the `create_index` statement in the `upgrade()` function.
-
-
-```bash
-alembic stamp head
-```
-1.
-```bash
-alembic revision --autogenerate -m "you_migration_name"
-```
-2.
-Дальше применяем:
-```bash
-alembic upgrade head
-```
-
-
 [:arrow_up:Оглавление](#Оглавление)
 ___
 
@@ -176,6 +144,9 @@ docker-compose -f docker-compose-local.yaml up -d --build
 ```bash
 docker compose -f docker-compose-local.yaml exec bot poetry run alembic upgrade head
 ```
+
+4. Смотреть заполненные заявки, прошедшие celery, можно во flower: http://localhost:5555/
+
 
 ### 3. Запуск Flask-admin
 Если виртуальное окружение активно и все контейнеры из `docker-compose-local.yaml` запущены или запущен `postgres-local.yaml`
