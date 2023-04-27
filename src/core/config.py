@@ -1,3 +1,5 @@
+from logging import INFO
+
 from dotenv import load_dotenv
 from pydantic import BaseSettings
 
@@ -27,6 +29,12 @@ class Settings(BaseSettings):
     redis_host: str | None = "redis"
     redis_port: str | None = "6379"
     celery_connect_string = 'redis://{}:{}/0'
+
+    # Logging
+    logger_name: str = "bot"
+    log_file: str | None = "bot.log"
+    log_level: int | None = INFO
+    log_encoding: str | None = "utf-8"
 
     class Config:
         env_file = ".env"

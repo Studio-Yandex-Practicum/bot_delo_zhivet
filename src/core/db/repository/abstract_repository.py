@@ -1,9 +1,10 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from structlog import get_logger
 
-from bot.handlers.loggers import get_logger
+from core.config import settings
 
-logger = get_logger()
+logger = get_logger(settings.logger_name)
 
 
 class CRUDBase:
