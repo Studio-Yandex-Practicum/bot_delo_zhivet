@@ -1,4 +1,3 @@
-import logging
 from functools import partial
 from json import dumps
 from os import getpid
@@ -64,4 +63,3 @@ structlog.configure(
 )
 
 logger: PrintLogger = structlog.getLogger(settings.logger_name)
-
