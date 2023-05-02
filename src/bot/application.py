@@ -1,6 +1,7 @@
 import logging
 from json import JSONDecodeError
 from urllib.parse import urljoin
+from uuid import uuid4
 
 import httpx
 import uvicorn
@@ -8,6 +9,7 @@ from starlette.applications import Starlette
 from starlette.requests import Request
 from starlette.responses import Response
 from starlette.routing import Route
+from structlog import get_logger, contextvars
 from telegram import Update
 from telegram.ext import (
     Application,
@@ -93,6 +95,8 @@ from .handlers.volunteer import (
     save_input,
 )
 from .tasks import save_social_problem, save_pollution, save_volunteer
+
+logger = get_logger(settings.logger_name)
 
 
 def create_bot() -> Application:
@@ -257,6 +261,9 @@ def run_bot_webhook():
         try:
             request_json = await request.json()
             bot_app = request.app.state.bot_app
+            contextvars.clear_contextvars()
+            contextvars.bind_contextvars(request_id=str(uuid4()))
+            logger.info('REQUEST', request_data=request_json)
             await bot_app.update_queue.put(Update.de_json(data=request_json, bot=bot_app.bot))
         except JSONDecodeError as error:
             aps_logger.error("Got a JSONDecodeError: %s", error)
