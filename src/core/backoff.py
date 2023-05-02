@@ -1,8 +1,9 @@
 import backoff
+from structlog import get_logger
 
-from bot.handlers.loggers import backoff_loger
+from core.config import settings
 
-logger = backoff_loger()
+logger = get_logger(settings.logger_name)
 
 """
 Base_method - арифметическая прогрессия.
@@ -15,12 +16,9 @@ JITTER = {"Base_method": None, "RandomJitter_method": backoff.random_jitter, "Fu
 
 
 def backoff_hdlr(details):
-    tries = details.get("tries")
-    wait = float("{:.3f}".format(details.get("wait")))
-    elapsed = float("{:.3f}".format(details.get("elapsed")))
     logger.error(
-        f"\nDatabase crash:\n"
-        f"{tries} attempt to connect to base\n"
-        f"Wait time {wait}\n"
-        f"Total waiting time {elapsed} seconds"
+        "Database crash",
+        tries=details.get("tries"),
+        wait_time=float("{:.3f}".format(details.get("wait"))),
+        total_waiting_time=float("{:.3f}".format(details.get("elapsed"))),
     )
