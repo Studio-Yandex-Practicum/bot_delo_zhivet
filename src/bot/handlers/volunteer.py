@@ -295,11 +295,11 @@ async def save_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
 
 
 async def save_and_exit_volunteer(
-        user_id: int,
-        username: str,
-        first_name: str,
-        last_name: str,
-        user_data,
+    user_id: int,
+    username: str,
+    first_name: str,
+    last_name: str,
+    user_data,
 ) -> None:
     """Сохранение данных в базу и отправка в трекер"""
     radius = user_data[SPECIFY_ACTIVITY_RADIUS][7:]

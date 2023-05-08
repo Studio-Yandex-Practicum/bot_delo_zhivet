@@ -1,6 +1,5 @@
 version: '3.8'
 
-
 services:
   db:
     image: postgis/postgis:14-3.3-alpine
@@ -10,7 +9,11 @@ services:
     env_file:
       - ./.env
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:?err} -d ${POSTGRES_DB:?err}" ]
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:?err} -d ${POSTGRES_DB:?err}"
+        ]
       timeout: 10s
       interval: 1s
       retries: 10
@@ -28,7 +31,7 @@ services:
       dockerfile: ./Dockerfile
     volumes:
       - media_data:/app/media/
-    command: [ "poetry", "run", "runbot"]
+    command: [ "poetry", "run", "runbot" ]
     restart: always
     depends_on:
       db:
@@ -40,7 +43,16 @@ services:
     build:
       context: .
       dockerfile: ./Dockerfile
-    command: [ "poetry", "run", "gunicorn", "--bind", "0.0.0.0:5000", "--access-logfile=-", "manage:app" ]
+    command:
+      [
+        "poetry",
+        "run",
+        "gunicorn",
+        "--bind",
+        "0.0.0.0:5000",
+        "--access-logfile=-",
+        "manage:app"
+      ]
     restart: always
     depends_on:
       db:
@@ -59,7 +71,15 @@ services:
       dockerfile: ./Dockerfile
     volumes:
       - media_data:/app/media/
-    command: [ "poetry", "run",  "celery", "-A", "src.bot.tasks", "worker" ]
+    command:
+      [
+        "poetry",
+        "run",
+        "celery",
+        "-A",
+        "src.bot.tasks",
+        "worker"
+      ]
     depends_on:
       db:
         condition: service_healthy
@@ -72,7 +92,15 @@ services:
     build:
       context: .
       dockerfile: ./Dockerfile
-    command: [ "poetry", "run", "celery", "-A", "src.bot.tasks", "flower" ]
+    command:
+      [
+        "poetry",
+        "run",
+        "celery",
+        "-A",
+        "src.bot.tasks",
+        "flower"
+      ]
     ports:
       - "5555:5555"
     depends_on:
@@ -100,8 +128,6 @@ services:
       - static_value:/var/html/static/
     depends_on:
       - web
-
-
 
 volumes:
   postgres_data:
