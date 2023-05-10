@@ -61,6 +61,7 @@ celery = "^5.2.7"
 redis = "^4.5.4"
 flower = "^1.2.0"
 structlog = "^23.1.0"
+pillow = "^9.5.0"
 
 [tool.poetry.group.prod]
 optional = true

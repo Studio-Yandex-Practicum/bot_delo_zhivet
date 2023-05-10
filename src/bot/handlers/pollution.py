@@ -8,7 +8,7 @@ from telegram.constants import ParseMode
 from telegram.ext import ContextTypes
 
 from src.api.tracker import client
-from src.bot.const import MAXIMUM_SIZE_OF_IMAGE_KB
+from src.bot.const import KB_IN_MB, MAXIMUM_SIZE_OF_IMAGE_KB
 from src.bot.service.pollution import create_new_pollution, download_to_object_storage, resize_downloaded_image
 from src.bot.service.save_new_user import check_user_in_db, create_new_user
 from src.bot.service.save_tracker_id import save_tracker_id
@@ -182,7 +182,7 @@ async def save_foto(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
         user_data[FEATURES][POLLUTION_FOTO] = str(file_path)
         user_data[START_OVER] = True
 
-        size_of_photo_in_kbytes = int(os.stat(file_path).st_size // 1024)
+        size_of_photo_in_kbytes = int(os.stat(file_path).st_size // KB_IN_MB)
         if size_of_photo_in_kbytes > MAXIMUM_SIZE_OF_IMAGE_KB:
             await resize_downloaded_image(file_path)
 
