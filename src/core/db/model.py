@@ -1,11 +1,13 @@
 from flask_login import UserMixin
 from flask_security import RoleMixin
 from geoalchemy2.types import Geography
-from sqlalchemy import BigInteger, Boolean, Column, Date, DateTime, Float, ForeignKey, Integer, String, Table, Text
+from sqlalchemy import (
+    BigInteger, Boolean, Column, Date, DateTime, Float, ForeignKey, Integer,
+    String, Table, Text,
+)
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import backref, relationship
 from werkzeug.security import check_password_hash, generate_password_hash
-
 
 from src.core.db.db import Base
 
@@ -39,6 +41,24 @@ class Volunteer(Base):
     ticketID = Column(Text, nullable=True)
 
 
+class Tag_Pollution(Base):
+    """Модель тега для сообщения о загрязнении."""
+
+    name = Column(String(35), nullable=False)
+
+    def __str__(self):
+        return self.name
+
+
+class Tag_Assistance(Base):
+    """Модель тега для сообщения о социальной помощи."""
+
+    name = Column(String(35), nullable=False)
+
+    def __str__(self):
+        return self.name
+
+
 class Pollution(Base):
     """Модель сообщения о загрязнении"""
 
@@ -49,6 +69,8 @@ class Pollution(Base):
     comment = Column(Text, nullable=True)
     telegram_id = Column(BigInteger, ForeignKey("user.telegram_id"))
     ticketID = Column(Text, nullable=True)
+    tag_id = Column(ForeignKey("tag_pollution.id"), nullable=True)
+    tag = relationship(Tag_Pollution, foreign_keys="Pollution.tag_id")
 
 
 class Assistance_disabled(Base):
@@ -62,6 +84,10 @@ class Assistance_disabled(Base):
     latitude = Column(Float, nullable=False)
     longitude = Column(Float, nullable=False)
     geometry = Column(Geography(geometry_type="POINT", srid=4326, dimension=2))
+    tag_id = Column(ForeignKey("tag_assistance.id"))
+    tag = relationship(
+        Tag_Assistance, foreign_keys="Assistance_disabled.tag_id"
+    )
 
 
 roles_users = Table(
@@ -91,7 +117,9 @@ class Staff(Base, UserMixin):
     email = Column(String(255), unique=True)
     password = Column(String(255))
     active = Column(Boolean())
-    roles = relationship("Role", secondary=roles_users, backref=backref("users", lazy="dynamic"))
+    roles = relationship(
+        "Role", secondary=roles_users, backref=backref("users", lazy="dynamic")
+    )
 
     def has_role(self, *args):
         return set(args).issubset({role.name for role in self.roles})
