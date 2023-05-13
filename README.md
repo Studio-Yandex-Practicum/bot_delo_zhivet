@@ -117,6 +117,11 @@ ___
 ### 1. Формирование env-файла
 1. Переименуйте файл .env.example в .env и заполните его. Пример значений: https://www.notion.so/env-8b7403f73b604daf90253041de4fec19
 
+появилась 2 новые константы в енв файле 
+LOCAL_START = True 
+DB_HOST_LOCAL=localhost 
+
+
 2. Узнать токен своего бота можно в @BotFather
 
 3. Запуск может быть в режимах polling и webhook. Для режима webhook в файле .env должны быть указаны параметры WEBHOOK_DOMAIN и WEBHOOK_PORT. Подробнее об этом написано [в официальном гайде telegram](https://core.telegram.org/bots/webhooks)
@@ -167,9 +172,10 @@ flask run
 
 1. Запустите docker-compose
 
-2. Проверить .env-файл, значение `DB_HOST` должно быть `localhost`
+2. Проверить .env-файл, значение `LOCAL_START` должно быть `True`
 ```
-DB_HOST=localhost
+LOCAL_START = True
+DB_HOST_LOCAL=localhost
 ```
 
 3. Поднять контейнер с базой
