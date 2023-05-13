@@ -20,7 +20,11 @@ Base.query = db_session.query_property()
 
 # Значение SQLALCHEMY_DATABASE_URI для логирования лучше не использовать,
 # т.к. там содержатся учетные данные для подключения, потому:
-db_info = f"{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('POSTGRES_DB')}"
+if os.getenv("LOCAL_START"):
+    db_info = f"{os.getenv('DB_HOST_LOCAL')}:{os.getenv('DB_PORT')}/{os.getenv('POSTGRES_DB')}"
+else:
+    db_info = f"{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('POSTGRES_DB')}"
+
 
 
 def get_not_existing_required_tables(tables):
