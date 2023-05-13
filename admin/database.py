@@ -14,8 +14,12 @@ from .messages import DB_COMMON_ERROR, DBAPI_ERROR, START_LOGGING, STOP_LOGGING
 logger = get_logger(__file__)
 logger.info(START_LOGGING)
 db = SQLAlchemy()
-engine = create_engine(Config.SQLALCHEMY_DATABASE_URI, pool_size=10000, max_overflow=100)
-db_session = scoped_session(sessionmaker(autocommit=False, autoflush=False, bind=engine))
+engine = create_engine(
+    Config.SQLALCHEMY_DATABASE_URI, pool_size=10000, max_overflow=100
+)
+db_session = scoped_session(
+    sessionmaker(autocommit=False, autoflush=False, bind=engine)
+)
 Base.query = db_session.query_property()
 
 # Значение SQLALCHEMY_DATABASE_URI для логирования лучше не использовать,
@@ -26,7 +30,6 @@ else:
     db_info = f"{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('POSTGRES_DB')}"
 
 
-
 def get_not_existing_required_tables(tables):
     not_existing_tables = []
     try:
@@ -34,18 +37,25 @@ def get_not_existing_required_tables(tables):
             if not inspect(engine).has_table(table):
                 not_existing_tables.append(table)
     except exc.OperationalError as error:
-        logger.critical(DBAPI_ERROR.format(db_info=db_info, details=str(error)))
+        logger.critical(
+            DBAPI_ERROR.format(db_info=db_info, details=str(error))
+        )
         logger.info(STOP_LOGGING)
-        raise ConnectionError(DBAPI_ERROR.format(db_info=db_info, details=str(error)))
+        raise ConnectionError(
+            DBAPI_ERROR.format(db_info=db_info, details=str(error))
+        )
     except Exception as error:
-        logger.critical(DB_COMMON_ERROR.format(db_info=db_info, details=str(error)))
+        logger.critical(
+            DB_COMMON_ERROR.format(db_info=db_info, details=str(error))
+        )
         logger.info(STOP_LOGGING)
-        raise EnvironmentError(DB_COMMON_ERROR.format(db_info=db_info, details=str(error)))
+        raise EnvironmentError(
+            DB_COMMON_ERROR.format(db_info=db_info, details=str(error))
+        )
     return not_existing_tables
 
 
 def create_roles_and_superuser():
-
     if len(Staff.query.all()) < 1:
         staff = Staff(
             login=os.getenv("SUPER_USER_LOGIN"),

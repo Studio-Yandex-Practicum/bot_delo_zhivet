@@ -11,10 +11,10 @@ class Config(object):
     DEBUG = True
     if os.getenv("LOCAL_START"):
         SQLALCHEMY_DATABASE_URI = (
-        f"postgresql://{os.getenv('POSTGRES_USER')}:"
-        f"{os.getenv('POSTGRES_PASSWORD')}@"
-        f"{os.getenv('DB_HOST_LOCAL')}:{os.getenv('DB_PORT')}/{os.getenv('POSTGRES_DB')}"
-    )
+            f"postgresql://{os.getenv('POSTGRES_USER')}:"
+            f"{os.getenv('POSTGRES_PASSWORD')}@"
+            f"{os.getenv('DB_HOST_LOCAL')}:{os.getenv('DB_PORT')}/{os.getenv('POSTGRES_DB')}"
+        )
     else:
         SQLALCHEMY_DATABASE_URI = (
             f"postgresql://{os.getenv('POSTGRES_USER')}:"
@@ -37,10 +37,16 @@ class Config(object):
     MAIL_SERVER = os.getenv("MAIL_SERVER", default="smtp.yandex.ru")
     MAIL_PORT = os.getenv("MAIL_PORT", default=465)
     MAIL_USE_SSL = os.getenv("MAIL_USE_SSL", default=True)
-    MAIL_USERNAME = os.getenv("MAIL_USERNAME", default="test.delo.zhivet@yandex.ru")
+    MAIL_USERNAME = os.getenv(
+        "MAIL_USERNAME", default="test.delo.zhivet@yandex.ru"
+    )
     MAIL_PASSWORD = os.getenv("MAIL_PASSWORD", default="bctlgfnckbtxhgzt")
     MAIL_DEBUG = os.getenv("MAIL_DEBUG", default=1)
 
     # Параметры генерации токенов сброса пароля
-    PASSWORD_RESET_TOKEN_TTL = os.getenv("PASSWORD_RESET_TOKEN_TTL", default=600)
-    PASSWORD_RESET_TOKEN_ALGORITHM = os.getenv("PASSWORD_RESET_TOKEN_ALGORITHM", default="HS256")
+    PASSWORD_RESET_TOKEN_TTL = os.getenv(
+        "PASSWORD_RESET_TOKEN_TTL", default=600
+    )
+    PASSWORD_RESET_TOKEN_ALGORITHM = os.getenv(
+        "PASSWORD_RESET_TOKEN_ALGORITHM", default="HS256"
+    )
