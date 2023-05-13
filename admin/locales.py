@@ -26,4 +26,7 @@ FIELD_TRANSLATION_RU = {
     "photo": "Фотография",
     "active": "Включен",
     "roles": "Роли",
+    "tag": "Тег",
+    "tag_id": "ID тега",
+    "name": "Имя",
 }
