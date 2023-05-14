@@ -7,20 +7,18 @@ load_dotenv()
 
 
 class Config(object):
+    LOCAL_START = True  # когда запускаем локально фласк True иначе False
     SECRET_KEY = os.getenv("ADMIN_SECRET_KEY", default="SECRET_KEY")
     DEBUG = True
-    if os.getenv("LOCAL_START"):
-        SQLALCHEMY_DATABASE_URI = (
-            f"postgresql://{os.getenv('POSTGRES_USER')}:"
-            f"{os.getenv('POSTGRES_PASSWORD')}@"
-            f"{os.getenv('DB_HOST_LOCAL')}:{os.getenv('DB_PORT')}/{os.getenv('POSTGRES_DB')}"
-        )
-    else:
-        SQLALCHEMY_DATABASE_URI = (
-            f"postgresql://{os.getenv('POSTGRES_USER')}:"
-            f"{os.getenv('POSTGRES_PASSWORD')}@"
-            f"{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('POSTGRES_DB')}"
-        )
+    DB_HOST = (
+        os.getenv("DB_HOST_LOCAL") if LOCAL_START else os.getenv("DB_HOST")
+    )
+    SQLALCHEMY_DATABASE_URI = (
+        f"postgresql://{os.getenv('POSTGRES_USER')}:"
+        f"{os.getenv('POSTGRES_PASSWORD')}@"
+        f"{DB_HOST}:{os.getenv('DB_PORT')}/{os.getenv('POSTGRES_DB')}"
+    )
+
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     FLASK_ENV = "development"
 
