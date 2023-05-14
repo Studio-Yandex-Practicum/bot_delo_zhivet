@@ -1,11 +1,24 @@
 from flask_login import UserMixin
 from flask_security import RoleMixin
 from geoalchemy2.types import Geography
-from sqlalchemy import BigInteger, Boolean, Column, Date, DateTime, Float, ForeignKey, Integer, String, Table, Text
+from sqlalchemy import (
+    TIMESTAMP,
+    BigInteger,
+    Boolean,
+    Column,
+    Date,
+    DateTime,
+    Float,
+    ForeignKey,
+    Integer,
+    String,
+    Table,
+    Text,
+    func,
+)
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import backref, relationship
 from werkzeug.security import check_password_hash, generate_password_hash
-
 
 from src.core.db.db import Base
 
@@ -37,6 +50,12 @@ class Volunteer(Base):
     deleted_at = Column(DateTime(timezone=True))
     is_banned = Column(Boolean, default=False)
     ticketID = Column(Text, nullable=True)
+    holiday_start = Column(TIMESTAMP, nullable=True)
+    holiday_end = Column(TIMESTAMP, nullable=True)
+
+    @property
+    def is_active(self):
+        return not self.holiday_start < func.current_timestamp() < self.holiday_end
 
 
 class Pollution(Base):
