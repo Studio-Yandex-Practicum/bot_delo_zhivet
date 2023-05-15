@@ -135,7 +135,7 @@ docker-compose -f postgres-local.yaml down
 DB_HOST=db
 ```
 
-2. Запуск сервисов бота (database, redis, бот, celery, flower):
+2. Запуск сервисов бота (database, redis, бот, web=админка на фласк, celery, flower):
 ```bash
 docker-compose -f docker-compose-local.yaml up -d --build
 ```
@@ -146,6 +146,18 @@ docker compose -f docker-compose-local.yaml exec bot poetry run alembic upgrade 
 ```
 
 4. Смотреть заполненные заявки, прошедшие celery, можно во flower: http://localhost:5555/
+
+5. Админка на фласке будет: http://localhost/admin/
+
+6. Если у вас в админке нет статики, то вероятно она не была собрана. 
+  * соберите статику: в корневой директории проекта с включенным вирт окружением:
+  ``` 
+  python admin/manage.py collectstatic --static_folder static --overwrite 
+  ```
+  * и пересоберите контейнер с админкой
+  ```
+  docker-compose -f docker-compose-local.yaml  up -d --build web
+  ```
 
 
 ### 3. Запуск Flask-admin
