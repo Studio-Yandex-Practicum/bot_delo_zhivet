@@ -181,9 +181,9 @@ async def report_about_social_problem(update: Update, context: ContextTypes.DEFA
 
 
 async def save_and_exit_from_social_problem(
-        user_id: int,
-        username: str,
-        user_data,
+    user_id: int,
+    username: str,
+    user_data,
 ) -> None:
     """Сохранение данных в базу и отправка в трекер"""
     user_data[GEOM] = f"POINT({user_data[LONGITUDE]} {user_data[LATITUDE]})"

@@ -28,7 +28,7 @@ class Settings(BaseSettings):
     # Celery
     redis_host: str | None = "redis"
     redis_port: str | None = "6379"
-    celery_connect_string = 'redis://{}:{}/0'
+    celery_connect_string = "redis://{}:{}/0"
 
     # Logging
     logger_name: str = "bot"
