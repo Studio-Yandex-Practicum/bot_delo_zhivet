@@ -41,22 +41,26 @@ class Volunteer(Base):
     ticketID = Column(Text, nullable=True)
 
 
-class Tag_Pollution(Base):
+class AbstractTag(Base):
+    """Абстрактная модель тега."""
+
+    __abstract__ = True
+    name = Column(String(35), nullable=False, unique=True)
+
+    def __str__(self):
+        return self.name
+
+
+class Tag_Pollution(AbstractTag):
     """Модель тега для сообщения о загрязнении."""
 
-    name = Column(String(35), nullable=False)
-
-    def __str__(self):
-        return self.name
+    pass
 
 
-class Tag_Assistance(Base):
+class Tag_Assistance(AbstractTag):
     """Модель тега для сообщения о социальной помощи."""
 
-    name = Column(String(35), nullable=False)
-
-    def __str__(self):
-        return self.name
+    pass
 
 
 class Pollution(Base):
@@ -85,9 +89,7 @@ class Assistance_disabled(Base):
     longitude = Column(Float, nullable=False)
     geometry = Column(Geography(geometry_type="POINT", srid=4326, dimension=2))
     tag_id = Column(ForeignKey("tag_assistance.id"))
-    tag = relationship(
-        Tag_Assistance, foreign_keys="Assistance_disabled.tag_id"
-    )
+    tag = relationship(Tag_Assistance, foreign_keys="Assistance_disabled.tag_id")
 
 
 roles_users = Table(
@@ -117,9 +119,7 @@ class Staff(Base, UserMixin):
     email = Column(String(255), unique=True)
     password = Column(String(255))
     active = Column(Boolean())
-    roles = relationship(
-        "Role", secondary=roles_users, backref=backref("users", lazy="dynamic")
-    )
+    roles = relationship("Role", secondary=roles_users, backref=backref("users", lazy="dynamic"))
 
     def has_role(self, *args):
         return set(args).issubset({role.name for role in self.roles})
