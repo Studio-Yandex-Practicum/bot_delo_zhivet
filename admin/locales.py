@@ -28,5 +28,5 @@ FIELD_TRANSLATION_RU = {
     "roles": "Роли",
     "tag": "Тег",
     "tag_id": "ID тега",
-    "name": "Имя",
+    "name": "Тег",
 }
