@@ -52,6 +52,7 @@ class Volunteer(Base):
     ticketID = Column(Text, nullable=True)
     holiday_start = Column(TIMESTAMP, nullable=True)
     holiday_end = Column(TIMESTAMP, nullable=True)
+    is_active = Column(Boolean, default=False)
 
     @property
     def is_active(self):

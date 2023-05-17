@@ -1,4 +1,4 @@
-from sqlalchemy import and_, between, desc, func, not_, select
+from sqlalchemy import and_, desc, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.db.model import Volunteer
@@ -10,7 +10,7 @@ class VolunteerCRUD(CRUDBase):
         self,
         telegram_id: int,
         session: AsyncSession,
-    ):
+    ) -> Volunteer:
         user_id = await session.execute(select(Volunteer).where(Volunteer.telegram_id == telegram_id))
         return user_id.scalars().first()
 
@@ -31,7 +31,6 @@ class VolunteerCRUD(CRUDBase):
                         Volunteer.radius,
                         use_spheroid=False,
                     ),
-                    not_(between(func.current_timestamp(), Volunteer.holiday_start, Volunteer.holiday_end)),
                 )
             )
             .order_by(Volunteer.radius, desc(Volunteer.created_at))
