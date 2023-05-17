@@ -14,7 +14,6 @@ from sqlalchemy import (
     String,
     Table,
     Text,
-    func,
 )
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import backref, relationship
@@ -53,10 +52,6 @@ class Volunteer(Base):
     holiday_start = Column(TIMESTAMP, nullable=True)
     holiday_end = Column(TIMESTAMP, nullable=True)
     is_active = Column(Boolean, default=False)
-
-    @property
-    def is_active(self):
-        return not self.holiday_start < func.current_timestamp() < self.holiday_end
 
 
 class Pollution(Base):
