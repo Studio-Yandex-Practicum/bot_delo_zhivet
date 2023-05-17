@@ -38,11 +38,11 @@ def upgrade() -> None:
     )
     with op.batch_alter_table('assistance_disabled', schema=None) as batch_op:
         batch_op.add_column(sa.Column('tag_id', postgresql.UUID(as_uuid=True), nullable=True))
-        batch_op.create_foreign_key(None, 'tag_assistance', ['tag_id'], ['id'])
+        batch_op.create_foreign_key(None, 'tag_assistance', ['tag_id'], ['id'], ondelete='SET NULL')
 
     with op.batch_alter_table('pollution', schema=None) as batch_op:
         batch_op.add_column(sa.Column('tag_id', postgresql.UUID(as_uuid=True), nullable=True))
-        batch_op.create_foreign_key(None, 'tag_pollution', ['tag_id'], ['id'])
+        batch_op.create_foreign_key(None, 'tag_pollution', ['tag_id'], ['id'], ondelete='SET NULL')
 
     
 

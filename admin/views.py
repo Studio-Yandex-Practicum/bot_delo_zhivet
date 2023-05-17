@@ -51,11 +51,7 @@ def send_async_email(app, msg):
     with app.app_context():
         try:
             mail.send(msg)
-            logger.info(
-                MAIL_SEND_SUCCESS.format(
-                    subject=msg.subject, recipients=msg.recipients
-                )
-            )
+            logger.info(MAIL_SEND_SUCCESS.format(subject=msg.subject, recipients=msg.recipients))
         except Exception as e:
             logger.error(
                 MAIL_SEND_ERROR.format(
@@ -79,12 +75,8 @@ def send_password_reset_email(user):
         RESET_PASSWORD_SUBJECT,
         sender=Config.MAIL_USERNAME,
         recipients=[user.email],
-        text_body=render_template(
-            "emails/reset_email.txt", user=user, token=token
-        ),
-        html_body=render_template(
-            "emails/reset_email.html", user=user, token=token
-        ),
+        text_body=render_template("emails/reset_email.txt", user=user, token=token),
+        html_body=render_template("emails/reset_email.html", user=user, token=token),
     )
 
 
@@ -179,10 +171,7 @@ class BaseModelView(sqla.ModelView):
         return (
             current_user.is_active
             and current_user.is_authenticated
-            and (
-                current_user.has_role("superuser")
-                or current_user.has_role("admin")
-            )
+            and (current_user.has_role("superuser") or current_user.has_role("admin"))
         )
 
 
@@ -216,11 +205,7 @@ class StaffModelView(BaseModelView):
     form_widget_args = {"login": {"readonly": True}}
 
     def is_accessible(self):
-        return (
-            current_user.is_active
-            and current_user.is_authenticated
-            and current_user.has_role("superuser")
-        )
+        return current_user.is_active and current_user.is_authenticated and current_user.has_role("superuser")
 
 
 class VolunteerModelView(BaseModelView):
@@ -254,9 +239,7 @@ class AssistanceDisabledModelView(BaseModelView):
     all_columns = get_table_fields_from_model(Assistance_disabled)
     column_labels = get_translated_lables(all_columns)
     sortable_relationship = {"tag": "tag.name"}
-    column_sortable_list = get_sortable_fields_list(
-        all_columns, sortable_relationship
-    )
+    column_sortable_list = get_sortable_fields_list(all_columns, sortable_relationship)
     can_edit = False
 
 
@@ -266,9 +249,7 @@ class PolutionModelView(BaseModelView):
     all_columns = get_table_fields_from_model(Pollution)
     column_labels = get_translated_lables(all_columns)
     sortable_relationship = {"tag": "tag.name"}
-    column_sortable_list = get_sortable_fields_list(
-        all_columns, sortable_relationship
-    )
+    column_sortable_list = get_sortable_fields_list(all_columns, sortable_relationship)
     can_edit = False
 
 
@@ -279,6 +260,7 @@ class TagPollutionModelView(BaseModelView):
     column_labels = get_translated_lables(all_columns)
     can_edit = True
     can_create = True
+    can_delete = True
 
 
 class TagAssistanceModelView(BaseModelView):
@@ -288,6 +270,7 @@ class TagAssistanceModelView(BaseModelView):
     column_labels = get_translated_lables(all_columns)
     can_edit = True
     can_create = True
+    can_delete = True
 
 
 admin = flask_admin.Admin(
@@ -302,15 +285,7 @@ admin.add_view(StaffModelView(Staff, db.session, name="Администрато�
 admin.add_view(UserModelView(User, db.session, name="Пользователи"))
 
 admin.add_view(VolunteerModelView(Volunteer, db.session, name="Волонтеры"))
-admin.add_view(
-    AssistanceDisabledModelView(
-        Assistance_disabled, db.session, name="Социальная помощь"
-    )
-)
+admin.add_view(AssistanceDisabledModelView(Assistance_disabled, db.session, name="Социальная помощь"))
 admin.add_view(PolutionModelView(Pollution, db.session, name="Загрязнения"))
-admin.add_view(
-    TagPollutionModelView(Tag_Pollution, db.session, name="Теги Загрязнения")
-)
-admin.add_view(
-    TagAssistanceModelView(Tag_Assistance, db.session, name="Теги Соц. помощи")
-)
+admin.add_view(TagPollutionModelView(Tag_Pollution, db.session, name="Теги Загрязнения"))
+admin.add_view(TagAssistanceModelView(Tag_Assistance, db.session, name="Теги Соц. помощи"))

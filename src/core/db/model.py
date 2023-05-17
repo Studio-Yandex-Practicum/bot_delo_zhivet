@@ -73,7 +73,7 @@ class Pollution(Base):
     comment = Column(Text, nullable=True)
     telegram_id = Column(BigInteger, ForeignKey("user.telegram_id"))
     ticketID = Column(Text, nullable=True)
-    tag_id = Column(ForeignKey("tag_pollution.id"), nullable=True)
+    tag_id = Column(ForeignKey("tag_pollution.id", ondelete="SET NULL"), nullable=True)
     tag = relationship(Tag_Pollution, foreign_keys="Pollution.tag_id")
 
 
@@ -88,7 +88,7 @@ class Assistance_disabled(Base):
     latitude = Column(Float, nullable=False)
     longitude = Column(Float, nullable=False)
     geometry = Column(Geography(geometry_type="POINT", srid=4326, dimension=2))
-    tag_id = Column(ForeignKey("tag_assistance.id"))
+    tag_id = Column(ForeignKey("tag_assistance.id", ondelete="SET NULL"), nullable=True)
     tag = relationship(Tag_Assistance, foreign_keys="Assistance_disabled.tag_id")
 
 
