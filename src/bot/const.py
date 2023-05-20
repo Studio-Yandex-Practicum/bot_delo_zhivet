@@ -27,3 +27,9 @@ SPECIFY_PHONE_PERMISSION_CMD = BASE_PATTERN.format(command=SPECIFY_PHONE_PERMISS
 BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_PATH = BASE_DIR.parent / "persistence_data" / "bot_persistence_data"
 SAVE_PERSISTENCE_INTERVAL = 30
+
+# FOR IMAGE_RESIZER
+MAXIMUM_SIZE_OF_IMAGE_KB = 300
+TARGET_WIDTH = 1000
+QUALITY = 95
+KB_IN_MB = 1024

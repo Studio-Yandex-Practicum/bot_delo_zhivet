@@ -6,9 +6,7 @@ from typing import TextIO
 import structlog
 from structlog import PrintLogger
 from structlog.contextvars import merge_contextvars
-from structlog.processors import (
-    add_log_level, TimeStamper, UnicodeDecoder, JSONRenderer
-)
+from structlog.processors import JSONRenderer, TimeStamper, UnicodeDecoder, add_log_level
 
 from core.config import settings
 
@@ -23,9 +21,9 @@ class _DualWriter(TextIO):
 
     def write(self, data):
         with open(
-                file=self._filename,
-                mode=self._mode,
-                encoding=self._encoding,
+            file=self._filename,
+            mode=self._mode,
+            encoding=self._encoding,
         ) as file:
             file.write(data)
             print(data, end="")
@@ -59,7 +57,7 @@ structlog.configure(
             encoding=settings.log_encoding,
         )
     ),
-    wrapper_class=structlog.make_filtering_bound_logger(settings.log_level)
+    wrapper_class=structlog.make_filtering_bound_logger(settings.log_level),
 )
 
 logger: PrintLogger = structlog.getLogger(settings.logger_name)

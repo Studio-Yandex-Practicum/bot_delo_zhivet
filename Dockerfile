@@ -1,10 +1,10 @@
 FROM python:3.11.2-alpine3.17 as build
 
 RUN apk update && apk add gcc \
-                          libpq-dev \
-                          libc-dev \
-                          libffi-dev \
-                          --no-cache bash
+    libpq-dev \
+    libc-dev \
+    libffi-dev \
+    --no-cache bash
 
 RUN pip install poetry==1.3.2
 

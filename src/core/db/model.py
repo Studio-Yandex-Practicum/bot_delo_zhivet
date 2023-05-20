@@ -2,8 +2,8 @@ from flask_login import UserMixin
 from flask_security import RoleMixin
 from geoalchemy2.types import Geography
 from sqlalchemy import (
-    BigInteger, Boolean, Column, Date, DateTime, Float, ForeignKey, Integer,
-    String, Table, Text,
+    TIMESTAMP, BigInteger, Boolean, Column, Date, DateTime, Float, ForeignKey,
+    Integer, String, Table, Text,
 )
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import backref, relationship
@@ -39,6 +39,9 @@ class Volunteer(Base):
     deleted_at = Column(DateTime(timezone=True))
     is_banned = Column(Boolean, default=False)
     ticketID = Column(Text, nullable=True)
+    holiday_start = Column(TIMESTAMP, nullable=True)
+    holiday_end = Column(TIMESTAMP, nullable=True)
+    is_active = Column(Boolean, default=False)
 
 
 class AbstractTag(Base):
