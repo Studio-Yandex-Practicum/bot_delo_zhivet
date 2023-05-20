@@ -26,4 +26,7 @@ FIELD_TRANSLATION_RU = {
     "photo": "Фотография",
     "active": "Включен",
     "roles": "Роли",
+    "holiday_start": "Начало каникул",
+    "holiday_end": "Окончание каникул",
+    "is_active": "Активен",
 }
