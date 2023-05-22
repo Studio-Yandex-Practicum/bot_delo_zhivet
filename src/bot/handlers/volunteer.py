@@ -51,6 +51,17 @@ from src.core.db.repository.volunteer_repository import crud_volunteer
 async def add_volunteer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     """Меню регистрации волонтёра."""
 
+    session_generator = get_async_session()
+    session = await session_generator.asend(None)
+    volunteer = await crud_volunteer.get_by_attribute("telegram_id", update.effective_chat.id, session)
+    if volunteer is not None:
+        context.user_data[FEATURES] = {
+            CITY: volunteer.city,
+            SPECIFY_ACTIVITY_RADIUS: volunteer.radius,
+            SPECIFY_CAR_AVAILABILITY: volunteer.has_car,
+            SPECIFY_PHONE_PERMISSION: volunteer.phone,
+        }
+
     def check_feature(feature):
         return FEATURES in context.user_data and feature in context.user_data[FEATURES]
 
@@ -62,27 +73,29 @@ async def add_volunteer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> s
         "- [Опционально] Номер телефона для связи."
     )
 
+    action = "Указать" if volunteer is None else "Редактировать"
+
     buttons = [
         [
             InlineKeyboardButton(
-                text=f"Указать свой адрес {CHECK_MARK*check_feature(CITY)}", callback_data=SPECIFY_CITY
+                text=f"{action} свой адрес {CHECK_MARK*check_feature(CITY)}", callback_data=SPECIFY_CITY
             ),
         ],
         [
             InlineKeyboardButton(
-                text=f"Указать радиус активности {CHECK_MARK*check_feature(SPECIFY_ACTIVITY_RADIUS)}",
+                text=f"{action} радиус активности {CHECK_MARK*check_feature(SPECIFY_ACTIVITY_RADIUS)}",
                 callback_data=SPECIFY_ACTIVITY_RADIUS,
             ),
         ],
         [
             InlineKeyboardButton(
-                text=f"Указать наличие автомобиля {CHECK_MARK*check_feature(SPECIFY_CAR_AVAILABILITY)}",
+                text=f"{action} наличие автомобиля {CHECK_MARK*check_feature(SPECIFY_CAR_AVAILABILITY)}",
                 callback_data=SPECIFY_CAR_AVAILABILITY,
             ),
         ],
         [
             InlineKeyboardButton(
-                text=f"Указать номер телефона {CHECK_MARK*check_feature(SPECIFY_PHONE_PERMISSION)}",
+                text=f"{action} номер телефона {CHECK_MARK*check_feature(SPECIFY_PHONE_PERMISSION)}",
                 callback_data=SPECIFY_PHONE_PERMISSION,
             ),
         ],
