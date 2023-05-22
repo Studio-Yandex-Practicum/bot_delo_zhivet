@@ -7,10 +7,8 @@ from src.core.db.model import Staff
 
 from .config import Config
 from .locales import FIELD_TRANSLATION_RU
-from .logger import get_logger
+from .logger import logger
 from .messages import TOKEN_VALIDATION_ERROR
-
-logger = get_logger(__file__, display=True)
 
 
 def get_readonly_dict(fields):

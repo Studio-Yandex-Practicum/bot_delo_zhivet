@@ -15,7 +15,7 @@ from . import app
 from .config import Config
 from .database import db
 from .forms import ForgotForm, LoginForm, PasswordResetForm, RegistrationForm
-from .logger import get_logger
+from .logger import logger
 from .messages import (
     ALREADY_REGISTRED,
     BAD_TOKEN,
@@ -33,8 +33,6 @@ from .utils import (
     get_translated_lables,
     verify_reset_password_token,
 )
-
-logger = get_logger(__file__)
 
 
 def init_login():

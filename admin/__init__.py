@@ -7,10 +7,9 @@ from sentry_sdk.integrations.flask import FlaskIntegration
 
 from .config import Config
 from .database import create_roles_and_superuser, db, get_not_existing_required_tables
-from .logger import get_logger
+from .logger import logger
 from .messages import DB_NOT_READY_FOR_INIT_APP_ERROR, MISSING_REQUIRED_TABLES_ERROR, START_LOGGING, STOP_LOGGING
 
-logger = get_logger(__file__)
 logger.info(START_LOGGING)
 REQUIRED_TABLES = (
     "staff",

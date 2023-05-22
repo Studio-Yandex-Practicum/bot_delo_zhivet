@@ -1,11 +1,11 @@
 import argparse
-import logging
 import os
 import shutil
 import sys
 
 import flask_admin
 from config import Config
+from logger import logger
 from messages import (
     APP_TEMPLATE_FOLDER_COPY_SUCCESS,
     APP_TEMPLATE_FOLDER_NOT_FOUND,
@@ -21,37 +21,6 @@ from messages import (
     UNKNOWN_COMMAND,
 )
 
-logging.root.setLevel(logging.NOTSET)
-
-# Переопределение логгера для manage.py
-# При попытке импорта по цепочке manage.py не импортирует модули через '.'
-# из-за ошибки attempted relative import with no known parent package
-# Изящнее решения не нашел
-
-
-def get_logger(file, display=False):
-
-    """Создание и настройка логгера."""
-
-    log_path = os.path.join(os.path.dirname(file), Config.LOG_REL_PATH)
-    if not os.path.exists(log_path):
-        os.mkdir(log_path)
-    log_file = os.path.join(log_path, os.path.basename(file) + Config.LOG_EXTENSION)
-    logger = logging.getLogger(os.path.basename(file))
-    formatter = logging.Formatter(Config.LOG_FORMAT)
-    file_handler = logging.FileHandler(log_file)
-    file_handler.setLevel(Config.LOG_DEFAULT_LVL)
-    file_handler.setFormatter(formatter)
-    logger.addHandler(file_handler)
-    if display:
-        console_handler = logging.StreamHandler(stream=sys.stdout)
-        console_handler.setLevel(Config.LOG_DEFAULT_LVL)
-        console_handler.setFormatter(formatter)
-        logger.addHandler(console_handler)
-    return logger
-
-
-logger = get_logger(__file__, display=True)
 logger.info(START_LOGGING)
 
 

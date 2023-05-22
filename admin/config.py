@@ -1,5 +1,5 @@
-import logging
 import os
+from logging import INFO
 
 from dotenv import load_dotenv
 
@@ -21,10 +21,15 @@ class Config(object):
 
     # Дополнительные параметры, не участвующие в ините приложения
     BOOTSTRAP_VERSION = "bootstrap4"
-    LOG_DEFAULT_LVL = logging.DEBUG
     LOG_EXTENSION = ".log"
     LOG_FORMAT = "%(asctime)s [%(levelname)s]  %(message)s"
     LOG_REL_PATH = "logs"
+
+    # Logging
+    LOG_NAME: str = "admin"
+    LOG_FILE: str | None = "admin.log"
+    LOG_DEFAULT_LVL: int | None = INFO
+    LOG_ENCODING: str | None = "utf-8"
 
     # Параметры почтового клиента
     MAIL_SERVER = os.getenv("MAIL_SERVER", default="smtp.yandex.ru")

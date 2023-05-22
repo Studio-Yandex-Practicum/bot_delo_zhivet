@@ -5,13 +5,12 @@ from sqlalchemy import create_engine, exc, inspect
 from sqlalchemy.orm import scoped_session, sessionmaker
 
 from admin.config import Config
-from admin.logger import get_logger
 from src.core.db.db import Base
 from src.core.db.model import Role, Staff
 
+from .logger import logger
 from .messages import DB_COMMON_ERROR, DBAPI_ERROR, START_LOGGING, STOP_LOGGING
 
-logger = get_logger(__file__)
 logger.info(START_LOGGING)
 db = SQLAlchemy()
 engine = create_engine(Config.SQLALCHEMY_DATABASE_URI, pool_size=10000, max_overflow=100)
