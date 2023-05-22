@@ -13,5 +13,4 @@ client = TrackerClient(
 issues = client.issues.find(
     filter={'queue': ["SOCIAL", "POLLUTION"], 'status': 'OPEN'}
 )
-descriptions = [issue.description for issue in issues]
-print(descriptions[5])
+print([issue.key for issue in issues])
