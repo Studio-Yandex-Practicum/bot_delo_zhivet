@@ -15,8 +15,10 @@ from src.bot.handlers.state_constants import (
     CITY_COMMAND,
     CITY_INPUT,
     CURRENT_FEATURE,
+    EDIT_PROFILE_GREETING,
     END,
     FEATURES,
+    FEATURES_DESCRIPTION,
     FIRST_NAME,
     GEOM,
     LAST_NAME,
@@ -25,6 +27,7 @@ from src.bot.handlers.state_constants import (
     PHONE_COMMAND,
     PHONE_INPUT,
     RADIUS_COMMAND,
+    REGISTER_GREETING,
     SAVE,
     SECOND_LEVEL_TEXT,
     SELECTING_OVER,
@@ -51,38 +54,42 @@ from src.core.db.repository.volunteer_repository import crud_volunteer
 async def add_volunteer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     """Меню регистрации волонтёра."""
 
+    session_generator = get_async_session()
+    session = await session_generator.asend(None)
+    volunteer = await check_volunteer_in_db(update.effective_chat.id, session)
+    if volunteer is None or volunteer.is_banned:
+        action = "Указать"
+        save_action = "Отправить заявку"
+        text = REGISTER_GREETING + FEATURES_DESCRIPTION
+    else:
+        action = "Редактировать"
+        save_action = "Сохранить"
+        text = EDIT_PROFILE_GREETING + FEATURES_DESCRIPTION
+
     def check_feature(feature):
         return FEATURES in context.user_data and feature in context.user_data[FEATURES]
-
-    text = (
-        "Для регистрации волонтером вам надо указать:\n"
-        "- Свой адрес, можно без квартиры, для удобства расчетов расстояния;\n"
-        "- Расстояние, на которое ты готов выезжать;\n"
-        "- Наличие автомобиля, и готовность задействовать его;\n"
-        "- [Опционально] Номер телефона для связи."
-    )
 
     buttons = [
         [
             InlineKeyboardButton(
-                text=f"Указать свой адрес {CHECK_MARK*check_feature(CITY)}", callback_data=SPECIFY_CITY
+                text=f"{action} свой адрес {CHECK_MARK*check_feature(CITY)}", callback_data=SPECIFY_CITY
             ),
         ],
         [
             InlineKeyboardButton(
-                text=f"Указать радиус активности {CHECK_MARK*check_feature(SPECIFY_ACTIVITY_RADIUS)}",
+                text=f"{action} радиус активности {CHECK_MARK*check_feature(SPECIFY_ACTIVITY_RADIUS)}",
                 callback_data=SPECIFY_ACTIVITY_RADIUS,
             ),
         ],
         [
             InlineKeyboardButton(
-                text=f"Указать наличие автомобиля {CHECK_MARK*check_feature(SPECIFY_CAR_AVAILABILITY)}",
+                text=f"{action} наличие автомобиля {CHECK_MARK*check_feature(SPECIFY_CAR_AVAILABILITY)}",
                 callback_data=SPECIFY_CAR_AVAILABILITY,
             ),
         ],
         [
             InlineKeyboardButton(
-                text=f"Указать номер телефона {CHECK_MARK*check_feature(SPECIFY_PHONE_PERMISSION)}",
+                text=f"{action} номер телефона {CHECK_MARK*check_feature(SPECIFY_PHONE_PERMISSION)}",
                 callback_data=SPECIFY_PHONE_PERMISSION,
             ),
         ],
@@ -98,8 +105,8 @@ async def add_volunteer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> s
         await update.callback_query.answer()
         await update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
     else:
-        if check_data(context.user_data[FEATURES]) is True:
-            buttons.append([InlineKeyboardButton(text="Отправить заявку", callback_data=SAVE)])
+        if check_data(context.user_data[FEATURES]) or volunteer is not None:
+            buttons.append([InlineKeyboardButton(text=f"{save_action}", callback_data=SAVE)])
             keyboard = InlineKeyboardMarkup(buttons)
         if update.message is not None:
             await update.message.reply_text(text=SECOND_LEVEL_TEXT, reply_markup=keyboard, parse_mode=ParseMode.HTML)
@@ -302,15 +309,18 @@ async def save_and_exit_volunteer(
     user_data,
 ) -> None:
     """Сохранение данных в базу и отправка в трекер"""
-    radius = user_data[SPECIFY_ACTIVITY_RADIUS][7:]
-    car = user_data[SPECIFY_CAR_AVAILABILITY][4:]
+    radius = user_data.get(SPECIFY_ACTIVITY_RADIUS)
+    car = user_data.get(SPECIFY_CAR_AVAILABILITY)
     if SPECIFY_PHONE_PERMISSION in user_data:
         phone = user_data[SPECIFY_PHONE_PERMISSION][6:]
     else:
         phone = None
-    user_data[GEOM] = f"POINT({user_data[LONGITUDE]} {user_data[LATITUDE]})"
-    user_data[SPECIFY_ACTIVITY_RADIUS] = int(radius) * 1000
-    user_data[SPECIFY_CAR_AVAILABILITY] = car
+    if user_data.get(LONGITUDE) is not None and user_data.get(LATITUDE) is not None:
+        user_data[GEOM] = f"POINT({user_data[LONGITUDE]} {user_data[LATITUDE]})"
+    if radius is not None:
+        user_data[SPECIFY_ACTIVITY_RADIUS] = int(radius[7:]) * 1000
+    if car is not None:
+        user_data[SPECIFY_CAR_AVAILABILITY] = car[4:]
     user_data[TELEGRAM_ID] = user_id
     user_data[TELEGRAM_USERNAME] = username
     user_data[FIRST_NAME] = first_name
@@ -318,13 +328,14 @@ async def save_and_exit_volunteer(
     user_data[SPECIFY_PHONE_PERMISSION] = phone
     if SPECIFY_CITY in user_data:
         del user_data[SPECIFY_CITY]
-    if user_data[SPECIFY_CAR_AVAILABILITY] == "Да":
+    if user_data.get(SPECIFY_CAR_AVAILABILITY) == "Да":
         user_data[SPECIFY_CAR_AVAILABILITY] = True
-    elif user_data[SPECIFY_CAR_AVAILABILITY] == "Нет":
+    elif user_data.get(SPECIFY_CAR_AVAILABILITY) == "Нет":
         user_data[SPECIFY_CAR_AVAILABILITY] = False
     user = {}
     user[TELEGRAM_ID] = user_data[TELEGRAM_ID]
     user[TELEGRAM_USERNAME] = user_data[TELEGRAM_USERNAME]
+
     session_generator = get_async_session()
     session = await session_generator.asend(None)
     old_user = await check_user_in_db(user_data[TELEGRAM_ID], session)
@@ -336,32 +347,32 @@ async def save_and_exit_volunteer(
     old_ticket_id = None
     if old_volunteer:
         if (
-            old_volunteer.full_address == user_data["full_address"]
-            and old_volunteer.telegram_username == user_data[TELEGRAM_USERNAME]
-            and old_volunteer.has_car == user_data[SPECIFY_CAR_AVAILABILITY]
-            and old_volunteer.radius == int(radius) * 1000
+            old_volunteer.full_address == user_data.get("full_address")
+            and old_volunteer.telegram_username == user_data.get(TELEGRAM_USERNAME)
+            and old_volunteer.has_car == user_data.get(SPECIFY_CAR_AVAILABILITY)
+            and old_volunteer.radius == int(0 if radius is None else radius) * 1000
             and old_volunteer.phone == phone
         ):
             return
         else:
             old_ticket_id = old_volunteer.ticketID
-            await update_volunteer(old_volunteer, user_data, session)
+            volunteer = await update_volunteer(old_volunteer, user_data, session)
     else:
-        await create_volunteer(user_data, session)
-    user_name = user_data[TELEGRAM_USERNAME]
+        volunteer = await create_volunteer(user_data, session)
+    user_name = volunteer.telegram_username
     if user_name is None:
         user_name = "Никнейм скрыт"
-    summary = f"{user_name} - {user_data['full_address']}"
+    summary = f"{user_name} - {volunteer.full_address}"
     description = f"""
     Ник в телеграмме: {user_name}
-    Адрес: {user_data['full_address']}
-    Наличие машины: {car}
-    Радиус выезда: {radius} км
+    Адрес: {volunteer.full_address}
+    Наличие машины: {"Да" if volunteer.has_car else "Нет"}
+    Радиус выезда: {volunteer.radius / 1000} км
     """
-    if phone is None:
+    if volunteer.phone is None:
         description += "Номер телефона: Не указан\n"
     else:
-        description += f"Номер телефона: {phone}\n"
+        description += f"Номер телефона: {volunteer.phone}\n"
     if old_ticket_id:
         description += f"Старый тикет: {old_ticket_id}"
     tracker = client.issues.create(
@@ -369,7 +380,7 @@ async def save_and_exit_volunteer(
         summary=summary,
         description=description,
     )
-    await save_tracker_id(crud_volunteer, tracker.key, user_data[TELEGRAM_ID], session)
+    await save_tracker_id(crud_volunteer, tracker.key, volunteer.telegram_id, session)
 
 
 async def back_to_add_volunteer(update: Update, context: ContextTypes.DEFAULT_TYPE):
