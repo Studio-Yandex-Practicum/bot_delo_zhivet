@@ -258,6 +258,7 @@ class TagPollutionModelView(BaseModelView):
 
     all_columns = get_table_fields_from_model(Tag_Pollution)
     column_labels = get_translated_lables(all_columns)
+    form_excluded_columns = ("created_at","updated_at")
     can_edit = True
     can_create = True
     can_delete = True
@@ -268,6 +269,7 @@ class TagAssistanceModelView(BaseModelView):
 
     all_columns = get_table_fields_from_model(Tag_Assistance)
     column_labels = get_translated_lables(all_columns)
+    form_excluded_columns = ("created_at","updated_at")
     can_edit = True
     can_create = True
     can_delete = True
