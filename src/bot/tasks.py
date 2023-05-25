@@ -66,23 +66,38 @@ async def save_pollution(
     return await end_describing(update, context)
 
 
-@celery.task(name="bot.tasks.save_volunteer_task")
-def save_volunteer_task(
-    user_id: int,
-    username: str,
-    first_name: str,
-    last_name: str,
-    user_data,
-) -> None:
-    run(
-        save_and_exit_volunteer(
-            user_id,
-            username,
-            first_name,
-            last_name,
-            user_data,
-        )
-    )
+# @celery.task(name="bot.tasks.save_volunteer_task")
+# def save_volunteer_task(
+#     user_id: int,
+#     username: str,
+#     first_name: str,
+#     last_name: str,
+#     user_data,
+# ) -> None:
+#     run(
+#         save_and_exit_volunteer(
+#             user_id,
+#             username,
+#             first_name,
+#             last_name,
+#             user_data,
+#         )
+#     )
+
+
+# async def save_volunteer(
+#     update: Update,
+#     context: ContextTypes.DEFAULT_TYPE,
+# ) -> int:
+#     context.user_data[START_OVER] = True
+#     save_volunteer_task.delay(
+#         update.effective_user.id,
+#         update.effective_user.username,
+#         update.effective_user.first_name,
+#         update.effective_user.last_name,
+#         context.user_data[FEATURES],
+#     )
+#     return await end_describing(update, context)
 
 
 async def save_volunteer(
@@ -90,7 +105,7 @@ async def save_volunteer(
     context: ContextTypes.DEFAULT_TYPE,
 ) -> int:
     context.user_data[START_OVER] = True
-    save_volunteer_task.delay(
+    save_and_exit_volunteer(
         update.effective_user.id,
         update.effective_user.username,
         update.effective_user.first_name,

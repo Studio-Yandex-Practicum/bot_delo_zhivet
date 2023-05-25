@@ -30,6 +30,7 @@ from src.bot.handlers.state_constants import (
     REGISTER_GREETING,
     SAVE,
     SECOND_LEVEL_TEXT,
+    SECOND_LEVEL_UPDATE_TEXT,
     SELECTING_OVER,
     SPECIFY_ACTIVITY_RADIUS,
     SPECIFY_CAR_AVAILABILITY,
@@ -61,10 +62,12 @@ async def add_volunteer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> s
         action = "Указать"
         save_action = "Отправить заявку"
         text = REGISTER_GREETING + FEATURES_DESCRIPTION
+        second_level_text = SECOND_LEVEL_TEXT
     else:
         action = "Редактировать"
         save_action = "Сохранить"
         text = EDIT_PROFILE_GREETING + FEATURES_DESCRIPTION
+        second_level_text = SECOND_LEVEL_UPDATE_TEXT
 
     def check_feature(feature):
         return FEATURES in context.user_data and feature in context.user_data[FEATURES]
@@ -97,6 +100,7 @@ async def add_volunteer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> s
             InlineKeyboardButton(text="Назад", callback_data=str(END)),
         ],
     ]
+
     keyboard = InlineKeyboardMarkup(buttons)
 
     if not context.user_data.get(START_OVER):
@@ -109,10 +113,10 @@ async def add_volunteer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> s
             buttons.append([InlineKeyboardButton(text=f"{save_action}", callback_data=SAVE)])
             keyboard = InlineKeyboardMarkup(buttons)
         if update.message is not None:
-            await update.message.reply_text(text=SECOND_LEVEL_TEXT, reply_markup=keyboard, parse_mode=ParseMode.HTML)
+            await update.message.reply_text(text=second_level_text, reply_markup=keyboard, parse_mode=ParseMode.HTML)
         else:
             await update.callback_query.edit_message_text(
-                text=SECOND_LEVEL_TEXT, reply_markup=keyboard, parse_mode=ParseMode.HTML
+                text=second_level_text, reply_markup=keyboard, parse_mode=ParseMode.HTML
             )
 
     context.user_data[START_OVER] = False
