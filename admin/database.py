@@ -3,14 +3,15 @@ import os
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine, exc, inspect
 from sqlalchemy.orm import scoped_session, sessionmaker
+from structlog import get_logger
 
 from admin.config import Config
 from src.core.db.db import Base
 from src.core.db.model import Role, Staff
 
-from .logger import logger
 from .messages import DB_COMMON_ERROR, DBAPI_ERROR, START_LOGGING, STOP_LOGGING
 
+logger = get_logger(Config.LOG_NAME)
 logger.info(START_LOGGING)
 db = SQLAlchemy()
 engine = create_engine(Config.SQLALCHEMY_DATABASE_URI, pool_size=10000, max_overflow=100)

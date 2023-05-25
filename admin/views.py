@@ -7,6 +7,7 @@ from flask_admin import AdminIndexView, expose, helpers
 from flask_admin.contrib import sqla
 from flask_mail import Mail, Message
 from flask_security import current_user
+from structlog import get_logger
 from werkzeug.security import generate_password_hash
 
 from src.core.db.model import Assistance_disabled, Pollution, Staff, User, Volunteer
@@ -15,7 +16,6 @@ from . import app
 from .config import Config
 from .database import db
 from .forms import ForgotForm, LoginForm, PasswordResetForm, RegistrationForm
-from .logger import logger
 from .messages import (
     ALREADY_REGISTRED,
     BAD_TOKEN,
@@ -33,6 +33,8 @@ from .utils import (
     get_translated_lables,
     verify_reset_password_token,
 )
+
+logger = get_logger(Config.LOG_NAME)
 
 
 def init_login():

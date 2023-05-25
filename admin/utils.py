@@ -2,13 +2,15 @@ from time import time
 
 import jwt
 from sqlalchemy.orm.attributes import InstrumentedAttribute
+from structlog import get_logger
 
 from src.core.db.model import Staff
 
 from .config import Config
 from .locales import FIELD_TRANSLATION_RU
-from .logger import logger
 from .messages import TOKEN_VALIDATION_ERROR
+
+logger = get_logger(Config.LOG_NAME)
 
 
 def get_readonly_dict(fields):
