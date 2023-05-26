@@ -1,3 +1,4 @@
+import sys
 from functools import partial
 from json import dumps
 from os import getpid
@@ -51,12 +52,13 @@ structlog.configure(
         UnicodeDecoder(),
         JSONRenderer(serializer=partial(dumps, ensure_ascii=False)),
     ],
-    logger_factory=lambda *args: PrintLogger(
-        file=_DualWriter(
-            filename=settings.log_file,
-            encoding=settings.log_encoding,
-        )
-    ),
+    # logger_factory=lambda *args: PrintLogger(
+    #    file=_DualWriter(
+    #        filename=settings.log_file,
+    #        encoding=settings.log_encoding,
+    #    )
+    # ),
+    logger_factory=lambda *args: PrintLogger(file=_DualWriter(filename=sys.stdout)),
     wrapper_class=structlog.make_filtering_bound_logger(settings.log_level),
 )
 

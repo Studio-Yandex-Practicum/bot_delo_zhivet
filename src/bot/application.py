@@ -1,5 +1,6 @@
 import logging
 from json import JSONDecodeError
+from typing import List
 from urllib.parse import urljoin
 from uuid import uuid4
 
@@ -237,7 +238,9 @@ async def init_webhook() -> Application:
     await bot_app.start()
     aps_logger = logging.getLogger("apscheduler")
     aps_logger.setLevel(logging.INFO)
-    aps_logger.info(f"Webhook is. Application url: {url}")
+    contextvars.clear_contextvars()
+    contextvars.bind_contextvars(app_url=str(uuid4()))
+    aps_logger.info("Webhook is. Application url: ", app_url=url)
     return bot_app
 
 
@@ -267,12 +270,14 @@ def run_bot_webhook():
             logger.info("REQUEST", request_data=request_json)
             await bot_app.update_queue.put(Update.de_json(data=request_json, bot=bot_app.bot))
         except JSONDecodeError as error:
-            aps_logger.error("Got a JSONDecodeError: %s", error)
+            contextvars.clear_contextvars()
+            contextvars.bind_contextvars(json_error=JSONDecodeError())
+            aps_logger.error("Got a JSONDecodeError ", json_error=error)
             response = {"status_code": httpx.codes.BAD_REQUEST}
 
         return Response(**response)
 
-    def get_routes() -> list[Route]:
+    def get_routes() -> List[Route]:
         """Список маршрутов"""
         routes = [
             Route(settings.WEBHOOK_PATH, webhook_api, methods=["POST"]),
