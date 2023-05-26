@@ -29,13 +29,6 @@ class VolunteerCreate(BaseModel):
         arbitrary_types_allowed = True
 
 
-async def check_volunteer_in_db(telegram_id, session: AsyncSession):
-    volunteer = await crud_volunteer.get_volunteer_by_telegram_id(telegram_id, session)
-    if not volunteer:
-        return None
-    return volunteer
-
-
 async def create_volunteer(data: VolunteerCreate, session: AsyncSession):
     return await crud_volunteer.create(data, session)
 

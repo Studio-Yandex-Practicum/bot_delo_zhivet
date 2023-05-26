@@ -105,7 +105,7 @@ async def save_volunteer(
     context: ContextTypes.DEFAULT_TYPE,
 ) -> int:
     context.user_data[START_OVER] = True
-    save_and_exit_volunteer(
+    await save_and_exit_volunteer(
         update.effective_user.id,
         update.effective_user.username,
         update.effective_user.first_name,

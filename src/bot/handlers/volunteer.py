@@ -47,9 +47,23 @@ from src.bot.service.dadata import get_fields_from_dadata
 from src.bot.service.phone_number import format_numbers, phone_number_validate
 from src.bot.service.save_new_user import check_user_in_db, create_new_user
 from src.bot.service.save_tracker_id import save_tracker_id
-from src.bot.service.volunteer import check_volunteer_in_db, create_volunteer, update_volunteer
+from src.bot.service.volunteer import create_volunteer, update_volunteer
 from src.core.db.db import get_async_session
 from src.core.db.repository.volunteer_repository import crud_volunteer
+
+
+def get_buttons_params(is_volunteer_exists: bool) -> tuple[str, str, str, str]:
+    if is_volunteer_exists:
+        action = "Редактировать"
+        save_action = "Сохранить"
+        text = EDIT_PROFILE_GREETING + FEATURES_DESCRIPTION
+        second_level_text = SECOND_LEVEL_UPDATE_TEXT
+    else:
+        action = "Указать"
+        save_action = "Отправить заявку"
+        text = REGISTER_GREETING + FEATURES_DESCRIPTION
+        second_level_text = SECOND_LEVEL_TEXT
+    return action, save_action, text, second_level_text
 
 
 async def add_volunteer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
@@ -57,17 +71,9 @@ async def add_volunteer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> s
 
     session_generator = get_async_session()
     session = await session_generator.asend(None)
-    volunteer = await check_volunteer_in_db(update.effective_chat.id, session)
-    if volunteer is None or volunteer.is_banned:
-        action = "Указать"
-        save_action = "Отправить заявку"
-        text = REGISTER_GREETING + FEATURES_DESCRIPTION
-        second_level_text = SECOND_LEVEL_TEXT
-    else:
-        action = "Редактировать"
-        save_action = "Сохранить"
-        text = EDIT_PROFILE_GREETING + FEATURES_DESCRIPTION
-        second_level_text = SECOND_LEVEL_UPDATE_TEXT
+    is_volunteer_exists = await crud_volunteer.get_exist_by_attribute(
+        TELEGRAM_ID, update.effective_chat.id, session)
+    action, save_action, text, second_level_text = get_buttons_params(is_volunteer_exists)
 
     def check_feature(feature):
         return FEATURES in context.user_data and feature in context.user_data[FEATURES]
@@ -109,7 +115,7 @@ async def add_volunteer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> s
         await update.callback_query.answer()
         await update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
     else:
-        if check_data(context.user_data[FEATURES]) or volunteer is not None:
+        if check_data(context.user_data[FEATURES]) or is_volunteer_exists:
             buttons.append([InlineKeyboardButton(text=f"{save_action}", callback_data=SAVE)])
             keyboard = InlineKeyboardMarkup(buttons)
         if update.message is not None:
@@ -347,7 +353,7 @@ async def save_and_exit_volunteer(
         await create_new_user(user, session)
     if old_user and old_user.is_banned:
         return
-    old_volunteer = await check_volunteer_in_db(user_data[TELEGRAM_ID], session)
+    old_volunteer = await crud_volunteer.get_volunteer_by_telegram_id(user_data[TELEGRAM_ID], session)
     old_ticket_id = None
     if old_volunteer:
         if (
@@ -395,8 +401,5 @@ async def back_to_add_volunteer(update: Update, context: ContextTypes.DEFAULT_TY
     return await add_volunteer(update, context)
 
 
-def check_data(user_data):
-    if (CITY in user_data and SPECIFY_ACTIVITY_RADIUS in user_data) and SPECIFY_CAR_AVAILABILITY in user_data:
-        return True
-    else:
-        return False
+def check_data(user_data) -> bool:
+    return all((feature in user_data for feature in (CITY, SPECIFY_ACTIVITY_RADIUS, SPECIFY_CAR_AVAILABILITY)))
