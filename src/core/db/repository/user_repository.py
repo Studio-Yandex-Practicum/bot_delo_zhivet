@@ -20,7 +20,7 @@ class UserCRUD(CRUDBase):
         self,
         telegram_id: int,
         session: AsyncSession,
-    ):
+    ) -> User:
         user = await session.execute(select(User).where(User.telegram_id == telegram_id))
         return user.scalars().first()
 
