@@ -6,7 +6,7 @@ from sqlalchemy import (
     Integer, String, Table, Text,
 )
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import backref, relationship
+from sqlalchemy.orm import Mapped, backref, relationship
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from src.core.db.db import Base
@@ -66,6 +66,20 @@ class Tag_Assistance(AbstractTag):
     pass
 
 
+pollution_tag_connection = Table(
+    "pollution_tag_connection",
+    Base.metadata,
+    Column("pollution_id", ForeignKey("pollution.id", ondelete="CASCADE")),
+    Column("tag", ForeignKey("tag_pollution.id", ondelete="CASCADE")),
+)
+assistance_tag_connection = Table(
+    "assistance_tag_connection",
+    Base.metadata,
+    Column("Assistance_id", ForeignKey("assistance_disabled.id", ondelete="CASCADE")),
+    Column("tag", ForeignKey("tag_assistance.id", ondelete="CASCADE")),
+)
+
+
 class Pollution(Base):
     """Модель сообщения о загрязнении"""
 
@@ -76,8 +90,9 @@ class Pollution(Base):
     comment = Column(Text, nullable=True)
     telegram_id = Column(BigInteger, ForeignKey("user.telegram_id"))
     ticketID = Column(Text, nullable=True)
-    tag_id = Column(ForeignKey("tag_pollution.id", ondelete="SET NULL"), nullable=True)
-    tag = relationship(Tag_Pollution, foreign_keys="Pollution.tag_id")
+    tags: Mapped[list[Tag_Pollution]] = relationship(
+        argument=Tag_Pollution, secondary=pollution_tag_connection, lazy="selectin"
+    )
 
 
 class Assistance_disabled(Base):
@@ -91,8 +106,9 @@ class Assistance_disabled(Base):
     latitude = Column(Float, nullable=False)
     longitude = Column(Float, nullable=False)
     geometry = Column(Geography(geometry_type="POINT", srid=4326, dimension=2))
-    tag_id = Column(ForeignKey("tag_assistance.id", ondelete="SET NULL"), nullable=True)
-    tag = relationship(Tag_Assistance, foreign_keys="Assistance_disabled.tag_id")
+    tags: Mapped[list[Tag_Assistance]] = relationship(
+        argument=Tag_Assistance, secondary=assistance_tag_connection, lazy="selectin"
+    )
 
 
 roles_users = Table(
