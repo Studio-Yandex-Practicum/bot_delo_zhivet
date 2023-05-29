@@ -7,6 +7,7 @@ from flask_admin import AdminIndexView, expose, helpers
 from flask_admin.contrib import sqla
 from flask_mail import Mail, Message
 from flask_security import current_user
+from sqlalchemy import select
 from werkzeug.security import generate_password_hash
 
 from src.core.db.model import (
@@ -238,8 +239,9 @@ class AssistanceDisabledModelView(BaseModelView):
 
     all_columns = get_table_fields_from_model(Assistance_disabled)
     column_labels = get_translated_lables(all_columns)
-    sortable_relationship = {"tag": "tag.name"}
+    sortable_relationship = {"tags": "tags.name"}
     column_sortable_list = get_sortable_fields_list(all_columns, sortable_relationship)
+    column_filters = ("tags.name",)
     can_edit = False
 
 
@@ -248,8 +250,9 @@ class PolutionModelView(BaseModelView):
 
     all_columns = get_table_fields_from_model(Pollution)
     column_labels = get_translated_lables(all_columns)
-    sortable_relationship = {"tag": "tag.name"}
+    sortable_relationship = {"tags": "tags.name"}
     column_sortable_list = get_sortable_fields_list(all_columns, sortable_relationship)
+    column_filters = ("tags.name",)
     can_edit = False
 
 
