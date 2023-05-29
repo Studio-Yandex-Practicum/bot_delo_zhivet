@@ -69,7 +69,7 @@ class Tag_Assistance(AbstractTag):
 class Pollution(Base):
     """Модель сообщения о загрязнении"""
 
-    photo = Column(String(100), nullable=False)
+    photo = Column(String(), nullable=False)
     latitude = Column(Float, nullable=False)
     longitude = Column(Float, nullable=False)
     geometry = Column(Geography(geometry_type="POINT", srid=4326, dimension=2))

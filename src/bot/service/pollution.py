@@ -1,4 +1,5 @@
 from typing import Optional
+from uuid import UUID
 
 import boto3
 from PIL import Image
@@ -6,6 +7,7 @@ from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.bot.const import QUALITY, TARGET_WIDTH
+from src.bot.service.tags import check_pollution_tag_exists
 from src.core.config import settings
 from src.core.db.repository.pollution_repository import crud_pollution
 
@@ -18,6 +20,7 @@ class PollutionCreate(BaseModel):
     comment = Optional[str]
     telegram_id = int
     ticketID = Optional[str]
+    tag_id = Optional[UUID]
 
     class Config:
         arbitrary_types_allowed = True
@@ -27,8 +30,11 @@ async def create_new_pollution(
     data: PollutionCreate,
     session: AsyncSession,
 ):
-    new_social_problem = await crud_pollution.create(data, session)
-    return new_social_problem
+    if "tag_id" in data:
+        if not await check_pollution_tag_exists(data["tag_id"], session):
+            data["tag_id"] = None
+    new_pollution_problem = await crud_pollution.create(data, session)
+    return new_pollution_problem
 
 
 async def download_to_object_storage(file_path: str):

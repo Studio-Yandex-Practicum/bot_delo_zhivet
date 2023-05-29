@@ -38,6 +38,11 @@ SHOWING = "showing"
 END = ConversationHandler.END
 
 # Различные константы для проекта
+ADD_POLLUTION_TAG = "ADD_POLLUTION_TAG"
+ADD_SOCIAL_TAG = "ADD_SOCIAL_TAG"
+NO_TAG = "NO_TAG"
+SAVE_TAG = "SAVE_TAG"
+TAG_ID = "tag_id"
 LONGITUDE = "longitude"
 LATITUDE = "latitude"
 GEOM = "geometry"

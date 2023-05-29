@@ -1,45 +1,27 @@
-from dotenv import load_dotenv
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.constants import ParseMode
 from telegram.ext import ContextTypes
 
-from api.tracker import client
 from bot.handlers.state_constants import (
-    ADDRESS_TEMPORARY,
-    BACK,
-    CHECK_MARK,
-    CITY,
-    CITY_INPUT,
-    CITY_SOCIAL,
-    CURRENT_FEATURE,
-    END,
-    FEATURES,
-    GEOM,
-    LATITUDE,
-    LONGITUDE,
-    SAVE,
-    SECOND_LEVEL_TEXT,
-    SELECTING_FEATURE,
-    SOCIAL,
-    SOCIAL_ADDRESS,
-    SOCIAL_COMMENT,
-    SOCIAL_PROBLEM_ADDRESS,
-    SOCIAL_PROBLEM_TYPING,
-    START_OVER,
-    TELEGRAM_ID,
-    TELEGRAM_USERNAME,
-    TYPING_SOCIAL_CITY,
+    ADD_SOCIAL_TAG, ADDRESS_TEMPORARY, BACK, CHECK_MARK, CITY, CITY_INPUT,
+    CITY_SOCIAL, CURRENT_FEATURE, END, FEATURES, GEOM, LATITUDE, LONGITUDE,
+    SAVE, SECOND_LEVEL_TEXT, SELECTING_FEATURE, SOCIAL, SOCIAL_ADDRESS,
+    SOCIAL_COMMENT, SOCIAL_PROBLEM_ADDRESS, SOCIAL_PROBLEM_TYPING, START_OVER,
+    TAG_ID, TELEGRAM_ID, TELEGRAM_USERNAME, TYPING_SOCIAL_CITY,
 )
 from bot.service.dadata import get_fields_from_dadata
 from src.bot.service.assistance_disabled import create_new_social
 from src.bot.service.save_new_user import check_user_in_db, create_new_user
 from src.bot.service.save_tracker_id import save_tracker_id
+from src.bot.service.tags import get_all_assistance_tags
 from src.bot.service.volunteer import volunteers_description
 from src.core.db.db import get_async_session
-from src.core.db.repository.assistance_disabled_repository import crud_assistance_disabled
+from src.core.db.repository.assistance_disabled_repository import (
+    crud_assistance_disabled,
+)
 from src.core.db.repository.volunteer_repository import crud_volunteer
 
-load_dotenv(".env")
+from api.tracker import client
 
 
 async def input_social_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -153,6 +135,17 @@ async def report_about_social_problem(update: Update, context: ContextTypes.DEFA
             InlineKeyboardButton(text="Назад", callback_data=str(END)),
         ],
     ]
+    tags = await get_all_assistance_tags()
+    if tags:
+        buttons.insert(
+            2,
+            [
+                InlineKeyboardButton(
+                    text=f"Указать тип проблемы {CHECK_MARK*check_feature(TAG_ID)}",
+                    callback_data=ADD_SOCIAL_TAG,
+                ),
+            ],
+        )
 
     keyboard = InlineKeyboardMarkup(buttons)
 
