@@ -1,7 +1,7 @@
 from sqlalchemy import and_, desc, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.core.db.model import Volunteer
+from src.core.db.model import Pollution, Assistance_disabled, Volunteer
 from src.core.db.repository.abstract_repository import CRUDBase
 
 
@@ -37,6 +37,30 @@ class VolunteerCRUD(CRUDBase):
         )
         volunteers = await session.execute(stmt)
         return volunteers.all()
+
+    async def get_issues_in_radius(
+        self,
+        longitude: float,
+        latitude: float,
+        radius: int,
+        session: AsyncSession,
+        models: list = [Pollution, Assistance_disabled]
+    ):
+        result = []
+        for model in models:
+            stmt = select(model.ticketID).where(
+                func.ST_DWITHIN(
+                    model.geometry,
+                    func.ST_GeomFromText(
+                        f'SRID=4326:POINT({longitude} {latitude})'
+                    ),
+                    radius,
+                    use_spheroid=False
+                )
+            )
+            issues = await session.execute(stmt)
+            result.extend(issues)
+        return result
 
 
 crud_volunteer = VolunteerCRUD(Volunteer)
