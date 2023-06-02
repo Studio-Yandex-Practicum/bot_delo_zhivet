@@ -40,7 +40,7 @@ async def add_new_volunteer_to_issue(
         if issue.key in issues_in_radius:
             issue = client.issues[issue.key]
             description = issue.description
-            description = '\n' + date.today().strftime(
+            description += '\n' + date.today().strftime(
                format
             ) + " Найден новый волонтер " 
             description = 'c машиной' if volunteer.has_car else 'без машины'
