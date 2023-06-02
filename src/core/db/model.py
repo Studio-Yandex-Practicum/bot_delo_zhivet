@@ -49,6 +49,7 @@ class AbstractTag(Base):
 
     __abstract__ = True
     name = Column(String(35), nullable=False, unique=True)
+    priority = Column(Integer, nullable=True)
 
     def __str__(self):
         return self.name
