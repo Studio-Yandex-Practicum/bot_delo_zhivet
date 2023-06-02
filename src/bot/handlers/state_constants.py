@@ -14,7 +14,7 @@ MAKING_DONATION = "making_donations"
 ADDING_ECO_TASK = "adding_eco_task"
 ADDING_SOCIAL_TASK = "adding_social_task"
 SELECTING_FEATURE = "selecting_feature"
-SELECTING_FEATURE_SOCIAL = "selecting_feature_social"
+
 # Обозначим состояния второго диалога второго уровня
 SPECIFY_CITY = "specify_city"
 SPECIFY_ACTIVITY_RADIUS = "radius"
@@ -41,14 +41,8 @@ END = ConversationHandler.END
 
 # Различные константы для проекта
 NO_COMMENT_PHASE = "Комментариев не оставили"
-
 ADD_POLLUTION_TAG = "ADD_POLLUTION_TAG"
 ADD_SOCIAL_TAG = "ADD_SOCIAL_TAG"
-
-
-BAD_CONVERSATION = "BAD_CONVERSATION"
-POLLUTION_BACK = "POLLUTION_BACK"
-SOCIAL_BACK = "SOCIAL_BACK"
 TAG_ID = "tag_id"
 TAG_BUTTON_CALLBACK_PREFIX = f"{TAG_ID}="
 TAG_ID_PATTERN_RAW = f"{TAG_ID}=(?P<{TAG_ID}>.*)"
@@ -88,7 +82,6 @@ FIRST_NAME = "first_name"
 LAST_NAME = "last_name"
 CITY_INPUT = "city_input"
 BACK = "back"
-OTHER_BACK = "OTHER_BACK"
 CITY = "city"
 VALIDATE = "validate"
 PHONE_INPUT = "phone_input"
