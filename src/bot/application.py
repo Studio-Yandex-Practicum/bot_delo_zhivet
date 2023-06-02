@@ -1,8 +1,6 @@
-import logging
 from json import JSONDecodeError
 from typing import List
 from urllib.parse import urljoin
-from uuid import uuid4
 
 import httpx
 import uvicorn
@@ -10,7 +8,7 @@ from starlette.applications import Starlette
 from starlette.requests import Request
 from starlette.responses import Response
 from starlette.routing import Route
-from structlog import contextvars, get_logger
+from structlog.contextvars import bound_contextvars
 from telegram import Update
 from telegram.ext import (
     Application,
@@ -35,6 +33,7 @@ from bot.const import (
     SPECIFY_CITY_CMD,
     SPECIFY_PHONE_PERMISSION_CMD,
 )
+from bot.handlers.loggers import logger
 from core.config import settings
 
 from .handlers.common import end_describing, help_command, stop
@@ -96,8 +95,6 @@ from .handlers.volunteer import (
     save_input,
 )
 from .tasks import save_pollution, save_social_problem, save_volunteer
-
-logger = get_logger(settings.logger_name)
 
 
 def create_bot() -> Application:
@@ -223,9 +220,7 @@ def run_bot_polling() -> None:
     """Запуск бота в режиме polling"""
     bot_app = create_bot()
     bot_app.run_polling()
-    aps_logger = logging.getLogger("apscheduler")
-    aps_logger.setLevel(logging.DEBUG)
-    aps_logger.info("Start polling")
+    logger.info("Start polling")
 
 
 async def init_webhook() -> Application:
@@ -236,28 +231,23 @@ async def init_webhook() -> Application:
     await bot_app.bot.set_webhook(url=url, secret_token=settings.TELEGRAM_BOT_TOKEN.replace(":", ""))
     await bot_app.initialize()
     await bot_app.start()
-    aps_logger = logging.getLogger("apscheduler")
-    aps_logger.setLevel(logging.INFO)
-    contextvars.clear_contextvars()
-    contextvars.bind_contextvars(app_url=str(uuid4()))
-    aps_logger.info("Webhook is. Application url: ", app_url=url)
+    with bound_contextvars(app_url=url):
+        logger.info("Webhook initialized")
     return bot_app
 
 
 def run_bot_webhook():
     """Запуск бота в режиме webhook"""
-    aps_logger = logging.getLogger("apscheduler")
-    aps_logger.setLevel(logging.DEBUG)
 
     async def on_start_bot() -> None:
         bot_app = await init_webhook()
         starlette_app.state.bot_app = bot_app
-        aps_logger.info("The bot has been started")
+        logger.info("The bot has been started")
 
     async def on_stop_bot() -> None:
         await starlette_app.state.bot_app.stop()
         await starlette_app.state.bot_app.shutdown()
-        aps_logger.info("The bot has been stopped")
+        logger.info("The bot has been stopped")
 
     async def webhook_api(request: Request) -> Response:
         """Обработка входящих обновлений и помещение их в очередь"""
@@ -265,14 +255,12 @@ def run_bot_webhook():
         try:
             request_json = await request.json()
             bot_app = request.app.state.bot_app
-            contextvars.clear_contextvars()
-            contextvars.bind_contextvars(request_id=str(uuid4()))
-            logger.info("REQUEST", request_data=request_json)
+            with bound_contextvars(request_data=request_json):
+                logger.info("REQUEST")
             await bot_app.update_queue.put(Update.de_json(data=request_json, bot=bot_app.bot))
         except JSONDecodeError as error:
-            contextvars.clear_contextvars()
-            contextvars.bind_contextvars(json_error=JSONDecodeError())
-            aps_logger.error("Got a JSONDecodeError ", json_error=error)
+            with bound_contextvars(error=error):
+                logger.error("Got a JSONDecodeError:")
             response = {"status_code": httpx.codes.BAD_REQUEST}
 
         return Response(**response)

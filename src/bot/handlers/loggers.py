@@ -1,8 +1,6 @@
-import sys
 from functools import partial
 from json import dumps
 from os import getpid
-from typing import TextIO
 
 import structlog
 from structlog import PrintLogger
@@ -12,28 +10,6 @@ from structlog.processors import JSONRenderer, TimeStamper, UnicodeDecoder, add_
 from core.config import settings
 
 DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S.%f"
-
-
-class _DualWriter(TextIO):
-    def __init__(self, filename, mode="a", encoding="utf-8"):
-        self._filename = filename
-        self._mode = mode
-        self._encoding = encoding
-
-    def write(self, data):
-        with open(
-            file=self._filename,
-            mode=self._mode,
-            encoding=self._encoding,
-        ) as file:
-            file.write(data)
-            print(data, end="")
-
-    def __getattr__(self, item):
-        return self.pass_
-
-    def pass_(self, *args, **kwargs):
-        pass
 
 
 def add_pid(logger, log_method, event_dict):
@@ -52,13 +28,6 @@ structlog.configure(
         UnicodeDecoder(),
         JSONRenderer(serializer=partial(dumps, ensure_ascii=False)),
     ],
-    # logger_factory=lambda *args: PrintLogger(
-    #    file=_DualWriter(
-    #        filename=settings.log_file,
-    #        encoding=settings.log_encoding,
-    #    )
-    # ),
-    logger_factory=lambda *args: PrintLogger(file=_DualWriter(filename=sys.stdout)),
     wrapper_class=structlog.make_filtering_bound_logger(settings.log_level),
 )
 
