@@ -4,18 +4,21 @@ from telegram.ext import ContextTypes
 
 from bot.handlers.state_constants import (
     ADD_SOCIAL_TAG, ADDRESS_TEMPORARY, BACK, CHECK_MARK, CITY, CITY_INPUT,
-    CITY_SOCIAL, CURRENT_FEATURE, END, FEATURES, GEOM, LATITUDE, LONGITUDE,
-    SAVE, SECOND_LEVEL_TEXT, SELECTING_FEATURE, SOCIAL, SOCIAL_ADDRESS,
-    SOCIAL_COMMENT, SOCIAL_PROBLEM_ADDRESS, SOCIAL_PROBLEM_TYPING, START_OVER,
-    TAG_ID, TELEGRAM_ID, TELEGRAM_USERNAME, TYPING_SOCIAL_CITY,
+    CITY_SOCIAL, CURRENT_FEATURE, END, FEATURES, SAVE, SECOND_LEVEL_TEXT,
+    SELECTING_FEATURE, SOCIAL_ADDRESS, SOCIAL_COMMENT, SOCIAL_PROBLEM_ADDRESS,
+    SOCIAL_PROBLEM_TYPING, SOCIAL_TAGS, START_OVER, TYPING_SOCIAL_CITY,
 )
 from bot.service.dadata import get_fields_from_dadata
-from src.bot.service.assistance_disabled import create_new_social
-from src.bot.service.save_new_user import check_user_in_db, create_new_user
-from src.bot.service.save_tracker_id import save_tracker_id
+from src.bot.service.assistance_disabled import (
+    create_new_social, create_new_social_dict_from_data,
+    create_new_social_message_for_tracker,
+)
+from src.bot.service.save_new_user import get_or_create_user
+from src.bot.service.save_tracker_id import other_save_tracker_id
 from src.bot.service.tags import get_all_assistance_tags
 from src.bot.service.volunteer import volunteers_description
 from src.core.db.db import get_async_session
+from src.core.db.model import Assistance_disabled
 from src.core.db.repository.assistance_disabled_repository import (
     crud_assistance_disabled,
 )
@@ -135,13 +138,16 @@ async def report_about_social_problem(update: Update, context: ContextTypes.DEFA
             InlineKeyboardButton(text="Назад", callback_data=str(END)),
         ],
     ]
-    tags = await get_all_assistance_tags()
+
+    session_generator = get_async_session()
+    session = await session_generator.asend(None)
+    tags = await get_all_assistance_tags(session)
     if tags:
         buttons.insert(
             2,
             [
                 InlineKeyboardButton(
-                    text=f"Указать тип проблемы {CHECK_MARK*check_feature(TAG_ID)}",
+                    text=f"Указать тип проблемы {CHECK_MARK*check_feature(SOCIAL_TAGS)}",
                     callback_data=ADD_SOCIAL_TAG,
                 ),
             ],
@@ -179,36 +185,20 @@ async def save_and_exit_from_social_problem(
     user_data,
 ) -> None:
     """Сохранение данных в базу и отправка в трекер"""
-    user_data[GEOM] = f"POINT({user_data[LONGITUDE]} {user_data[LATITUDE]})"
-    user_data[TELEGRAM_ID] = user_id
-    if SOCIAL_ADDRESS in user_data:
-        del user_data[SOCIAL_ADDRESS]
-    if CITY_INPUT in user_data:
-        del user_data[CITY_INPUT]
-    user = {}
-    user[TELEGRAM_ID] = user_data[TELEGRAM_ID]
-    user[TELEGRAM_USERNAME] = username
+
     session_generator = get_async_session()
     session = await session_generator.asend(None)
-    old_user = await check_user_in_db(user_data[TELEGRAM_ID], session)
-    if not old_user:
-        await create_new_user(user, session)
-    if old_user and old_user.is_banned:
+
+    user_db = await get_or_create_user(user_id, username, session)
+    if user_db.is_banned:
         return
-    await create_new_social(user_data, session)
-    volunteers = await crud_volunteer.get_volunteers_by_point(user_data[LONGITUDE], user_data[LATITUDE], session)
-    city = await crud_assistance_disabled.get_full_address_by_telegram_id(user_data[TELEGRAM_ID], session)
-    description = f"""
-    Ник в телеграмме оставившего заявку: {user[TELEGRAM_USERNAME]}
-    Комментарий к заявке: {user_data[SOCIAL_COMMENT]}
-    """
-    description += volunteers_description(volunteers)
-    tracker = client.issues.create(
-        queue=SOCIAL,
-        summary=city,
-        description=description,
-    )
-    await save_tracker_id(crud_assistance_disabled, tracker.key, user_data[TELEGRAM_ID], session)
+
+    new_social_data: dict = await create_new_social_dict_from_data(user_db.telegram_id, user_data, session)
+    new_social_db: Assistance_disabled = await create_new_social(new_social_data, session)
+    volunteers = await crud_volunteer.get_volunteers_by_point(new_social_db.longitude, new_social_db.latitude, session)
+    message: dict = create_new_social_message_for_tracker(new_social_db, volunteers_description(volunteers))
+    tracker = client.issues.create(**message)
+    await other_save_tracker_id(crud_assistance_disabled, tracker.key, new_social_db, session)
 
 
 async def back_to_add_social(update: Update, context: ContextTypes.DEFAULT_TYPE):

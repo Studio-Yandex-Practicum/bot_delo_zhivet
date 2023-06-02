@@ -19,7 +19,7 @@ class VolunteerCRUD(CRUDBase):
         longitude: float,
         latitude: float,
         session: AsyncSession,
-    ):
+    ) -> list[Volunteer]:
         stmt = (
             select(Volunteer.telegram_username, Volunteer.has_car, Volunteer.city, Volunteer.ticketID)
             .where(

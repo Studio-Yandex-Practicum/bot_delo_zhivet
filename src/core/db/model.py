@@ -91,8 +91,9 @@ class Pollution(Base):
     telegram_id = Column(BigInteger, ForeignKey("user.telegram_id"))
     ticketID = Column(Text, nullable=True)
     tags: Mapped[list[Tag_Pollution]] = relationship(
-        argument=Tag_Pollution, secondary=pollution_tag_connection, lazy="selectin"
+        argument=Tag_Pollution, secondary=pollution_tag_connection, lazy="subquery"
     )
+    sender = relationship(User, lazy="subquery")
 
 
 class Assistance_disabled(Base):
@@ -107,8 +108,9 @@ class Assistance_disabled(Base):
     longitude = Column(Float, nullable=False)
     geometry = Column(Geography(geometry_type="POINT", srid=4326, dimension=2))
     tags: Mapped[list[Tag_Assistance]] = relationship(
-        argument=Tag_Assistance, secondary=assistance_tag_connection, lazy="selectin"
+        argument=Tag_Assistance, secondary=assistance_tag_connection, lazy="subquery"
     )
+    sender = relationship(User, lazy="subquery")
 
 
 roles_users = Table(
