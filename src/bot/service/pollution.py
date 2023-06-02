@@ -74,6 +74,7 @@ async def create_new_pollution_dict_from_data(user_id: int, data: dict, session:
 
 
 def create_new_pollution_message_for_tracker(pollution: Pollution, volunteers_description: str) -> dict:
+    """Создает словарь сообщения для отправки в треккер"""
     summary = f"{pollution.sender.telegram_username} - {pollution.latitude}, {pollution.longitude}"
     comment = pollution.comment if pollution.comment else NO_COMMENT_PHASE
     description = f"""

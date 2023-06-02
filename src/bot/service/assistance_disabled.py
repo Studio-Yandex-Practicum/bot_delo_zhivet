@@ -38,6 +38,7 @@ async def create_new_social(
 
 
 async def create_new_social_dict_from_data(user_id: int, data: dict, session) -> dict:
+    """Перекладывает данные из data в словарь который подходит для создания Assistance_disabled"""
     mandatory_fields = [LATITUDE, LONGITUDE, CITY, "full_address"]
     new_social_dict: dict = {TELEGRAM_ID: user_id}
     new_social_dict[GEOM] = f"POINT({data[LONGITUDE]} {data[LATITUDE]})"
@@ -52,6 +53,7 @@ async def create_new_social_dict_from_data(user_id: int, data: dict, session) ->
 
 
 def create_new_social_message_for_tracker(social: Assistance_disabled, volunteers_description: str) -> dict:
+    """Создает словарь сообщения для отправки в треккер"""
     comment = social.comment if social.comment else NO_COMMENT_PHASE
     description = f"""
     Ник в телеграмме оставившего заявку: {social.sender.telegram_username}
