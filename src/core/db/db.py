@@ -42,7 +42,7 @@ db_session = scoped_session(
         autoflush=False,
     )
 )
-AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession)
+AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 
 async def get_async_session():

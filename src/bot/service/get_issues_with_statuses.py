@@ -16,9 +16,10 @@ client = TrackerClient(
     org_id=os.getenv("ORG_ID")
 )
 
+
 def get_issues_with_statuses(
     queues=[POLLUTION, SOCIAL],
-    statuses=['OPEN']  
+    statuses=['OPEN']
 ):
     issues = client.issues.find(
         filter=dict(queue=queues, status=statuses)
@@ -30,7 +31,7 @@ async def add_new_volunteer_to_issue(
     volunteer: Volunteer,
     session: AsyncSession
 ):
-    format = "%d/%m/%Y"
+    FORMAT = "%d/%m/%Y"
     open_issues = get_issues_with_statuses()
     issues_in_radius = await crud_volunteer.get_issues_in_radius(
         volunteer.longitude, volunteer.latitude, volunteer.radius,
@@ -39,8 +40,7 @@ async def add_new_volunteer_to_issue(
     for issue in open_issues:
         if issue.key in issues_in_radius:
             description = issue.description
-            description += '\n' + date.today().strftime(
-               format
-            ) + " Найден новый волонтер " 
-            description += 'c машиной' if volunteer.has_car else 'без машины'
+            description += '\n' + date.today().strftime(FORMAT)
+            + ' Найден новый волонтер '
+            + 'c машиной' if volunteer.has_car else 'без машины'
             issue.update(description=description)
