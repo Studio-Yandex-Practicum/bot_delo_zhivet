@@ -4,15 +4,17 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine, exc, inspect
 from sqlalchemy.orm import scoped_session, sessionmaker
 from structlog import get_logger
+from structlog.contextvars import bind_contextvars, clear_contextvars
 
 from admin.config import Config
 from src.core.db.db import Base
 from src.core.db.model import Role, Staff
 
-from .messages import DB_COMMON_ERROR, DBAPI_ERROR, START_LOGGING, STOP_LOGGING
+from .messages import DB_COMMON_ERROR, DB_COMMON_LOGGER, DBAPI_ERROR, DBAPI_LOGGER, START_LOGGING, STOP_LOGGING
 
-logger = get_logger(Config.LOG_NAME)
+logger = get_logger("admin_logger")
 logger.info(START_LOGGING)
+
 db = SQLAlchemy()
 engine = create_engine(Config.SQLALCHEMY_DATABASE_URI, pool_size=10000, max_overflow=100)
 db_session = scoped_session(sessionmaker(autocommit=False, autoflush=False, bind=engine))
@@ -30,11 +32,15 @@ def get_not_existing_required_tables(tables):
             if not inspect(engine).has_table(table):
                 not_existing_tables.append(table)
     except exc.OperationalError as error:
-        logger.critical(DBAPI_ERROR.format(db_info=db_info, details=str(error)))
+        bind_contextvars(db_info=db_info, details=str(error))
+        logger.critical(DBAPI_LOGGER)
+        clear_contextvars()
         logger.info(STOP_LOGGING)
         raise ConnectionError(DBAPI_ERROR.format(db_info=db_info, details=str(error)))
     except Exception as error:
-        logger.critical(DB_COMMON_ERROR.format(db_info=db_info, details=str(error)))
+        bind_contextvars(db_info=db_info, details=str(error))
+        logger.critical(DB_COMMON_LOGGER)
+        clear_contextvars()
         logger.info(STOP_LOGGING)
         raise EnvironmentError(DB_COMMON_ERROR.format(db_info=db_info, details=str(error)))
     return not_existing_tables

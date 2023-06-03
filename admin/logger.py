@@ -28,8 +28,7 @@ structlog.configure(
         UnicodeDecoder(),
         JSONRenderer(serializer=partial(dumps, ensure_ascii=False)),
     ],
-    logger_factory=lambda *args: PrintLogger(),
     wrapper_class=structlog.make_filtering_bound_logger(Config.LOG_DEFAULT_LVL),
 )
 
-logger: PrintLogger = structlog.getLogger(Config.LOG_NAME)
+logger: PrintLogger = structlog.getLogger("admin_logger")

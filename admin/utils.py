@@ -3,6 +3,7 @@ from time import time
 import jwt
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 from structlog import get_logger
+from structlog.contextvars import bind_contextvars
 
 from src.core.db.model import Staff
 
@@ -10,7 +11,7 @@ from .config import Config
 from .locales import FIELD_TRANSLATION_RU
 from .messages import TOKEN_VALIDATION_ERROR
 
-logger = get_logger(Config.LOG_NAME)
+logger = get_logger("admin_logger")
 
 
 def get_readonly_dict(fields):
@@ -59,6 +60,7 @@ def verify_reset_password_token(token):
             "reset_password"
         ]
     except Exception as e:
-        logger.warning(TOKEN_VALIDATION_ERROR.format(token=token, details=str(e)))
+        bind_contextvars(token=token, details=str(e))
+        logger.warning(TOKEN_VALIDATION_ERROR)
         return
     return Staff.query.filter_by(login=login).first()
