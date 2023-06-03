@@ -7,7 +7,6 @@ from sentry_sdk.integrations.flask import FlaskIntegration
 from structlog import get_logger
 from structlog.contextvars import bind_contextvars, clear_contextvars
 
-import admin.database  # noqa
 import admin.logger
 import admin.manage  # noqa
 import admin.utils  # noqa
@@ -22,6 +21,9 @@ from .messages import (
     START_LOGGING,
     STOP_LOGGING,
 )
+
+import admin.database  # isort: skip # noqa
+
 
 logger = get_logger("admin_logger")
 logger.info(START_LOGGING)
