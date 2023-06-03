@@ -10,7 +10,7 @@ class VolunteerCRUD(CRUDBase):
         self,
         telegram_id: int,
         session: AsyncSession,
-    ):
+    ) -> Volunteer:
         user_id = await session.execute(select(Volunteer).where(Volunteer.telegram_id == telegram_id))
         return user_id.scalars().first()
 
