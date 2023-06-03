@@ -3,6 +3,7 @@
 .pre-commit-config.yaml
 infrastructure/*
 .env.example
+.env*.example
 .venv
 venv
 env

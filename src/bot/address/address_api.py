@@ -1,13 +1,10 @@
-# scr/bot/address/address_api.py
-
 import os
 from copy import deepcopy
 
 import requests
 from dotenv import find_dotenv, load_dotenv
 
-load_dotenv(find_dotenv())
-load_dotenv(find_dotenv(".env.example"))  # В будущем нужно удалить
+load_dotenv(find_dotenv(".env.geocoder"))
 
 ENDPOINT = os.getenv("GEOCODER_BASE_URL", default="None")
 GEOCODER_APIKEY = os.getenv("GEOCODER_APIKEY", default="None")
@@ -28,7 +25,7 @@ GEOCODER_INPUT_PARAMS = dict(
 )
 MAXIMUM_OBJECTS = os.getenv("MAXIMUM_OBJECTS_FROM_GEOCODER", default="10")
 DATA_EXTRACTION_ERROR_MESSAGE = "Ошибка извлечения адресных данных: {error}"
-NETWORK_ERROR = "Сетевая ошибка: {error}. " "Параметры get запроса: ENDPOINT: {url}; params: {params}."
+NETWORK_ERROR_MESSAGE = "Сетевая ошибка: {error}. " "Параметры get запроса: ENDPOINT: {url}; params: {params}."
 
 
 def _extract_address_data(response: dict) -> list:
@@ -84,7 +81,7 @@ def search_addresses(
     try:
         response = requests.get(**request_parameters)
     except requests.RequestException as error:
-        error_message = NETWORK_ERROR.format(error=error, **request_parameters)
+        error_message = NETWORK_ERROR_MESSAGE.format(error=error, **request_parameters)
         # Сообщение для логера
         # logging.exception('error_message')
         raise ConnectionError(error_message)

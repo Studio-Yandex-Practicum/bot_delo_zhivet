@@ -1,4 +1,3 @@
-from dotenv import load_dotenv
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.constants import ParseMode
 from telegram.ext import ContextTypes
@@ -38,8 +37,6 @@ from src.bot.service.volunteer import volunteers_description
 from src.core.db.db import get_async_session
 from src.core.db.repository.assistance_disabled_repository import crud_assistance_disabled
 from src.core.db.repository.volunteer_repository import crud_volunteer
-
-load_dotenv(".env")
 
 
 async def input_social_data(update: Update, context: ContextTypes.DEFAULT_TYPE):

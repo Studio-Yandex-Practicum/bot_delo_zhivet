@@ -1,6 +1,9 @@
 import os
 
 from dadata import Dadata
+from dotenv import find_dotenv, load_dotenv
+
+load_dotenv(find_dotenv(".env.dadata"))
 
 token = os.environ["DADATA_TOKEN"]
 secret = os.environ["DADATA_SECRET"]

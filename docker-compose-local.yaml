@@ -7,15 +7,12 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     env_file:
-      - ./.env
+      - ./.env.db
     healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "pg_isready -U ${POSTGRES_USER:?err} -d ${POSTGRES_DB:?err}"
-        ]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:?err} -d $${POSTGRES_DB:?err}"]
+      start_period: 30s
       timeout: 10s
-      interval: 1s
+      interval: 5s
       retries: 10
     ports:
       - "5432:5432"
@@ -37,7 +34,9 @@ services:
       db:
         condition: service_healthy
     env_file:
-      - ./.env
+      - ./.env.telegram
+    environment:
+      - PG_DOCKER_ENV=dev
 
   web:
     build:
@@ -60,7 +59,17 @@ services:
       bot:
         condition: service_started
     env_file:
-      - ./.env
+      - ./.env.aws
+      - ./.env.dadata
+      - ./.env.flask
+      - ./.env.geocoder
+      - ./.env.mail
+      - ./.env.nginx
+      - ./.env.redis
+      - ./.env.sentry
+      - ./.env.yatracker
+    environment:
+      - PG_DOCKER_ENV=dev
     volumes:
       - static_value:/app/admin/static/
       - ./admin/logs/:/app/admin/logs/
@@ -80,6 +89,8 @@ services:
         "src.bot.tasks",
         "worker"
       ]
+    environment:
+      - PG_DOCKER_ENV=dev
     depends_on:
       db:
         condition: service_healthy
@@ -103,6 +114,8 @@ services:
       ]
     ports:
       - "5555:5555"
+    environment:
+      - PG_DOCKER_ENV=dev
     depends_on:
       db:
         condition: service_healthy

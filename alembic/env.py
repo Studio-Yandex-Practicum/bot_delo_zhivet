@@ -2,7 +2,7 @@ import asyncio
 import os
 from logging.config import fileConfig
 
-from dotenv import load_dotenv
+from dotenv import find_dotenv, load_dotenv
 from geoalchemy2 import alembic_helpers
 from sqlalchemy import engine_from_config, pool
 from sqlalchemy.ext.asyncio import AsyncEngine
@@ -10,19 +10,22 @@ from sqlalchemy.ext.asyncio import AsyncEngine
 from alembic import context
 from src.core.db.base import Base
 
-load_dotenv(".env")
+PG_DOCKER_ENV = os.getenv("PG_DOCKER_ENV", "local")
+
+if PG_DOCKER_ENV == "dev":
+    load_dotenv(find_dotenv(".env.db"))
+else:
+    load_dotenv(find_dotenv(".env.db.local"))
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
 
-
-POSTGRES_USER = os.environ["POSTGRES_USER"]
-POSTGRES_PASSWORD = os.environ["POSTGRES_PASSWORD"]
-DB_HOST = os.environ["DB_HOST"]
-DB_PORT = os.environ["DB_PORT"]
-POSTGRES_DB = os.environ["POSTGRES_DB"]
-database_url = f"postgresql+asyncpg://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{DB_HOST}:{DB_PORT}/{POSTGRES_DB}"
+database_url = (
+    f'postgresql+asyncpg://{os.environ["POSTGRES_USER"]}:'
+    f'{os.environ["POSTGRES_PASSWORD"]}@{os.environ["DB_HOST"]}:'
+    f'{os.environ["DB_PORT"]}/{os.environ["POSTGRES_DB"]}'
+)
 
 config.set_main_option("sqlalchemy.url", database_url)
 
