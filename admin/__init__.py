@@ -10,10 +10,9 @@ from structlog.contextvars import bind_contextvars, clear_contextvars
 import admin.logger
 import admin.manage  # noqa
 import admin.utils  # noqa
-
-from .config import Config
-from .database import create_roles_and_superuser, db, get_not_existing_required_tables
-from .messages import (
+from admin.config import Config
+from admin.database import create_roles_and_superuser, db, get_not_existing_required_tables
+from admin.messages import (
     DB_NOT_READY_FOR_INIT_APP_ERROR,
     DB_NOT_READY_FOR_INIT_APP_LOGGER,
     MISSING_REQUIRED_TABLES_ERROR,

@@ -7,8 +7,8 @@ import flask_admin
 from structlog import get_logger
 from structlog.contextvars import bind_contextvars, clear_contextvars
 
-from .config import Config
-from .messages import (
+from admin.config import Config
+from admin.messages import (
     APP_TEMPLATE_FOLDER_COPY_SUCCESS,
     APP_TEMPLATE_FOLDER_NOT_FOUND,
     COLLECT_STATIC_CLEAR_DIR_INFO,
