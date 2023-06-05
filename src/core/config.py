@@ -36,6 +36,9 @@ class Settings(BaseSettings):
     log_level: int | None = INFO
     log_encoding: str | None = "utf-8"
 
+    # порядок сортировки тегов в боте по убыванию (по мере убывания важности поля)
+    sort_tags_in_bot = ["priority", "name"]
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"

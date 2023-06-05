@@ -23,7 +23,7 @@ from src.bot.service.pollution import (
 )
 from src.bot.service.save_new_user import get_or_create_user
 from src.bot.service.save_tracker_id import other_save_tracker_id
-from src.bot.service.tags import get_all_pollution_tags
+from src.bot.service.tags import check_pollution_tags_are_in_db
 from src.bot.service.volunteer import volunteers_description
 from src.core.db.db import get_async_session
 from src.core.db.model import Pollution, User, Volunteer
@@ -60,8 +60,8 @@ async def select_option_to_report_about_pollution(update: Update, context: Conte
 
     session_generator = get_async_session()
     session = await session_generator.asend(None)
-    tags = await get_all_pollution_tags(session)
-    if tags:
+    tag = await check_pollution_tags_are_in_db(session)
+    if tag:
         buttons.insert(
             3,
             [

@@ -15,7 +15,7 @@ from src.bot.service.assistance_disabled import (
 )
 from src.bot.service.save_new_user import get_or_create_user
 from src.bot.service.save_tracker_id import other_save_tracker_id
-from src.bot.service.tags import get_all_assistance_tags
+from src.bot.service.tags import check_assistance_tags_are_in_db
 from src.bot.service.volunteer import volunteers_description
 from src.core.db.db import get_async_session
 from src.core.db.model import Assistance_disabled
@@ -141,8 +141,8 @@ async def report_about_social_problem(update: Update, context: ContextTypes.DEFA
 
     session_generator = get_async_session()
     session = await session_generator.asend(None)
-    tags = await get_all_assistance_tags(session)
-    if tags:
+    tag = await check_assistance_tags_are_in_db(session)
+    if tag:
         buttons.insert(
             2,
             [

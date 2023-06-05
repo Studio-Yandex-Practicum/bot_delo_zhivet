@@ -14,6 +14,7 @@ from src.bot.handlers.state_constants import (
     TAG_ID, TAG_ID_PATTERN,
 )
 from src.bot.service.tags import get_chosen_tags_names
+from src.core.config import settings
 from src.core.db.db import get_async_session
 from src.core.db.repository.tags_repository import (
     AbstractTag, TagCRUD, crud_tag_assistance, crud_tag_pollution,
@@ -42,7 +43,7 @@ class TagsHandlerClass:
         if not await self._on_enter_checks(update, context):
             return await handle_invalid_button(update, context)
 
-        await update.callback_query.answer(update.callback_query.data)
+        await update.callback_query.answer()
 
         chosen_tags_ids_list = context.user_data[FEATURES][self.tag_storage_name]
         all_tags_list = await self._get_tags_from_db()
@@ -104,7 +105,7 @@ class TagsHandlerClass:
         """Получает список тегов их базы в заданом порядке."""
         session_generator = get_async_session()
         session = await session_generator.asend(None)
-        return await self.crud_tag.get_all_sorted_by_attribute("name", session)
+        return await self.crud_tag.get_all_sorted_by_attribute(settings.sort_tags_in_bot, session)
 
     def _update_chosen_tags(self, chosen_tag: str, chosen_tags_ids_list: list[str], all_tags_ids_list: list[str]):
         """Проверяет что chosen_tag есть в all_tags_ids_list

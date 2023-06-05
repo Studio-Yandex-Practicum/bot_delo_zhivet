@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import asc, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from structlog import get_logger
 
@@ -10,10 +10,12 @@ logger = get_logger(settings.logger_name)
 
 
 class TagCRUD(CRUDBase):
-    async def get_all_sorted_by_attribute(self, attr_name: str, session: AsyncSession) -> list[AbstractTag]:
+    async def get_all_sorted_by_attribute(self, attrs_name_list: list[str], session: AsyncSession) -> list[AbstractTag]:
         """Получить все теги отсортированные по заданому атрибуту."""
-        attr = getattr(self.model, attr_name)
-        statement = select(self.model).order_by(attr)
+        statement = select(self.model)
+        for attr_name in attrs_name_list:
+            attr = getattr(self.model, attr_name)
+            statement = statement.order_by(asc(attr))
         db_objs = await session.execute(statement)
         logger.info(f"Retrieved all records from database: {self.model.__name__}.")
         return db_objs.scalars().all()
@@ -29,6 +31,13 @@ class TagCRUD(CRUDBase):
             if db_tag is not None:
                 db_tags.append(db_tag)
         return db_tags
+
+    async def get_some_tag(self, session: AsyncSession) -> AbstractTag:
+        """Достает из базы какой-то тег Удобно для проверки что теги вообще есть."""
+        db_tag = await session.execute(select(self.model))
+        db_tag = db_tag.scalars().first()
+        logger.info(f"Retrieved record from database: {db_tag}.")
+        return db_tag
 
 
 crud_tag_assistance = TagCRUD(Tag_Assistance)
