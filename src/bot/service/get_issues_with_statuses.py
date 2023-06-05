@@ -18,8 +18,8 @@ client = TrackerClient(
 
 
 def get_issues_with_statuses(
-    queues=[POLLUTION, SOCIAL],
-    statuses=['OPEN']
+    queues: list = [POLLUTION, SOCIAL],
+    statuses: list = ['OPEN']
 ):
     issues = client.issues.find(
         filter=dict(queue=queues, status=statuses)
@@ -34,13 +34,17 @@ async def add_new_volunteer_to_issue(
     FORMAT = "%d/%m/%Y"
     open_issues = get_issues_with_statuses()
     issues_in_radius = await crud_volunteer.get_issues_in_radius(
-        volunteer.longitude, volunteer.latitude, volunteer.radius,
-        session
+        volunteer, session
     )
     for issue in open_issues:
         if issue.key in issues_in_radius:
             description = issue.description
-            description += '\n' + date.today().strftime(FORMAT)
-            + ' Найден новый волонтер '
-            + 'c машиной' if volunteer.has_car else 'без машины'
+            description += (
+                '\n\n' + date.today().strftime(FORMAT)
+                + ' Найден новый волонтер '
+            )
+            description += 'с машиной' if volunteer.has_car else 'без машины'
+            description += '\n' + (
+                f'https://t.me/{volunteer.telegram_username}, {volunteer.ticketID}'
+            )
             issue.update(description=description)

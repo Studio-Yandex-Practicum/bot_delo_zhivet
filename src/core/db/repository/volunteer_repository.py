@@ -40,26 +40,24 @@ class VolunteerCRUD(CRUDBase):
 
     async def get_issues_in_radius(
         self,
-        longitude: float,
-        latitude: float,
-        radius: int,
+        volunteer: Volunteer,
         session: AsyncSession,
-        models: list = [Pollution, Assistance_disabled]
-    ):
+        models: list = [Assistance_disabled, Pollution]
+    ) -> list:
         result = []
         for model in models:
             stmt = select(model.ticketID).where(
                 func.ST_DWITHIN(
                     model.geometry,
                     func.ST_GeomFromText(
-                        f'SRID=4326:POINT({longitude} {latitude})'
+                        f'SRID=4326;POINT({volunteer.longitude} {volunteer.latitude})'
                     ),
-                    radius,
+                    volunteer.radius,
                     use_spheroid=False
                 )
             )
             issues = await session.execute(stmt)
-            result.extend(issues)
+            result.extend(issues.scalars().all())
         return result
 
 
