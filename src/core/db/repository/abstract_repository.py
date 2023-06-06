@@ -1,6 +1,5 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from structlog.contextvars import bound_contextvars
 
 from bot.handlers.loggers import logger
 
@@ -19,15 +18,13 @@ class CRUDBase:
         """get one record by id from DB."""
         db_obj = await session.execute(select(self.model).where(self.model.id == obj_id))
         db_obj = db_obj.scalars().first()
-        with bound_contextvars(db=db_obj):
-            logger.info("Retrieved record from database ")
+        logger.info("Retrieved record from database:", db=db_obj)
         return db_obj
 
     async def get_multi(self, session: AsyncSession):
         """get all records from DB."""
         db_objs = await session.execute(select(self.model))
-        with bound_contextvars(name=self.model.__name__):
-            logger.info("Retrieved all records from database:")
+        logger.info("Retrieved all records from database:", name=self.model.__name__)
         return db_objs.scalars().all()
 
     async def create(
@@ -40,8 +37,7 @@ class CRUDBase:
         session.add(db_obj)
         await session.commit()
         await session.refresh(db_obj)
-        with bound_contextvars(db=db_obj):
-            logger.info("Database record created")
+        logger.info("Database record created", db=db_obj)
         return db_obj
 
     async def update(
@@ -63,8 +59,7 @@ class CRUDBase:
         session.add(db_obj)
         await session.commit()
         await session.refresh(db_obj)
-        with bound_contextvars(db=db_obj):
-            logger.info("Database record updated")
+        logger.info("Database record updated", db=db_obj)
         return db_obj
 
     async def remove(
@@ -75,8 +70,7 @@ class CRUDBase:
         """Remove record"""
         await session.delete(db_obj)
         await session.commit()
-        with bound_contextvars(db=db_obj):
-            logger.info("Database record deleted")
+        logger.info("Database record deleted", db=db_obj)
         return db_obj
 
     async def get_by_attribute(
@@ -89,8 +83,7 @@ class CRUDBase:
         attr = getattr(self.model, attr_name)
         db_obj = await session.execute(select(self.model).where(attr == attr_value))
         db_obj = db_obj.scalars().first()
-        with bound_contextvars(attr_name=attr_name, attr_value=attr_value, db=db_obj):
-            logger.info("Retrieved record from database with")
+        logger.info("Retrieved record from database with", attr_name=attr_name, attr_value=attr_value, db=db_obj)
         return db_obj
 
     async def get_id_by_telegram_id(self, telegram_id: int, session: AsyncSession):

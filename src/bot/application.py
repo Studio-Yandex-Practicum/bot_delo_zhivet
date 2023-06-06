@@ -1,6 +1,6 @@
 from json import JSONDecodeError
-from typing import List
 from urllib.parse import urljoin
+from uuid import uuid4
 
 import httpx
 import uvicorn
@@ -8,7 +8,7 @@ from starlette.applications import Starlette
 from starlette.requests import Request
 from starlette.responses import Response
 from starlette.routing import Route
-from structlog.contextvars import bound_contextvars
+from structlog import contextvars
 from telegram import Update
 from telegram.ext import (
     Application,
@@ -231,8 +231,7 @@ async def init_webhook() -> Application:
     await bot_app.bot.set_webhook(url=url, secret_token=settings.TELEGRAM_BOT_TOKEN.replace(":", ""))
     await bot_app.initialize()
     await bot_app.start()
-    with bound_contextvars(app_url=url):
-        logger.info("Webhook initialized")
+    logger.info("Webhook initialized", app_url=url)
     return bot_app
 
 
@@ -255,17 +254,17 @@ def run_bot_webhook():
         try:
             request_json = await request.json()
             bot_app = request.app.state.bot_app
-            with bound_contextvars(request_data=request_json):
-                logger.info("REQUEST")
+            contextvars.clear_contextvars()
+            contextvars.bind_contextvars(request_id=str(uuid4()))
+            logger.info("REQUEST", request_data=request_json)
             await bot_app.update_queue.put(Update.de_json(data=request_json, bot=bot_app.bot))
         except JSONDecodeError as error:
-            with bound_contextvars(error=error):
-                logger.error("Got a JSONDecodeError:")
+            logger.error("Got a JSONDecodeError:", error=error)
             response = {"status_code": httpx.codes.BAD_REQUEST}
 
         return Response(**response)
 
-    def get_routes() -> List[Route]:
+    def get_routes() -> list[Route]:
         """Список маршрутов"""
         routes = [
             Route(settings.WEBHOOK_PATH, webhook_api, methods=["POST"]),
