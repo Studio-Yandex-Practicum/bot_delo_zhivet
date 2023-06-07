@@ -1,20 +1,11 @@
 from datetime import date
-import os
 
-from dotenv import load_dotenv
 from sqlalchemy.ext.asyncio import AsyncSession
-from yandex_tracker_client import TrackerClient
 
+from src.api.tracker import client
 from src.bot.handlers.state_constants import POLLUTION, SOCIAL
 from src.core.db.model import Volunteer
 from src.core.db.repository.volunteer_repository import crud_volunteer
-
-load_dotenv()
-
-client = TrackerClient(
-    token=os.getenv("OAUTH_TOKEN"),
-    org_id=os.getenv("ORG_ID")
-)
 
 
 def get_issues_with_statuses(
