@@ -1,8 +1,9 @@
 import asyncio
 import os
+import sys
 from logging.config import fileConfig
 
-from dotenv import find_dotenv, load_dotenv
+from dotenv import load_dotenv
 from geoalchemy2 import alembic_helpers
 from sqlalchemy import engine_from_config, pool
 from sqlalchemy.ext.asyncio import AsyncEngine
@@ -10,12 +11,15 @@ from sqlalchemy.ext.asyncio import AsyncEngine
 from alembic import context
 from src.core.db.base import Base
 
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+
 PG_DOCKER_ENV = os.getenv("PG_DOCKER_ENV", "local")
+dotenv_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "infrastructure")
 
 if PG_DOCKER_ENV == "dev":
-    load_dotenv(find_dotenv(".env.db"))
+    load_dotenv(dotenv_path=os.path.join(dotenv_path, ".env.db"))
 else:
-    load_dotenv(find_dotenv(".env.db.local"))
+    load_dotenv(dotenv_path=os.path.join(dotenv_path, ".env.db.local"))
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

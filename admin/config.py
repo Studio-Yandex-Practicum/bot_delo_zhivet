@@ -1,12 +1,12 @@
 import logging
 import os
 
-from dotenv import find_dotenv, load_dotenv
+from dotenv import load_dotenv
 
-load_dotenv(find_dotenv(".env.db"))
-load_dotenv(find_dotenv(".env.flask"))
-load_dotenv(find_dotenv(".env.mail"))
-load_dotenv(find_dotenv(".env.sentry"))
+load_dotenv("./infrastructure/.env.db")
+load_dotenv("./infrastructure/.env.flask")
+load_dotenv("./infrastructure/.env.mail")
+load_dotenv("./infrastructure/.env.sentry")
 
 
 class Config(object):

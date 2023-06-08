@@ -7,7 +7,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     env_file:
-      - ./.env.db
+      - ./infrastructure/.env.db
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:?err} -d $${POSTGRES_DB:?err}"]
       start_period: 30s
@@ -34,7 +34,7 @@ services:
       db:
         condition: service_healthy
     env_file:
-      - ./.env.telegram
+      - ./infrastructure/.env.telegram
     environment:
       - PG_DOCKER_ENV=dev
 
@@ -59,15 +59,15 @@ services:
       bot:
         condition: service_started
     env_file:
-      - ./.env.aws
-      - ./.env.dadata
-      - ./.env.flask
-      - ./.env.geocoder
-      - ./.env.mail
-      - ./.env.nginx
-      - ./.env.redis
-      - ./.env.sentry
-      - ./.env.yatracker
+      - ./infrastructure/.env.aws
+      - ./infrastructure/.env.dadata
+      - ./infrastructure/.env.flask
+      - ./infrastructure/.env.geocoder
+      - ./infrastructure/.env.mail
+      - ./infrastructure/.env.nginx
+      - ./infrastructure/.env.redis
+      - ./infrastructure/.env.sentry
+      - ./infrastructure/.env.yatracker
     environment:
       - PG_DOCKER_ENV=dev
     volumes:

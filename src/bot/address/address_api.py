@@ -2,9 +2,9 @@ import os
 from copy import deepcopy
 
 import requests
-from dotenv import find_dotenv, load_dotenv
+from dotenv import load_dotenv
 
-load_dotenv(find_dotenv(".env.geocoder"))
+load_dotenv("./infrastructure/.env.geocoder")
 
 ENDPOINT = os.getenv("GEOCODER_BASE_URL", default="None")
 GEOCODER_APIKEY = os.getenv("GEOCODER_APIKEY", default="None")
