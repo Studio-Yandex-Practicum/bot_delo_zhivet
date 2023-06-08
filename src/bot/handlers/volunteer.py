@@ -5,46 +5,22 @@ from telegram.ext import ContextTypes
 from src.api.tracker import client
 from src.bot.handlers.start import start
 from src.bot.handlers.state_constants import (
-    ACTIVITY_RADIUS,
-    ADDING_VOLUNTEER,
-    ADDRESS_TEMPORARY,
-    BACK,
-    CAR_COMMAND,
-    CHECK_MARK,
-    CITY,
-    CITY_COMMAND,
-    CITY_INPUT,
-    CURRENT_FEATURE,
-    END,
-    FEATURES,
-    FIRST_NAME,
-    GEOM,
-    LAST_NAME,
-    LATITUDE,
-    LONGITUDE,
-    PHONE_COMMAND,
-    PHONE_INPUT,
-    RADIUS_COMMAND,
-    SAVE,
-    SECOND_LEVEL_TEXT,
-    SELECTING_OVER,
-    SPECIFY_ACTIVITY_RADIUS,
-    SPECIFY_CAR_AVAILABILITY,
-    SPECIFY_CITY,
-    SPECIFY_PHONE_PERMISSION,
-    START_OVER,
-    TELEGRAM_ID,
-    TELEGRAM_USERNAME,
-    TYPING_CITY,
-    VALIDATE,
-    VOLUNTEER,
+    ACTIVITY_RADIUS, ADDING_VOLUNTEER, ADDRESS_TEMPORARY, BACK, CAR_COMMAND,
+    CHECK_MARK, CITY, CITY_COMMAND, CITY_INPUT, CURRENT_FEATURE, END, FEATURES,
+    FIRST_NAME, GEOM, LAST_NAME, LATITUDE, LONGITUDE, PHONE_COMMAND,
+    PHONE_INPUT, RADIUS_COMMAND, SAVE, SECOND_LEVEL_TEXT, SELECTING_OVER,
+    SPECIFY_ACTIVITY_RADIUS, SPECIFY_CAR_AVAILABILITY, SPECIFY_CITY,
+    SPECIFY_PHONE_PERMISSION, START_OVER, TELEGRAM_ID, TELEGRAM_USERNAME,
+    TYPING_CITY, VALIDATE, VOLUNTEER,
 )
 from src.bot.service.dadata import get_fields_from_dadata
 from src.bot.service.get_issues_with_statuses import add_new_volunteer_to_issue
 from src.bot.service.phone_number import format_numbers, phone_number_validate
 from src.bot.service.save_new_user import check_user_in_db, create_new_user
 from src.bot.service.save_tracker_id import save_tracker_id
-from src.bot.service.volunteer import check_volunteer_in_db, create_volunteer, update_volunteer
+from src.bot.service.volunteer import (
+    check_volunteer_in_db, create_volunteer, update_volunteer,
+)
 from src.core.db.db import get_async_session
 from src.core.db.repository.volunteer_repository import crud_volunteer
 
@@ -98,6 +74,10 @@ async def add_volunteer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> s
 
         await update.callback_query.answer()
         await update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
+    elif FEATURES not in context.user_data:
+        # context.user_data[START_OVER] = False
+        return await start(update, context)
+
     else:
         if check_data(context.user_data[FEATURES]) is True:
             buttons.append([InlineKeyboardButton(text="Отправить заявку", callback_data=SAVE)])
