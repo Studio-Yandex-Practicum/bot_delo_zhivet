@@ -40,6 +40,7 @@ from src.bot.handlers.state_constants import (
     VOLUNTEER,
 )
 from src.bot.service.dadata import get_fields_from_dadata
+from src.bot.service.get_issues_with_statuses import add_new_volunteer_to_issue
 from src.bot.service.phone_number import format_numbers, phone_number_validate
 from src.bot.service.save_new_user import check_user_in_db, create_new_user
 from src.bot.service.save_tracker_id import save_tracker_id
@@ -345,9 +346,9 @@ async def save_and_exit_volunteer(
             return
         else:
             old_ticket_id = old_volunteer.ticketID
-            await update_volunteer(old_volunteer, user_data, session)
+            volunteer = await update_volunteer(old_volunteer, user_data, session)
     else:
-        await create_volunteer(user_data, session)
+        volunteer = await create_volunteer(user_data, session)
     user_name = user_data[TELEGRAM_USERNAME]
     if user_name is None:
         user_name = "Никнейм скрыт"
@@ -370,6 +371,7 @@ async def save_and_exit_volunteer(
         description=description,
     )
     await save_tracker_id(crud_volunteer, tracker.key, user_data[TELEGRAM_ID], session)
+    await add_new_volunteer_to_issue(volunteer, session)
 
 
 async def back_to_add_volunteer(update: Update, context: ContextTypes.DEFAULT_TYPE):
