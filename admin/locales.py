@@ -29,4 +29,6 @@ FIELD_TRANSLATION_RU = {
     "holiday_start": "Начало каникул",
     "holiday_end": "Окончание каникул",
     "is_active": "Активен",
+    "tags": "Теги",
+    "name": "Тег",
 }

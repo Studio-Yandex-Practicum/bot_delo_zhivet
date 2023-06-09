@@ -3,7 +3,9 @@ import uuid
 from sqlalchemy import TIMESTAMP, Column, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import declarative_base, declared_attr, scoped_session, sessionmaker
+from sqlalchemy.orm import (
+    declarative_base, declared_attr, scoped_session, sessionmaker,
+)
 from sqlalchemy.pool import NullPool
 
 from src.core.config import settings
@@ -42,7 +44,7 @@ db_session = scoped_session(
         autoflush=False,
     )
 )
-AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession)
+AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 
 async def get_async_session():

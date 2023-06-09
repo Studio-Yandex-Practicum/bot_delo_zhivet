@@ -15,6 +15,7 @@ from telegram.ext import (
     CallbackQueryHandler,
     CommandHandler,
     ConversationHandler,
+    InvalidCallbackData,
     MessageHandler,
     PicklePersistence,
     filters,
@@ -33,10 +34,11 @@ from bot.const import (
     SPECIFY_CITY_CMD,
     SPECIFY_PHONE_PERMISSION_CMD,
 )
+from bot.handlers.add_tags import pollution_tags_handler, social_tags_handler
 from bot.handlers.loggers import logger
 from core.config import settings
 
-from .handlers.common import end_describing, help_command, stop
+from .handlers.common import end_describing, handle_invalid_button, help_command, stop
 from .handlers.participation import make_donation
 from .handlers.pollution import (
     back_to_select_option_to_report_about_pollution,
@@ -57,6 +59,8 @@ from .handlers.social import (
 )
 from .handlers.start import start
 from .handlers.state_constants import (
+    ADD_POLLUTION_TAG,
+    ADD_SOCIAL_TAG,
     ADDING_SOCIAL_TASK,
     ADDING_VOLUNTEER,
     BACK,
@@ -64,6 +68,7 @@ from .handlers.state_constants import (
     CITY_COMMAND,
     CITY_INPUT,
     CITY_SOCIAL,
+    NO_TAG,
     PHONE_COMMAND,
     PHONE_INPUT,
     POLLUTION_COMMENT,
@@ -78,6 +83,7 @@ from .handlers.state_constants import (
     SOCIAL_COMMENT,
     SOCIAL_PROBLEM_ADDRESS,
     SOCIAL_PROBLEM_TYPING,
+    TAG_ID_PATTERN,
     TYPING,
     TYPING_CITY,
     TYPING_SOCIAL_CITY,
@@ -141,12 +147,18 @@ def create_bot() -> Application:
                 CallbackQueryHandler(input, pattern="^" + POLLUTION_COORDINATES + "$"),
                 CallbackQueryHandler(input, pattern="^" + POLLUTION_FOTO + "$"),
                 CallbackQueryHandler(save_pollution, pattern="^" + SAVE + "$"),
+                CallbackQueryHandler(pollution_tags_handler.enter_tags, ADD_POLLUTION_TAG),
             ],
             TYPING: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, save_comment),
                 MessageHandler(filters.PHOTO & ~filters.COMMAND, save_foto),
                 MessageHandler(filters.LOCATION & ~filters.COMMAND, save_location),
                 MessageHandler(filters.ATTACHMENT & ~filters.COMMAND, save_foto),
+            ],
+            ADD_POLLUTION_TAG: [
+                CallbackQueryHandler(pollution_tags_handler.enter_tags, TAG_ID_PATTERN),
+                CallbackQueryHandler(pollution_tags_handler.no_tag, NO_TAG),
+                CallbackQueryHandler(pollution_tags_handler.exit_tags, BACK),
             ],
         },
         fallbacks=[
@@ -174,6 +186,7 @@ def create_bot() -> Application:
                 CallbackQueryHandler(ask_for_input_address, pattern="^" + SOCIAL_ADDRESS + "$"),
                 CallbackQueryHandler(input_social_data, pattern="^" + SOCIAL_COMMENT + "$"),
                 CallbackQueryHandler(save_social_problem, pattern="^" + SAVE + "$"),
+                CallbackQueryHandler(social_tags_handler.enter_tags, ADD_SOCIAL_TAG),
             ],
             SOCIAL_PROBLEM_TYPING: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, save_social_problem_data),
@@ -181,6 +194,11 @@ def create_bot() -> Application:
             SOCIAL_PROBLEM_ADDRESS: [CallbackQueryHandler(save_social_address_input, pattern="^" + CITY_SOCIAL)],
             TYPING_SOCIAL_CITY: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, address_confirmation),
+            ],
+            ADD_SOCIAL_TAG: [
+                CallbackQueryHandler(social_tags_handler.enter_tags, TAG_ID_PATTERN),
+                CallbackQueryHandler(social_tags_handler.no_tag, NO_TAG),
+                CallbackQueryHandler(social_tags_handler.exit_tags, BACK),
             ],
         },
         fallbacks=[
@@ -212,6 +230,7 @@ def create_bot() -> Application:
 
     app.add_handler(MessageHandler(Regex(MAKE_DONATION_CMD), make_donation))
     app.add_handler(CommandHandler("help", help_command))
+    app.add_handler(CallbackQueryHandler(handle_invalid_button, InvalidCallbackData))
 
     return app
 
@@ -281,7 +300,7 @@ def run_bot_webhook():
 
 
 def start_bot() -> None:
-    # Если в файле .env есть такие настройки, то запустится webhook
+    # Если в файле .env.telegram есть такие настройки, то запустится webhook
     if settings.WEBHOOK_DOMAIN and settings.WEBHOOK_PORT:
         run_bot_webhook()
     else:

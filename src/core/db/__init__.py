@@ -1,1 +1,4 @@
-from .model import Assistance_disabled, Pollution, Role, Staff, User, Volunteer, roles_users  # noqa
+from .model import (  # noqa
+    Assistance_disabled, Pollution, Role, Staff, Tag_Assistance, Tag_Pollution,
+    User, Volunteer, roles_users,
+)
