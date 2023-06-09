@@ -1,4 +1,3 @@
-import logging
 from json import JSONDecodeError
 from urllib.parse import urljoin
 from uuid import uuid4
@@ -9,54 +8,99 @@ from starlette.applications import Starlette
 from starlette.requests import Request
 from starlette.responses import Response
 from starlette.routing import Route
-from structlog import contextvars, get_logger
+from structlog import contextvars
 from telegram import Update
 from telegram.ext import (
-    Application, CallbackQueryHandler, CommandHandler, ConversationHandler,
-    InvalidCallbackData, MessageHandler, PicklePersistence, filters,
+    Application,
+    CallbackQueryHandler,
+    CommandHandler,
+    ConversationHandler,
+    InvalidCallbackData,
+    MessageHandler,
+    PicklePersistence,
+    filters,
 )
 from telegram.ext.filters import Regex
 
 from bot.const import (
-    BECOME_VOLUNTEER_CMD, DATA_PATH, END_CMD, MAKE_DONATION_CMD,
-    REPORT_ECO_PROBLEM_CMD, SAVE_PERSISTENCE_INTERVAL,
-    SPECIFY_ACTIVITY_RADIUS_CMD, SPECIFY_CAR_AVAILABILITY_CMD,
-    SPECIFY_CITY_CMD, SPECIFY_PHONE_PERMISSION_CMD,
+    BECOME_VOLUNTEER_CMD,
+    DATA_PATH,
+    END_CMD,
+    MAKE_DONATION_CMD,
+    REPORT_ECO_PROBLEM_CMD,
+    SAVE_PERSISTENCE_INTERVAL,
+    SPECIFY_ACTIVITY_RADIUS_CMD,
+    SPECIFY_CAR_AVAILABILITY_CMD,
+    SPECIFY_CITY_CMD,
+    SPECIFY_PHONE_PERMISSION_CMD,
 )
 from bot.handlers.add_tags import pollution_tags_handler, social_tags_handler
+from bot.handlers.loggers import logger
 from core.config import settings
 
-from .handlers.common import (
-    end_describing, handle_invalid_button, help_command, stop,
-)
+from .handlers.common import end_describing, handle_invalid_button, help_command, stop
 from .handlers.participation import make_donation
 from .handlers.pollution import (
-    back_to_select_option_to_report_about_pollution, input, save_comment,
-    save_foto, save_location, select_option_to_report_about_pollution,
+    back_to_select_option_to_report_about_pollution,
+    input,
+    save_comment,
+    save_foto,
+    save_location,
+    select_option_to_report_about_pollution,
 )
 from .handlers.social import (
-    address_confirmation, ask_for_input_address, back_to_add_social,
-    input_social_data, report_about_social_problem, save_social_address_input,
+    address_confirmation,
+    ask_for_input_address,
+    back_to_add_social,
+    input_social_data,
+    report_about_social_problem,
+    save_social_address_input,
     save_social_problem_data,
 )
 from .handlers.start import start
 from .handlers.state_constants import (
-    ADD_POLLUTION_TAG, ADD_SOCIAL_TAG, ADDING_SOCIAL_TASK, ADDING_VOLUNTEER,
-    BACK, CAR_COMMAND, CITY_COMMAND, CITY_INPUT, CITY_SOCIAL, NO_TAG,
-    PHONE_COMMAND, PHONE_INPUT, POLLUTION_COMMENT, POLLUTION_COORDINATES,
-    POLLUTION_FOTO, RADIUS_COMMAND, SAVE, SELECTING_ACTION, SELECTING_FEATURE,
-    SELECTING_OVER, SOCIAL_ADDRESS, SOCIAL_COMMENT, SOCIAL_PROBLEM_ADDRESS,
-    SOCIAL_PROBLEM_TYPING, TAG_ID_PATTERN, TYPING, TYPING_CITY,
-    TYPING_SOCIAL_CITY, VALIDATE,
+    ADD_POLLUTION_TAG,
+    ADD_SOCIAL_TAG,
+    ADDING_SOCIAL_TASK,
+    ADDING_VOLUNTEER,
+    BACK,
+    CAR_COMMAND,
+    CITY_COMMAND,
+    CITY_INPUT,
+    CITY_SOCIAL,
+    NO_TAG,
+    PHONE_COMMAND,
+    PHONE_INPUT,
+    POLLUTION_COMMENT,
+    POLLUTION_COORDINATES,
+    POLLUTION_FOTO,
+    RADIUS_COMMAND,
+    SAVE,
+    SELECTING_ACTION,
+    SELECTING_FEATURE,
+    SELECTING_OVER,
+    SOCIAL_ADDRESS,
+    SOCIAL_COMMENT,
+    SOCIAL_PROBLEM_ADDRESS,
+    SOCIAL_PROBLEM_TYPING,
+    TAG_ID_PATTERN,
+    TYPING,
+    TYPING_CITY,
+    TYPING_SOCIAL_CITY,
+    VALIDATE,
 )
 from .handlers.volunteer import (
-    add_volunteer, ask_for_input_city, ask_user_phone_number,
-    back_to_add_volunteer, handle_car_input, handle_city_input,
-    handle_phone_input, handle_radius_input, save_input,
+    add_volunteer,
+    ask_for_input_city,
+    ask_user_phone_number,
+    back_to_add_volunteer,
+    handle_car_input,
+    handle_city_input,
+    handle_phone_input,
+    handle_radius_input,
+    save_input,
 )
 from .tasks import save_pollution, save_social_problem, save_volunteer
-
-logger = get_logger(settings.logger_name)
 
 
 def create_bot() -> Application:
@@ -195,9 +239,7 @@ def run_bot_polling() -> None:
     """Запуск бота в режиме polling"""
     bot_app = create_bot()
     bot_app.run_polling()
-    aps_logger = logging.getLogger("apscheduler")
-    aps_logger.setLevel(logging.DEBUG)
-    aps_logger.info("Start polling")
+    logger.info("Start polling")
 
 
 async def init_webhook() -> Application:
@@ -208,26 +250,22 @@ async def init_webhook() -> Application:
     await bot_app.bot.set_webhook(url=url, secret_token=settings.TELEGRAM_BOT_TOKEN.replace(":", ""))
     await bot_app.initialize()
     await bot_app.start()
-    aps_logger = logging.getLogger("apscheduler")
-    aps_logger.setLevel(logging.INFO)
-    aps_logger.info(f"Webhook is. Application url: {url}")
+    logger.info("Webhook initialized", app_url=url)
     return bot_app
 
 
 def run_bot_webhook():
     """Запуск бота в режиме webhook"""
-    aps_logger = logging.getLogger("apscheduler")
-    aps_logger.setLevel(logging.DEBUG)
 
     async def on_start_bot() -> None:
         bot_app = await init_webhook()
         starlette_app.state.bot_app = bot_app
-        aps_logger.info("The bot has been started")
+        logger.info("The bot has been started")
 
     async def on_stop_bot() -> None:
         await starlette_app.state.bot_app.stop()
         await starlette_app.state.bot_app.shutdown()
-        aps_logger.info("The bot has been stopped")
+        logger.info("The bot has been stopped")
 
     async def webhook_api(request: Request) -> Response:
         """Обработка входящих обновлений и помещение их в очередь"""
@@ -240,7 +278,7 @@ def run_bot_webhook():
             logger.info("REQUEST", request_data=request_json)
             await bot_app.update_queue.put(Update.de_json(data=request_json, bot=bot_app.bot))
         except JSONDecodeError as error:
-            aps_logger.error("Got a JSONDecodeError: %s", error)
+            logger.error("Got a JSONDecodeError:", error=error)
             response = {"status_code": httpx.codes.BAD_REQUEST}
 
         return Response(**response)
