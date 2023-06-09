@@ -1,9 +1,7 @@
+import os
 from logging import INFO
 
-from dotenv import load_dotenv
 from pydantic import BaseSettings
-
-load_dotenv()
 
 
 class Settings(BaseSettings):
@@ -40,8 +38,30 @@ class Settings(BaseSettings):
     sort_tags_in_bot = ["priority", "name"]
 
     class Config:
-        env_file = ".env"
         env_file_encoding = "utf-8"
 
 
-settings = Settings()
+class DevSettings(Settings):
+    class Config:
+        env_file = (
+            "./infrastructure/.env.db",
+            "./infrastructure/.env.telegram",
+            "./infrastructure/.env.aws",
+            "./infrastructure/.env.sentry",
+        )
+
+
+class LocalSettings(Settings):
+    class Config:
+        env_file = ("./infrastructure/.env.db.local", "./infrastructure/.env.aws")
+
+
+def get_settings():
+    PG_DOCKER_ENV = os.getenv("PG_DOCKER_ENV", "local")
+    if PG_DOCKER_ENV == "dev":
+        return DevSettings()
+    else:
+        return LocalSettings()
+
+
+settings = get_settings()

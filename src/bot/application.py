@@ -262,7 +262,7 @@ def run_bot_webhook():
 
 
 def start_bot() -> None:
-    # Если в файле .env есть такие настройки, то запустится webhook
+    # Если в файле .env.telegram есть такие настройки, то запустится webhook
     if settings.WEBHOOK_DOMAIN and settings.WEBHOOK_PORT:
         run_bot_webhook()
     else:
