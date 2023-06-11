@@ -2,13 +2,8 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
 
 from bot.handlers.state_constants import (
-    ADDING_ECO_TASK,
-    ADDING_SOCIAL_TASK,
-    ADDING_VOLUNTEER,
-    GREETING_MESSAGE,
-    SELECTING_ACTION,
-    START_OVER,
-    TOP_LEVEL_MENU_TEXT,
+    ADDING_ECO_TASK, ADDING_SOCIAL_TASK, ADDING_VOLUNTEER, GREETING_MESSAGE,
+    SELECTING_ACTION, START_OVER, TOP_LEVEL_MENU_TEXT,
 )
 
 

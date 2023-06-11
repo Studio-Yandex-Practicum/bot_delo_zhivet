@@ -1,4 +1,6 @@
 # Обозначим состояния главного менюSELECTING_ACTION
+import re
+
 from telegram.ext import ConversationHandler
 
 # Константы для API трекера
@@ -38,6 +40,17 @@ SHOWING = "showing"
 END = ConversationHandler.END
 
 # Различные константы для проекта
+NO_COMMENT_PHASE = "Комментариев не оставили"
+ADD_POLLUTION_TAG = "ADD_POLLUTION_TAG"
+ADD_SOCIAL_TAG = "ADD_SOCIAL_TAG"
+TAG_ID = "tag_id"
+TAG_BUTTON_CALLBACK_PREFIX = f"{TAG_ID}="
+TAG_ID_PATTERN_RAW = f"{TAG_ID}=(?P<{TAG_ID}>.*)"
+TAG_ID_PATTERN = re.compile(TAG_ID_PATTERN_RAW)
+NO_TAG = "NO_TAG"
+TAGS = "tags"
+POLLUTION_TAGS = "POLLUTION_TAGS"
+SOCIAL_TAGS = "SOCIAL_TAGS"
 LONGITUDE = "longitude"
 LATITUDE = "latitude"
 GEOM = "geometry"
@@ -57,6 +70,7 @@ POLLUTION_COORDINATES = "pollution_coordinates"
 POLLUTION_COMMENT = "comment"
 SOCIAL_ADDRESS = "social_address"
 SOCIAL_COMMENT = "comment"
+COMMENT = "comment"
 SAVE = "save"
 ACTIVITY_RADIUS = [
     list(range(5, 30, 5)),

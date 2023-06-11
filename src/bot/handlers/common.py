@@ -2,7 +2,10 @@ from telegram import Update
 from telegram.ext import ContextTypes
 
 from bot.handlers.start import start
-from bot.handlers.state_constants import CURRENT_FEATURE, END, FEATURES, HELP_TEXT, SITE_INFO, START_OVER, STOP_TEXT
+from bot.handlers.state_constants import (
+    CURRENT_FEATURE, END, FEATURES, HELP_TEXT, SITE_INFO, START_OVER,
+    STOP_TEXT,
+)
 
 
 async def stop(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -26,3 +29,11 @@ async def end_describing(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Обработчик команды /help."""
     await update.message.reply_text(HELP_TEXT.format(site_info=SITE_INFO))
+
+
+async def handle_invalid_button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Informs the user that the button is no longer available."""
+    await update.callback_query.answer()
+    await update.effective_message.edit_text(
+        "Мне очень жаль, но эта кнопка больше не работает 😕 отправтьте /start что бы получить новые работающие кнопки."
+    )

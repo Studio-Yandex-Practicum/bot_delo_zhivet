@@ -1,9 +1,6 @@
 import backoff
-from structlog import get_logger
 
-from core.config import settings
-
-logger = get_logger(settings.logger_name)
+from bot.handlers.loggers import logger
 
 """
 Base_method - арифметическая прогрессия.
