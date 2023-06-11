@@ -19,7 +19,6 @@ from src.bot.handlers.state_constants import (
     VOLUNTEER,
 )
 from src.api.tracker import client
-from src.core.db.db import get_async_session
 from src.core.db.model import Volunteer
 from src.core.db.repository.volunteer_repository import crud_volunteer
 
@@ -51,13 +50,6 @@ async def create_volunteer(data: VolunteerCreate, session: AsyncSession):
 
 async def update_volunteer(db_obj: Volunteer, data: VolunteerCreate, session: AsyncSession):
     return await crud_volunteer.update(db_obj, data, session)
-
-
-async def get_is_volunteer_exists(telegram_id: int) -> bool:
-    """Проверяет существует ли волонтер с указанным id в базе"""
-    session_generator = get_async_session()
-    session = await session_generator.asend(None)
-    return await crud_volunteer.get_exist_by_attribute(TELEGRAM_ID, telegram_id, session)
 
 
 def volunteers_description(volunteers):
@@ -99,23 +91,19 @@ def volunteer_data_preparation(telegram_id: int, username: str, first_name: str,
     return data
 
 
-async def create_or_update_volunteer(
-        volunteer_data: dict, volunteer_is_exists: bool, session) -> tuple[Optional[Volunteer], Optional[str]]:
-    """Создает или обновляет данные волонтера"""
-    if volunteer_is_exists:
-        volunteer = await crud_volunteer.get_volunteer_by_telegram_id(volunteer_data[TELEGRAM_ID], session)
-        old_ticket_id = volunteer.ticketID
-        if volunteer.is_banned:
-            return None, old_ticket_id
-        for attr in set(volunteer_data.keys()):
-            if getattr(volunteer, attr) == volunteer_data[attr]:
-                del volunteer_data[attr]
-        if not volunteer_data:
-            return None, old_ticket_id
-        volunteer = await update_volunteer(volunteer, volunteer_data, session)
-    else:
-        volunteer = await create_volunteer(volunteer_data, session)
-        old_ticket_id = None
+async def check_and_update_volunteer(
+        volunteer_data: dict, session: AsyncSession) -> tuple[Optional[Volunteer], Optional[str]]:
+    """Проверяет не забанен ли волонтер, есть ли данные для обновления"""
+    volunteer = await crud_volunteer.get_volunteer_by_telegram_id(volunteer_data[TELEGRAM_ID], session)
+    old_ticket_id = volunteer.ticketID
+    if volunteer.is_banned:
+        return None, old_ticket_id
+    for attr in set(volunteer_data.keys()):
+        if getattr(volunteer, attr) == volunteer_data[attr]:
+            del volunteer_data[attr]
+    if not volunteer_data:
+        return None, old_ticket_id
+    volunteer = await update_volunteer(volunteer, volunteer_data, session)
     return volunteer, old_ticket_id
 
 

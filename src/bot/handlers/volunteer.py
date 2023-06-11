@@ -2,17 +2,17 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.constants import ParseMode
 from telegram.ext import ContextTypes
 
-from src.api.tracker import client
 from src.bot.handlers.start import start
 from src.bot.handlers.state_constants import (
     ACTIVITY_RADIUS, ADDING_VOLUNTEER, ADDRESS_TEMPORARY, BACK, CAR_COMMAND,
-    CHECK_MARK, CITY, CITY_COMMAND, CITY_INPUT, CURRENT_FEATURE, EDIT_PROFILE_GREETING,
-    END, FEATURES, FEATURES_DESCRIPTION, IS_EXISTS, FIRST_NAME, GEOM, LAST_NAME,
-    LATITUDE, LONGITUDE, PHONE_COMMAND, PHONE_INPUT, RADIUS_COMMAND, REGISTER_GREETING,
-    SAVE, SECOND_LEVEL_TEXT, SECOND_LEVEL_UPDATE_TEXT, SELECTING_OVER,
-    SPECIFY_ACTIVITY_RADIUS, SPECIFY_CAR_AVAILABILITY, SPECIFY_CITY,
+    CHECK_MARK, CITY, CITY_COMMAND, CITY_INPUT, CURRENT_FEATURE,
+    EDIT_PROFILE_GREETING, END, FEATURES, FEATURES_DESCRIPTION, IS_EXISTS,
+    PHONE_COMMAND, PHONE_INPUT, RADIUS_COMMAND, REGISTER_GREETING, SAVE,
+    SECOND_LEVEL_TEXT,
+    SECOND_LEVEL_UPDATE_TEXT, SELECTING_OVER, SPECIFY_ACTIVITY_RADIUS,
+    SPECIFY_CAR_AVAILABILITY, SPECIFY_CITY,
     SPECIFY_PHONE_PERMISSION, START_OVER, TELEGRAM_ID, TELEGRAM_USERNAME,
-    TYPING_CITY, VALIDATE, VOLUNTEER,
+    TYPING_CITY, VALIDATE,
 )
 from src.bot.service.dadata import get_fields_from_dadata
 from src.bot.service.get_issues_with_statuses import add_new_volunteer_to_issue
@@ -20,9 +20,8 @@ from src.bot.service.phone_number import format_numbers, phone_number_validate
 from src.bot.service.save_new_user import create_new_user
 from src.bot.service.save_tracker_id import save_tracker_id
 from src.bot.service.volunteer import (
-    check_volunteer_in_db, create_volunteer, create_or_update_volunteer,
-    get_is_volunteer_exists, get_tracker, volunteer_data_preparation,
-    update_volunteer
+    check_and_update_volunteer, create_volunteer, get_tracker,
+    volunteer_data_preparation,
 )
 from src.core.db.db import get_async_session
 from src.core.db.repository.volunteer_repository import crud_volunteer
@@ -48,7 +47,11 @@ async def add_volunteer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> s
     """Меню регистрации волонтёра."""
 
     if context.user_data.get(IS_EXISTS) is None:
-        context.user_data[IS_EXISTS] = await get_is_volunteer_exists(update.effective_chat.id)
+        session_generator = get_async_session()
+        session = await session_generator.asend(None)
+        context.user_data[IS_EXISTS] = await crud_volunteer.get_exist_by_attribute(
+            TELEGRAM_ID, update.effective_chat.id, session)
+        context.chat_data['current_session'] = session
     action, save_action, text, second_level_text = get_buttons_params(context.user_data[IS_EXISTS])
 
     def check_feature(feature):
@@ -310,12 +313,18 @@ async def save_and_exit_volunteer(
         await create_new_user({TELEGRAM_ID: telegram_id, TELEGRAM_USERNAME: username}, session)
 
     volunteer_data = volunteer_data_preparation(telegram_id, username, first_name, last_name, volunteer_data)
-    volunteer, old_ticket_id = await create_or_update_volunteer(volunteer_data, volunteer_is_exists, session)
-    if volunteer is None:
-        return
+
+    if volunteer_is_exists:
+        volunteer, old_ticket_id = await check_and_update_volunteer(volunteer_data, session)
+        if volunteer is None:
+            return
+    else:
+        volunteer = await create_volunteer(volunteer_data, session)
+        old_ticket_id = None
 
     tracker = get_tracker(volunteer, old_ticket_id)
     await save_tracker_id(crud_volunteer, tracker.key, volunteer.telegram_id, session)
+    await add_new_volunteer_to_issue(volunteer, session)
 
 
 async def back_to_add_volunteer(update: Update, context: ContextTypes.DEFAULT_TYPE):
