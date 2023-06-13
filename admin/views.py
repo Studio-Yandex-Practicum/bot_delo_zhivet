@@ -9,10 +9,7 @@ from flask_mail import Mail, Message
 from flask_security import current_user
 from werkzeug.security import generate_password_hash
 
-from src.core.db.model import (
-    Assistance_disabled, Pollution, Staff, Tag_Assistance, Tag_Pollution, User,
-    Volunteer,
-)
+from src.core.db.model import Assistance_disabled, Pollution, Staff, Tag_Assistance, Tag_Pollution, User, Volunteer
 
 from . import app
 from .config import Config
@@ -20,13 +17,22 @@ from .database import db
 from .forms import ForgotForm, LoginForm, PasswordResetForm, RegistrationForm
 from .logger import get_logger
 from .messages import (
-    ALREADY_REGISTRED, BAD_TOKEN, MAIL_SEND_ERROR, MAIL_SEND_SUCCESS,
-    PASSWORD_CHANGED_SUCCESS, RESET_PASSWORD_SUBJECT, RESTORE_PASSWORD_SEND,
+    ALREADY_REGISTRED,
+    BAD_TOKEN,
+    MAIL_SEND_ERROR,
+    MAIL_SEND_SUCCESS,
+    PASSWORD_CHANGED_SUCCESS,
+    RESET_PASSWORD_SUBJECT,
+    RESTORE_PASSWORD_SEND,
     SUGGEST_REGISTRATION,
 )
 from .utils import (
-    get_readonly_dict, get_reset_password_token, get_sortable_fields_list,
-    get_table_fields_from_model, get_translated_lables,
+    check_tag_uniqueness,
+    get_readonly_dict,
+    get_reset_password_token,
+    get_sortable_fields_list,
+    get_table_fields_from_model,
+    get_translated_lables,
     verify_reset_password_token,
 )
 
@@ -267,6 +273,12 @@ class TagPollutionModelView(BaseModelView):
     can_create = True
     can_delete = True
 
+    def on_model_change(self, form, model, is_created):
+        if is_created:
+            existing_tags = Tag_Pollution.query.all()
+            check_tag_uniqueness(model, existing_tags)
+        super().on_model_change(form, model, is_created)
+
 
 class TagAssistanceModelView(BaseModelView):
     """Вью-класс тегов соц. помощи."""
@@ -277,6 +289,12 @@ class TagAssistanceModelView(BaseModelView):
     can_edit = True
     can_create = True
     can_delete = True
+
+    def on_model_change(self, form, model, is_created):
+        if is_created:
+            existing_tags = Tag_Assistance.query.all()
+            check_tag_uniqueness(model, existing_tags)
+        super().on_model_change(form, model, is_created)
 
 
 admin = flask_admin.Admin(

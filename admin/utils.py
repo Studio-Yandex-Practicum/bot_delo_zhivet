@@ -1,7 +1,9 @@
 from time import time
 
 import jwt
+from Levenshtein import distance
 from sqlalchemy.orm.attributes import InstrumentedAttribute
+from wtforms.validators import ValidationError
 
 from src.core.db.model import Staff
 
@@ -45,9 +47,7 @@ def get_table_fields_from_model(model):
     return fields
 
 
-def get_sortable_fields_list(
-    all_columns: list, name_relation: dict[str:str]
-) -> list:
+def get_sortable_fields_list(all_columns: list, name_relation: dict[str:str]) -> list:
     """
     Функция для создания списка сортируемых полей и замены field_name на (field_name, <relation name>.<column name>)
     для relationship
@@ -62,9 +62,7 @@ def get_sortable_fields_list(
     return fields
 
 
-def get_reset_password_token(
-    user, expires_in=int(Config.PASSWORD_RESET_TOKEN_TTL)
-):
+def get_reset_password_token(user, expires_in=int(Config.PASSWORD_RESET_TOKEN_TTL)):
     return jwt.encode(
         {"reset_password": user.login, "exp": time() + expires_in},
         Config.SECRET_KEY,
@@ -80,8 +78,13 @@ def verify_reset_password_token(token):
             algorithms=Config.PASSWORD_RESET_TOKEN_ALGORITHM,
         )["reset_password"]
     except Exception as e:
-        logger.warning(
-            TOKEN_VALIDATION_ERROR.format(token=token, details=str(e))
-        )
+        logger.warning(TOKEN_VALIDATION_ERROR.format(token=token, details=str(e)))
         return
     return Staff.query.filter_by(login=login).first()
+
+
+def check_tag_uniqueness(model, existing_tags):
+    """Функция для проверки уникальности тега."""
+    for tag in existing_tags:
+        if distance(tag.name.lower(), model.name.lower()) < 5:
+            raise ValidationError("В базе уже существует похожий тег!")

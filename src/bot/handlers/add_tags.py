@@ -4,21 +4,26 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
 
 from src.bot.handlers.common import handle_invalid_button
-from src.bot.handlers.pollution import (
-    back_to_select_option_to_report_about_pollution,
-)
+from src.bot.handlers.pollution import back_to_select_option_to_report_about_pollution
 from src.bot.handlers.social import back_to_add_social
 from src.bot.handlers.state_constants import (
-    ADD_POLLUTION_TAG, ADD_SOCIAL_TAG, BACK, CHECK_MARK, CURRENT_FEATURE,
-    FEATURES, NO_TAG, POLLUTION_TAGS, SOCIAL_TAGS, TAG_BUTTON_CALLBACK_PREFIX,
-    TAG_ID, TAG_ID_PATTERN,
+    ADD_POLLUTION_TAG,
+    ADD_SOCIAL_TAG,
+    BACK,
+    CHECK_MARK,
+    CURRENT_FEATURE,
+    FEATURES,
+    NO_TAG,
+    POLLUTION_TAGS,
+    SOCIAL_TAGS,
+    TAG_BUTTON_CALLBACK_PREFIX,
+    TAG_ID,
+    TAG_ID_PATTERN,
 )
 from src.bot.service.tags import get_chosen_tags_names
 from src.core.config import settings
 from src.core.db.db import get_async_session
-from src.core.db.repository.tags_repository import (
-    AbstractTag, TagCRUD, crud_tag_assistance, crud_tag_pollution,
-)
+from src.core.db.repository.tags_repository import AbstractTag, TagCRUD, crud_tag_assistance, crud_tag_pollution
 
 
 class TagsHandlerClass:
@@ -127,7 +132,7 @@ class TagsHandlerClass:
 
         tags_buttons_list: list[InlineKeyboardButton] = [
             InlineKeyboardButton(
-                text=f"{str(tag.name)} {CHECK_MARK*check_tag_is_added(tag.id, chosen_tags_ids_list)}",
+                text=f"{str(tag.name.capitalize())} {CHECK_MARK*check_tag_is_added(tag.id, chosen_tags_ids_list)}",
                 callback_data=TAG_BUTTON_CALLBACK_PREFIX + str(tag.id),
             )
             for tag in all_tags_list
