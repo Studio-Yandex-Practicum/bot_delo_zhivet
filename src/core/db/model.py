@@ -2,8 +2,18 @@ from flask_login import UserMixin
 from flask_security import RoleMixin
 from geoalchemy2.types import Geography
 from sqlalchemy import (
-    TIMESTAMP, BigInteger, Boolean, Column, Date, DateTime, Float, ForeignKey,
-    Integer, String, Table, Text,
+    TIMESTAMP,
+    BigInteger,
+    Boolean,
+    Column,
+    Date,
+    DateTime,
+    Float,
+    ForeignKey,
+    Integer,
+    String,
+    Table,
+    Text,
 )
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, backref, relationship
@@ -122,7 +132,7 @@ roles_users = Table(
 )
 
 
-class Role(Base, RoleMixin):
+class Role(RoleMixin, Base):
     """Модель роли для персонала"""
 
     name = Column(String, unique=True)
@@ -132,7 +142,7 @@ class Role(Base, RoleMixin):
         return self.name
 
 
-class Staff(Base, UserMixin):
+class Staff(UserMixin, Base):
     """Модель персонала"""
 
     first_name = Column(String(255))
