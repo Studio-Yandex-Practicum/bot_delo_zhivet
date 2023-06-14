@@ -10,7 +10,7 @@ from flask_security import current_user
 from structlog import get_logger
 from werkzeug.security import generate_password_hash
 
-from src.core.db.model import Assistance_disabled, Pollution, Staff, User, Volunteer
+from src.core.db.model import Assistance_disabled, Pollution, Staff, Tag_Assistance, Tag_Pollution, User, Volunteer
 
 from . import app
 from .config import Config
@@ -29,6 +29,7 @@ from .messages import (
 from .utils import (
     get_readonly_dict,
     get_reset_password_token,
+    get_sortable_fields_list,
     get_table_fields_from_model,
     get_translated_lables,
     verify_reset_password_token,
@@ -236,6 +237,10 @@ class AssistanceDisabledModelView(BaseModelView):
 
     all_columns = get_table_fields_from_model(Assistance_disabled)
     column_labels = get_translated_lables(all_columns)
+    sortable_relationship = {"tags": "tags.name"}
+    column_list = all_columns
+    column_sortable_list = get_sortable_fields_list(all_columns, sortable_relationship)
+    column_filters = ("tags.name",)
     can_edit = False
 
 
@@ -244,7 +249,33 @@ class PolutionModelView(BaseModelView):
 
     all_columns = get_table_fields_from_model(Pollution)
     column_labels = get_translated_lables(all_columns)
+    sortable_relationship = {"tags": "tags.name"}
+    column_list = all_columns
+    column_sortable_list = get_sortable_fields_list(all_columns, sortable_relationship)
+    column_filters = ("tags.name",)
     can_edit = False
+
+
+class TagPollutionModelView(BaseModelView):
+    """Вью-класс тегов загрязнения."""
+
+    all_columns = get_table_fields_from_model(Tag_Pollution)
+    column_labels = get_translated_lables(all_columns)
+    form_excluded_columns = ("created_at", "updated_at")
+    can_edit = True
+    can_create = True
+    can_delete = True
+
+
+class TagAssistanceModelView(BaseModelView):
+    """Вью-класс тегов соц. помощи."""
+
+    all_columns = get_table_fields_from_model(Tag_Assistance)
+    column_labels = get_translated_lables(all_columns)
+    form_excluded_columns = ("created_at", "updated_at")
+    can_edit = True
+    can_create = True
+    can_delete = True
 
 
 admin = flask_admin.Admin(
@@ -261,3 +292,5 @@ admin.add_view(UserModelView(User, db.session, name="Пользователи"))
 admin.add_view(VolunteerModelView(Volunteer, db.session, name="Волонтеры"))
 admin.add_view(AssistanceDisabledModelView(Assistance_disabled, db.session, name="Социальная помощь"))
 admin.add_view(PolutionModelView(Pollution, db.session, name="Загрязнения"))
+admin.add_view(TagPollutionModelView(Tag_Pollution, db.session, name="Теги Загрязнения"))
+admin.add_view(TagAssistanceModelView(Tag_Assistance, db.session, name="Теги Соц. помощи"))

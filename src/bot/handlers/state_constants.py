@@ -1,4 +1,6 @@
 # Обозначим состояния главного менюSELECTING_ACTION
+import re
+
 from telegram.ext import ConversationHandler
 
 # Константы для API трекера
@@ -38,11 +40,23 @@ SHOWING = "showing"
 END = ConversationHandler.END
 
 # Различные константы для проекта
+NO_COMMENT_PHASE = "Комментариев не оставили"
+ADD_POLLUTION_TAG = "ADD_POLLUTION_TAG"
+ADD_SOCIAL_TAG = "ADD_SOCIAL_TAG"
+TAG_ID = "tag_id"
+TAG_BUTTON_CALLBACK_PREFIX = f"{TAG_ID}="
+TAG_ID_PATTERN_RAW = f"{TAG_ID}=(?P<{TAG_ID}>.*)"
+TAG_ID_PATTERN = re.compile(TAG_ID_PATTERN_RAW)
+NO_TAG = "NO_TAG"
+TAGS = "tags"
+POLLUTION_TAGS = "POLLUTION_TAGS"
+SOCIAL_TAGS = "SOCIAL_TAGS"
 LONGITUDE = "longitude"
 LATITUDE = "latitude"
 GEOM = "geometry"
 FILE_PATH = "file_path"
 START_OVER = "start_over"
+IS_EXISTS = "is_exists"
 FEATURES = "features"
 CURRENT_FEATURE = "current_feature"
 CURRENT_LEVEL = "current_level"
@@ -56,6 +70,7 @@ POLLUTION_COORDINATES = "pollution_coordinates"
 POLLUTION_COMMENT = "comment"
 SOCIAL_ADDRESS = "social_address"
 SOCIAL_COMMENT = "comment"
+COMMENT = "comment"
 SAVE = "save"
 ACTIVITY_RADIUS = [
     list(range(5, 30, 5)),
@@ -81,12 +96,25 @@ GREETING_MESSAGE = (
     " Выбери, что хочешь сделать:"
 )
 
+FEATURES_DESCRIPTION = (
+    "- Свой адрес, можно без квартиры, для удобства расчетов расстояния;\n"
+    "- Расстояние, на которое ты готов выезжать;\n"
+    "- Наличие автомобиля, и готовность задействовать его;\n"
+    "- [Опционально] Номер телефона для связи."
+)
+
+REGISTER_GREETING = "Для регистрации волонтером вам надо указать:\n"
+EDIT_PROFILE_GREETING = "Выберите данные для изменения:\n"
+
 TOP_LEVEL_MENU_TEXT = "Можно выбрать новое действие или закончить разговор, набрав команду /stop"
 
-SECOND_LEVEL_TEXT = (
+SECOND_LEVEL_TEXT_BASE = (
     "Понял-принял! Укажите информацию для остальных пунктов или нажмите на кнопку "
-    "<b>Отправить заявку</b> (она появится, когда всё будет заполнено):"
+    "<b>{}</b>{}:"
 )
+SECOND_LEVEL_TEXT = SECOND_LEVEL_TEXT_BASE.format("Отправить заявку", " (она появится, когда всё будет заполнено)")
+SECOND_LEVEL_UPDATE_TEXT = SECOND_LEVEL_TEXT_BASE.format("Сохранить", "")
+
 
 CHECK_MARK = "\U00002705"  # Эмодзи галочки
 

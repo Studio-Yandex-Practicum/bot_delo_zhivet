@@ -2,87 +2,82 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.constants import ParseMode
 from telegram.ext import ContextTypes
 
-from src.api.tracker import client
 from src.bot.handlers.start import start
 from src.bot.handlers.state_constants import (
-    ACTIVITY_RADIUS,
-    ADDING_VOLUNTEER,
-    ADDRESS_TEMPORARY,
-    BACK,
-    CAR_COMMAND,
-    CHECK_MARK,
-    CITY,
-    CITY_COMMAND,
-    CITY_INPUT,
-    CURRENT_FEATURE,
-    END,
-    FEATURES,
-    FIRST_NAME,
-    GEOM,
-    LAST_NAME,
-    LATITUDE,
-    LONGITUDE,
-    PHONE_COMMAND,
-    PHONE_INPUT,
-    RADIUS_COMMAND,
-    SAVE,
+    ACTIVITY_RADIUS, ADDING_VOLUNTEER, ADDRESS_TEMPORARY, BACK, CAR_COMMAND,
+    CHECK_MARK, CITY, CITY_COMMAND, CITY_INPUT, CURRENT_FEATURE,
+    EDIT_PROFILE_GREETING, END, FEATURES, FEATURES_DESCRIPTION, IS_EXISTS,
+    PHONE_COMMAND, PHONE_INPUT, RADIUS_COMMAND, REGISTER_GREETING, SAVE,
     SECOND_LEVEL_TEXT,
-    SELECTING_OVER,
-    SPECIFY_ACTIVITY_RADIUS,
-    SPECIFY_CAR_AVAILABILITY,
-    SPECIFY_CITY,
-    SPECIFY_PHONE_PERMISSION,
-    START_OVER,
-    TELEGRAM_ID,
-    TELEGRAM_USERNAME,
-    TYPING_CITY,
-    VALIDATE,
-    VOLUNTEER,
+    SECOND_LEVEL_UPDATE_TEXT, SELECTING_OVER, SPECIFY_ACTIVITY_RADIUS,
+    SPECIFY_CAR_AVAILABILITY, SPECIFY_CITY,
+    SPECIFY_PHONE_PERMISSION, START_OVER, TELEGRAM_ID, TELEGRAM_USERNAME,
+    TYPING_CITY, VALIDATE,
 )
 from src.bot.service.dadata import get_fields_from_dadata
+from src.bot.service.get_issues_with_statuses import add_new_volunteer_to_issue
 from src.bot.service.phone_number import format_numbers, phone_number_validate
-from src.bot.service.save_new_user import check_user_in_db, create_new_user
+from src.bot.service.save_new_user import create_new_user
 from src.bot.service.save_tracker_id import save_tracker_id
-from src.bot.service.volunteer import check_volunteer_in_db, create_volunteer, update_volunteer
+from src.bot.service.volunteer import (
+    check_and_update_volunteer, create_volunteer, get_tracker,
+    volunteer_data_preparation,
+)
 from src.core.db.db import get_async_session
 from src.core.db.repository.volunteer_repository import crud_volunteer
+from src.core.db.repository.user_repository import crud_user
+
+
+def get_buttons_params(is_volunteer_exists: bool) -> tuple[str, str, str, str]:
+    """Формирует параметры кнопок регистрации/редактирования волонтера"""
+    if is_volunteer_exists:
+        action = "Редактировать"
+        save_action = "Сохранить"
+        text = EDIT_PROFILE_GREETING + FEATURES_DESCRIPTION
+        second_level_text = SECOND_LEVEL_UPDATE_TEXT
+    else:
+        action = "Указать"
+        save_action = "Отправить заявку"
+        text = REGISTER_GREETING + FEATURES_DESCRIPTION
+        second_level_text = SECOND_LEVEL_TEXT
+    return action, save_action, text, second_level_text
 
 
 async def add_volunteer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     """Меню регистрации волонтёра."""
 
+    if context.user_data.get(IS_EXISTS) is None:
+        session_generator = get_async_session()
+        session = await session_generator.asend(None)
+        context.user_data[IS_EXISTS] = await crud_volunteer.get_exist_by_attribute(
+            TELEGRAM_ID, update.effective_chat.id, session)
+        context.chat_data['current_session'] = session
+    action, save_action, text, second_level_text = get_buttons_params(context.user_data[IS_EXISTS])
+
     def check_feature(feature):
         return FEATURES in context.user_data and feature in context.user_data[FEATURES]
-
-    text = (
-        "Для регистрации волонтером вам надо указать:\n"
-        "- Свой адрес, можно без квартиры, для удобства расчетов расстояния;\n"
-        "- Расстояние, на которое ты готов выезжать;\n"
-        "- Наличие автомобиля, и готовность задействовать его;\n"
-        "- [Опционально] Номер телефона для связи."
-    )
 
     buttons = [
         [
             InlineKeyboardButton(
-                text=f"Указать свой адрес {CHECK_MARK*check_feature(CITY)}", callback_data=SPECIFY_CITY
+                text=f"{action} свой адрес {CHECK_MARK*check_feature(CITY)}", callback_data=SPECIFY_CITY
             ),
         ],
         [
             InlineKeyboardButton(
-                text=f"Указать радиус активности {CHECK_MARK*check_feature(SPECIFY_ACTIVITY_RADIUS)}",
+                text=f"{action} радиус активности {CHECK_MARK*check_feature(SPECIFY_ACTIVITY_RADIUS)}",
                 callback_data=SPECIFY_ACTIVITY_RADIUS,
             ),
         ],
         [
             InlineKeyboardButton(
-                text=f"Указать наличие автомобиля {CHECK_MARK*check_feature(SPECIFY_CAR_AVAILABILITY)}",
+                text=f"{action} наличие автомобиля {CHECK_MARK*check_feature(SPECIFY_CAR_AVAILABILITY)}",
                 callback_data=SPECIFY_CAR_AVAILABILITY,
             ),
         ],
         [
             InlineKeyboardButton(
-                text=f"Указать номер телефона {CHECK_MARK*check_feature(SPECIFY_PHONE_PERMISSION)}",
+                text=f"{action} номер телефона {CHECK_MARK*check_feature(SPECIFY_PHONE_PERMISSION)}",
                 callback_data=SPECIFY_PHONE_PERMISSION,
             ),
         ],
@@ -90,6 +85,7 @@ async def add_volunteer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> s
             InlineKeyboardButton(text="Назад", callback_data=str(END)),
         ],
     ]
+
     keyboard = InlineKeyboardMarkup(buttons)
 
     if not context.user_data.get(START_OVER):
@@ -97,15 +93,19 @@ async def add_volunteer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> s
 
         await update.callback_query.answer()
         await update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
+    elif FEATURES not in context.user_data:
+        # context.user_data[START_OVER] = False
+        return await start(update, context)
+
     else:
-        if check_data(context.user_data[FEATURES]) is True:
-            buttons.append([InlineKeyboardButton(text="Отправить заявку", callback_data=SAVE)])
+        if check_data(context.user_data[FEATURES]) or context.user_data[IS_EXISTS]:
+            buttons.append([InlineKeyboardButton(text=f"{save_action}", callback_data=SAVE)])
             keyboard = InlineKeyboardMarkup(buttons)
         if update.message is not None:
-            await update.message.reply_text(text=SECOND_LEVEL_TEXT, reply_markup=keyboard, parse_mode=ParseMode.HTML)
+            await update.message.reply_text(text=second_level_text, reply_markup=keyboard, parse_mode=ParseMode.HTML)
         else:
             await update.callback_query.edit_message_text(
-                text=SECOND_LEVEL_TEXT, reply_markup=keyboard, parse_mode=ParseMode.HTML
+                text=second_level_text, reply_markup=keyboard, parse_mode=ParseMode.HTML
             )
 
     context.user_data[START_OVER] = False
@@ -295,81 +295,36 @@ async def save_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
 
 
 async def save_and_exit_volunteer(
-    user_id: int,
+    telegram_id: int,
     username: str,
     first_name: str,
     last_name: str,
-    user_data,
+    volunteer_data,
+    volunteer_is_exists: bool,
 ) -> None:
     """Сохранение данных в базу и отправка в трекер"""
-    radius = user_data[SPECIFY_ACTIVITY_RADIUS][7:]
-    car = user_data[SPECIFY_CAR_AVAILABILITY][4:]
-    if SPECIFY_PHONE_PERMISSION in user_data:
-        phone = user_data[SPECIFY_PHONE_PERMISSION][6:]
-    else:
-        phone = None
-    user_data[GEOM] = f"POINT({user_data[LONGITUDE]} {user_data[LATITUDE]})"
-    user_data[SPECIFY_ACTIVITY_RADIUS] = int(radius) * 1000
-    user_data[SPECIFY_CAR_AVAILABILITY] = car
-    user_data[TELEGRAM_ID] = user_id
-    user_data[TELEGRAM_USERNAME] = username
-    user_data[FIRST_NAME] = first_name
-    user_data[LAST_NAME] = last_name
-    user_data[SPECIFY_PHONE_PERMISSION] = phone
-    if SPECIFY_CITY in user_data:
-        del user_data[SPECIFY_CITY]
-    if user_data[SPECIFY_CAR_AVAILABILITY] == "Да":
-        user_data[SPECIFY_CAR_AVAILABILITY] = True
-    elif user_data[SPECIFY_CAR_AVAILABILITY] == "Нет":
-        user_data[SPECIFY_CAR_AVAILABILITY] = False
-    user = {}
-    user[TELEGRAM_ID] = user_data[TELEGRAM_ID]
-    user[TELEGRAM_USERNAME] = user_data[TELEGRAM_USERNAME]
     session_generator = get_async_session()
     session = await session_generator.asend(None)
-    old_user = await check_user_in_db(user_data[TELEGRAM_ID], session)
-    if not old_user:
-        await create_new_user(user, session)
+
+    old_user = await crud_user.get_user_by_telegram_id(telegram_id, session)
     if old_user and old_user.is_banned:
         return
-    old_volunteer = await check_volunteer_in_db(user_data[TELEGRAM_ID], session)
-    old_ticket_id = None
-    if old_volunteer:
-        if (
-            old_volunteer.full_address == user_data["full_address"]
-            and old_volunteer.telegram_username == user_data[TELEGRAM_USERNAME]
-            and old_volunteer.has_car == user_data[SPECIFY_CAR_AVAILABILITY]
-            and old_volunteer.radius == int(radius) * 1000
-            and old_volunteer.phone == phone
-        ):
+    if old_user is None:
+        await create_new_user({TELEGRAM_ID: telegram_id, TELEGRAM_USERNAME: username}, session)
+
+    volunteer_data = volunteer_data_preparation(telegram_id, username, first_name, last_name, volunteer_data)
+
+    if volunteer_is_exists:
+        volunteer, old_ticket_id = await check_and_update_volunteer(volunteer_data, session)
+        if volunteer is None:
             return
-        else:
-            old_ticket_id = old_volunteer.ticketID
-            await update_volunteer(old_volunteer, user_data, session)
     else:
-        await create_volunteer(user_data, session)
-    user_name = user_data[TELEGRAM_USERNAME]
-    if user_name is None:
-        user_name = "Никнейм скрыт"
-    summary = f"{user_name} - {user_data['full_address']}"
-    description = f"""
-    Ник в телеграмме: {user_name}
-    Адрес: {user_data['full_address']}
-    Наличие машины: {car}
-    Радиус выезда: {radius} км
-    """
-    if phone is None:
-        description += "Номер телефона: Не указан\n"
-    else:
-        description += f"Номер телефона: {phone}\n"
-    if old_ticket_id:
-        description += f"Старый тикет: {old_ticket_id}"
-    tracker = client.issues.create(
-        queue=VOLUNTEER,
-        summary=summary,
-        description=description,
-    )
-    await save_tracker_id(crud_volunteer, tracker.key, user_data[TELEGRAM_ID], session)
+        volunteer = await create_volunteer(volunteer_data, session)
+        old_ticket_id = None
+
+    tracker = get_tracker(volunteer, old_ticket_id)
+    await save_tracker_id(crud_volunteer, tracker.key, volunteer.telegram_id, session)
+    await add_new_volunteer_to_issue(volunteer, session)
 
 
 async def back_to_add_volunteer(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -380,8 +335,5 @@ async def back_to_add_volunteer(update: Update, context: ContextTypes.DEFAULT_TY
     return await add_volunteer(update, context)
 
 
-def check_data(user_data):
-    if (CITY in user_data and SPECIFY_ACTIVITY_RADIUS in user_data) and SPECIFY_CAR_AVAILABILITY in user_data:
-        return True
-    else:
-        return False
+def check_data(user_data) -> bool:
+    return all((feature in user_data for feature in (CITY, SPECIFY_ACTIVITY_RADIUS, SPECIFY_CAR_AVAILABILITY)))

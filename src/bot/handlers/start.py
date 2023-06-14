@@ -2,13 +2,8 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
 
 from bot.handlers.state_constants import (
-    ADDING_ECO_TASK,
-    ADDING_SOCIAL_TASK,
-    ADDING_VOLUNTEER,
-    GREETING_MESSAGE,
-    SELECTING_ACTION,
-    START_OVER,
-    TOP_LEVEL_MENU_TEXT,
+    ADDING_ECO_TASK, ADDING_SOCIAL_TASK, ADDING_VOLUNTEER, GREETING_MESSAGE,
+    SELECTING_ACTION, START_OVER, TOP_LEVEL_MENU_TEXT,
 )
 
 
@@ -27,7 +22,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
             InlineKeyboardButton(text="Сообщить о социальной проблеме", callback_data=ADDING_SOCIAL_TASK),
         ],
         [
-            InlineKeyboardButton(text="Стать волонтером", callback_data=ADDING_VOLUNTEER),
+            InlineKeyboardButton(text="Стать волонтёром / Профиль", callback_data=ADDING_VOLUNTEER),
         ],
         [
             InlineKeyboardButton(
