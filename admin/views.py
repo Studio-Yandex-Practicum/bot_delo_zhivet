@@ -8,7 +8,6 @@ from flask_admin.contrib import sqla
 from flask_mail import Mail, Message
 from flask_security import current_user
 from structlog import get_logger
-from structlog.contextvars import bind_contextvars, clear_contextvars
 from werkzeug.security import generate_password_hash
 
 from src.core.db.model import Assistance_disabled, Pollution, Staff, User, Volunteer
@@ -56,12 +55,9 @@ def send_async_email(app, msg):
     with app.app_context():
         try:
             mail.send(msg)
-            bind_contextvars(subject=msg.subject, recipients=msg.recipients)
-            logger.info(MAIL_SEND_SUCCESS)
+            logger.info(MAIL_SEND_SUCCESS, subject=msg.subject, recipients=msg.recipients)
         except Exception as e:
-            clear_contextvars()
-            bind_contextvars(subject=msg.subject, recipients=msg.recipients, details=str(e))
-            logger.error(MAIL_SEND_ERROR)
+            logger.error(MAIL_SEND_ERROR, subject=msg.subject, recipients=msg.recipients, details=str(e))
 
 
 def send_email(subject, sender, recipients, text_body, html_body):

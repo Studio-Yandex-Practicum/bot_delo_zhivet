@@ -4,7 +4,6 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine, exc, inspect
 from sqlalchemy.orm import scoped_session, sessionmaker
 from structlog import get_logger
-from structlog.contextvars import bind_contextvars, clear_contextvars
 
 from admin.config import Config
 from src.core.db.db import Base
@@ -32,15 +31,11 @@ def get_not_existing_required_tables(tables):
             if not inspect(engine).has_table(table):
                 not_existing_tables.append(table)
     except exc.OperationalError as error:
-        bind_contextvars(db_info=db_info, details=str(error))
-        logger.critical(DBAPI_LOGGER)
-        clear_contextvars()
+        logger.critical(DBAPI_LOGGER, db_info=db_info, details=str(error))
         logger.info(STOP_LOGGING)
         raise ConnectionError(DBAPI_ERROR.format(db_info=db_info, details=str(error)))
     except Exception as error:
-        bind_contextvars(db_info=db_info, details=str(error))
-        logger.critical(DB_COMMON_LOGGER)
-        clear_contextvars()
+        logger.critical(DB_COMMON_LOGGER, db_info=db_info, details=str(error))
         logger.info(STOP_LOGGING)
         raise EnvironmentError(DB_COMMON_ERROR.format(db_info=db_info, details=str(error)))
     return not_existing_tables

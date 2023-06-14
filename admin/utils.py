@@ -3,7 +3,6 @@ from time import time
 import jwt
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 from structlog import get_logger
-from structlog.contextvars import bind_contextvars
 
 from src.core.db.model import Staff
 
@@ -60,7 +59,6 @@ def verify_reset_password_token(token):
             "reset_password"
         ]
     except Exception as e:
-        bind_contextvars(token=token, details=str(e))
-        logger.warning(TOKEN_VALIDATION_ERROR)
+        logger.warning(TOKEN_VALIDATION_ERROR, token=token, details=str(e))
         return
     return Staff.query.filter_by(login=login).first()

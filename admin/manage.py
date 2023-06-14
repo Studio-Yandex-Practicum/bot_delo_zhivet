@@ -5,7 +5,6 @@ import sys
 
 import flask_admin
 from structlog import get_logger
-from structlog.contextvars import bind_contextvars, clear_contextvars
 
 from admin.config import Config
 from admin.messages import (
@@ -37,8 +36,7 @@ def flush_folder(folder):
             os.rmdir(os.path.join(folder, items))
         else:
             os.remove(os.path.join(folder, items))
-            bind_contextvars(folder=folder)
-            logger.debug("Item removed")
+            logger.debug("Item removed", folder=folder)
 
 
 def recursive_copy_not_existing_items(src, dst):
@@ -57,8 +55,7 @@ def recursive_copy_not_existing_items(src, dst):
             dst_file = os.path.join(dst, item)
             if not os.path.exists(dst_file):
                 shutil.copy(src_file, dst_file)
-                bind_contextvars(src_file=src_file, dst_file=dst_file)
-                logger.debug("Copied files")
+                logger.debug("Copied files", src_file=src_file, dst_file=dst_file)
 
 
 class Manage(object):
@@ -79,8 +76,7 @@ class Manage(object):
         args = parser.parse_args(sys.argv[1:2])
         if not hasattr(self, args.command):
             print(UNKNOWN_COMMAND.format(command=args.command))
-            bind_contextvars(command=args.command)
-            logger.warning(UNKNOWN_COMMAND)
+            logger.warning(UNKNOWN_COMMAND, command=args.command)
             parser.print_help()
             exit(1)
         getattr(self, args.command)()
@@ -130,26 +126,21 @@ class Manage(object):
         try:
             if os.path.exists(dst) and overwrite:
                 print(COLLECT_STATIC_CLEAR_DIR_INFO.format(dst=dst))
-                logger.info(COLLECT_STATIC_CLEAR_DIR_INFO.format(dst=dst))
+                logger.info(COLLECT_STATIC_CLEAR_DIR_INFO, dst=dst)
                 flush_folder(dst)
             elif not os.path.exists(dst):
                 os.mkdir(dst)
             else:
                 print(COLLECT_STATIC_DIR_ALREADY_EXIST.format(dst=dst, overwrite=overwrite))
-                bind_contextvars(dst=dst, overwrite=overwrite)
-                logger.info(COLLECT_STATIC_DIR_ALREADY_EXIST)
+                logger.info(COLLECT_STATIC_DIR_ALREADY_EXIST, dst=dst, overwrite=overwrite)
                 return True
             print(COLLECT_STATIC_INFO.format(dst=dst))
-            clear_contextvars()
-            bind_contextvars(dst=dst)
-            logger.info(COLLECT_STATIC_INFO)
+            logger.info(COLLECT_STATIC_INFO, dst=dst)
             recursive_copy_not_existing_items(src, dst)
             return True
         except Exception as error:
             print(COLLECT_STATIC_ERROR.format(details=str(error)))
-            clear_contextvars()
-            bind_contextvars(details=str(error))
-            logger.error(COLLECT_STATIC_ERROR)
+            logger.error(COLLECT_STATIC_ERROR, details=str(error))
             return False
 
     def collecttemplates(self):
@@ -217,8 +208,7 @@ class Manage(object):
             return True
         except Exception as error:
             print(COLLECT_TEMPLATES_ERROR.format(details=str(error)))
-            bind_contextvars(details=str(error))
-            logger.warning(COLLECT_TEMPLATES_ERROR)
+            logger.warning(COLLECT_TEMPLATES_ERROR, details=str(error))
             return False
 
 
@@ -228,6 +218,5 @@ if __name__ == "__main__":
         logger.info(STOP_LOGGING)
         sys.exit(0)
     except Exception as error:
-        bind_contextvars(details=str(error))
-        logger.error(COMMON_ERROR)
+        logger.error(COMMON_ERROR, details=str(error))
         sys.exit(1)
