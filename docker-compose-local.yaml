@@ -59,7 +59,7 @@ services:
       bot:
         condition: service_started
     env_file:
-      - ./infrastructure/.env.aws
+      - ./infrastructure/.env.s3
       - ./infrastructure/.env.dadata
       - ./infrastructure/.env.flask
       - ./infrastructure/.env.geocoder

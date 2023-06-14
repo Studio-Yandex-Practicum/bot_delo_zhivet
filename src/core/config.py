@@ -46,14 +46,14 @@ class DevSettings(Settings):
         env_file = (
             "./infrastructure/.env.db",
             "./infrastructure/.env.telegram",
-            "./infrastructure/.env.aws",
+            "./infrastructure/.env.s3",
             "./infrastructure/.env.sentry",
         )
 
 
 class LocalSettings(Settings):
     class Config:
-        env_file = ("./infrastructure/.env.db.local", "./infrastructure/.env.aws")
+        env_file = ("./infrastructure/.env.db.local", "./infrastructure/.env.s3")
 
 
 def get_settings():
