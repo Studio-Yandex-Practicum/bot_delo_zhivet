@@ -86,6 +86,19 @@ class CRUDBase:
         logger.info("Retrieved record from database with", attr_name=attr_name, attr_value=attr_value, db=db_obj)
         return db_obj
 
+    async def get_exist_by_attribute(
+        self,
+        attr_name: str,
+        attr_value: str,
+        session: AsyncSession,
+    ) -> bool:
+        """get is record exists by attribute value from DB."""
+        attr = getattr(self.model, attr_name)
+        is_exists = await session.scalars(select(True).where(select(self.model).where(attr == attr_value).exists()))
+        is_exists = is_exists.first()
+        logger.info("Retrieved record exist from database with " f"{attr_name} = {attr_value}: {is_exists}.")
+        return False if is_exists is None else True
+
     async def get_id_by_telegram_id(self, telegram_id: int, session: AsyncSession):
         db_id = await session.execute(select(self.model.id).where(self.model.telegram_id == telegram_id))
         id = db_id.scalars().all()[-1]

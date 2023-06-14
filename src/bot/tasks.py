@@ -7,7 +7,7 @@ from telegram.ext import ContextTypes
 from src.bot.handlers.common import end_describing
 from src.bot.handlers.pollution import save_and_exit_pollution
 from src.bot.handlers.social import save_and_exit_from_social_problem
-from src.bot.handlers.state_constants import FEATURES, START_OVER
+from src.bot.handlers.state_constants import FEATURES, IS_EXISTS, START_OVER
 from src.bot.handlers.volunteer import save_and_exit_volunteer
 from src.core.config import settings
 
@@ -72,7 +72,8 @@ def save_volunteer_task(
     username: str,
     first_name: str,
     last_name: str,
-    user_data,
+    user_data: dict,
+    volunteer_is_exists: bool,
 ) -> None:
     run(
         save_and_exit_volunteer(
@@ -81,6 +82,7 @@ def save_volunteer_task(
             first_name,
             last_name,
             user_data,
+            volunteer_is_exists,
         )
     )
 
@@ -96,5 +98,7 @@ async def save_volunteer(
         update.effective_user.first_name,
         update.effective_user.last_name,
         context.user_data[FEATURES],
+        context.user_data[IS_EXISTS],
     )
+    context.user_data[IS_EXISTS] = True
     return await end_describing(update, context)

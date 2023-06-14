@@ -56,6 +56,7 @@ LATITUDE = "latitude"
 GEOM = "geometry"
 FILE_PATH = "file_path"
 START_OVER = "start_over"
+IS_EXISTS = "is_exists"
 FEATURES = "features"
 CURRENT_FEATURE = "current_feature"
 CURRENT_LEVEL = "current_level"
@@ -95,12 +96,25 @@ GREETING_MESSAGE = (
     " Выбери, что хочешь сделать:"
 )
 
+FEATURES_DESCRIPTION = (
+    "- Свой адрес, можно без квартиры, для удобства расчетов расстояния;\n"
+    "- Расстояние, на которое ты готов выезжать;\n"
+    "- Наличие автомобиля, и готовность задействовать его;\n"
+    "- [Опционально] Номер телефона для связи."
+)
+
+REGISTER_GREETING = "Для регистрации волонтером вам надо указать:\n"
+EDIT_PROFILE_GREETING = "Выберите данные для изменения:\n"
+
 TOP_LEVEL_MENU_TEXT = "Можно выбрать новое действие или закончить разговор, набрав команду /stop"
 
-SECOND_LEVEL_TEXT = (
+SECOND_LEVEL_TEXT_BASE = (
     "Понял-принял! Укажите информацию для остальных пунктов или нажмите на кнопку "
-    "<b>Отправить заявку</b> (она появится, когда всё будет заполнено):"
+    "<b>{}</b>{}:"
 )
+SECOND_LEVEL_TEXT = SECOND_LEVEL_TEXT_BASE.format("Отправить заявку", " (она появится, когда всё будет заполнено)")
+SECOND_LEVEL_UPDATE_TEXT = SECOND_LEVEL_TEXT_BASE.format("Сохранить", "")
+
 
 CHECK_MARK = "\U00002705"  # Эмодзи галочки
 
