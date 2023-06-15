@@ -85,6 +85,5 @@ def verify_reset_password_token(token):
 
 def check_tag_uniqueness(model, existing_tags):
     """Функция для проверки уникальности тега."""
-    for tag in existing_tags:
-        if distance(tag.name.lower(), model.name.lower()) < 5:
-            raise ValidationError("В базе уже существует похожий тег!")
+    if any(distance(tag.name.lower(), model.name.lower()) < 5 for tag in existing_tags):
+        raise ValidationError("В базе уже существует похожий тег!")
