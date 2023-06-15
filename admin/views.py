@@ -7,30 +7,35 @@ from flask_admin import AdminIndexView, expose, helpers
 from flask_admin.contrib import sqla
 from flask_mail import Mail, Message
 from flask_security import current_user
+from structlog import get_logger
 from werkzeug.security import generate_password_hash
 
-from src.core.db.model import (
-    Assistance_disabled, Pollution, Staff, Tag_Assistance, Tag_Pollution, User,
-    Volunteer,
-)
+from src.core.db.model import Assistance_disabled, Pollution, Staff, Tag_Assistance, Tag_Pollution, User, Volunteer
 
 from . import app
 from .config import Config
 from .database import db
 from .forms import ForgotForm, LoginForm, PasswordResetForm, RegistrationForm
-from .logger import get_logger
 from .messages import (
-    ALREADY_REGISTRED, BAD_TOKEN, MAIL_SEND_ERROR, MAIL_SEND_SUCCESS,
-    PASSWORD_CHANGED_SUCCESS, RESET_PASSWORD_SUBJECT, RESTORE_PASSWORD_SEND,
+    ALREADY_REGISTRED,
+    BAD_TOKEN,
+    MAIL_SEND_ERROR,
+    MAIL_SEND_SUCCESS,
+    PASSWORD_CHANGED_SUCCESS,
+    RESET_PASSWORD_SUBJECT,
+    RESTORE_PASSWORD_SEND,
     SUGGEST_REGISTRATION,
 )
 from .utils import (
-    get_readonly_dict, get_reset_password_token, get_sortable_fields_list,
-    get_table_fields_from_model, get_translated_lables,
+    get_readonly_dict,
+    get_reset_password_token,
+    get_sortable_fields_list,
+    get_table_fields_from_model,
+    get_translated_lables,
     verify_reset_password_token,
 )
 
-logger = get_logger(__file__)
+logger = get_logger("admin_logger")
 
 
 def init_login():
@@ -51,15 +56,9 @@ def send_async_email(app, msg):
     with app.app_context():
         try:
             mail.send(msg)
-            logger.info(MAIL_SEND_SUCCESS.format(subject=msg.subject, recipients=msg.recipients))
+            logger.info(MAIL_SEND_SUCCESS, subject=msg.subject, recipients=msg.recipients)
         except Exception as e:
-            logger.error(
-                MAIL_SEND_ERROR.format(
-                    subject=msg.subject,
-                    recipients=msg.recipients,
-                    details=str(e),
-                )
-            )
+            logger.error(MAIL_SEND_ERROR, subject=msg.subject, recipients=msg.recipients, details=str(e))
 
 
 def send_email(subject, sender, recipients, text_body, html_body):

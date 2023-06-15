@@ -184,4 +184,7 @@ cython_debug/
 .vscode/
 *.code-workspace
 
+# editorconfig
+.editorconfig
+
 bot_persistence_data

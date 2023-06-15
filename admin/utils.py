@@ -2,15 +2,15 @@ from time import time
 
 import jwt
 from sqlalchemy.orm.attributes import InstrumentedAttribute
+from structlog import get_logger
 
 from src.core.db.model import Staff
 
 from .config import Config
 from .locales import FIELD_TRANSLATION_RU
-from .logger import get_logger
 from .messages import TOKEN_VALIDATION_ERROR
 
-logger = get_logger(__file__, display=True)
+logger = get_logger("admin_logger")
 
 
 def get_readonly_dict(fields):
@@ -45,9 +45,7 @@ def get_table_fields_from_model(model):
     return fields
 
 
-def get_sortable_fields_list(
-    all_columns: list, name_relation: dict[str:str]
-) -> list:
+def get_sortable_fields_list(all_columns: list, name_relation: dict[str:str]) -> list:
     """
     Функция для создания списка сортируемых полей и замены field_name на (field_name, <relation name>.<column name>)
     для relationship
@@ -62,9 +60,7 @@ def get_sortable_fields_list(
     return fields
 
 
-def get_reset_password_token(
-    user, expires_in=int(Config.PASSWORD_RESET_TOKEN_TTL)
-):
+def get_reset_password_token(user, expires_in=int(Config.PASSWORD_RESET_TOKEN_TTL)):
     return jwt.encode(
         {"reset_password": user.login, "exp": time() + expires_in},
         Config.SECRET_KEY,
@@ -80,8 +76,6 @@ def verify_reset_password_token(token):
             algorithms=Config.PASSWORD_RESET_TOKEN_ALGORITHM,
         )["reset_password"]
     except Exception as e:
-        logger.warning(
-            TOKEN_VALIDATION_ERROR.format(token=token, details=str(e))
-        )
+        logger.warning(TOKEN_VALIDATION_ERROR, token=token, details=str(e))
         return
     return Staff.query.filter_by(login=login).first()

@@ -4,14 +4,28 @@ import sys
 import sentry_sdk
 from flask import Flask, current_app, redirect, render_template, url_for
 from sentry_sdk.integrations.flask import FlaskIntegration
+from structlog import get_logger
 
-from .config import Config
-from .database import create_roles_and_superuser, db, get_not_existing_required_tables
-from .logger import get_logger
-from .messages import DB_NOT_READY_FOR_INIT_APP_ERROR, MISSING_REQUIRED_TABLES_ERROR, START_LOGGING, STOP_LOGGING
+import admin.logger
+import admin.manage  # noqa
+import admin.utils  # noqa
+from admin.config import Config
+from admin.database import create_roles_and_superuser, db, get_not_existing_required_tables
+from admin.messages import (
+    DB_NOT_READY_FOR_INIT_APP_ERROR,
+    DB_NOT_READY_FOR_INIT_APP_LOGGER,
+    MISSING_REQUIRED_TABLES_ERROR,
+    MISSING_REQUIRED_TABLES_LOGGER,
+    START_LOGGING,
+    STOP_LOGGING,
+)
 
-logger = get_logger(__file__)
+import admin.database  # isort: skip # noqa
+
+
+logger = get_logger("admin_logger")
 logger.info(START_LOGGING)
+
 REQUIRED_TABLES = (
     "staff",
     "role",
@@ -19,11 +33,12 @@ REQUIRED_TABLES = (
 try:
     not_existing_tables = get_not_existing_required_tables(REQUIRED_TABLES)
 except Exception as error:
-    logger.critical(DB_NOT_READY_FOR_INIT_APP_ERROR.format(app_name=__name__, details=str(error)))
+    logger.critical(DB_NOT_READY_FOR_INIT_APP_LOGGER, app_name=__name__, details=str(error))
     logger.info(STOP_LOGGING)
     sys.exit(DB_NOT_READY_FOR_INIT_APP_ERROR.format(app_name=__name__, details=str(error)))
+
 if not_existing_tables:
-    logger.critical(MISSING_REQUIRED_TABLES_ERROR.format(app_name=__name__, not_existing_tables=not_existing_tables))
+    logger.critical(MISSING_REQUIRED_TABLES_LOGGER, app_name=__name__, not_existing_tables=not_existing_tables)
     logger.info(STOP_LOGGING)
     sys.exit(MISSING_REQUIRED_TABLES_ERROR.format(app_name=__name__, not_existing_tables=not_existing_tables))
 
