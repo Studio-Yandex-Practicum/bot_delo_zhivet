@@ -4,15 +4,15 @@ import jwt
 from Levenshtein import distance
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 from wtforms.validators import ValidationError
+from structlog import get_logger
 
 from src.core.db.model import Staff
 
 from .config import Config
 from .locales import FIELD_TRANSLATION_RU
-from .logger import get_logger
 from .messages import TOKEN_VALIDATION_ERROR
 
-logger = get_logger(__file__, display=True)
+logger = get_logger("admin_logger")
 
 
 def get_readonly_dict(fields):
@@ -78,7 +78,7 @@ def verify_reset_password_token(token):
             algorithms=Config.PASSWORD_RESET_TOKEN_ALGORITHM,
         )["reset_password"]
     except Exception as e:
-        logger.warning(TOKEN_VALIDATION_ERROR.format(token=token, details=str(e)))
+        logger.warning(TOKEN_VALIDATION_ERROR, token=token, details=str(e))
         return
     return Staff.query.filter_by(login=login).first()
 
