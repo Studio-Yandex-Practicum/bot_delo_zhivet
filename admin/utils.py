@@ -1,7 +1,9 @@
 from time import time
 
 import jwt
+from Levenshtein import distance
 from sqlalchemy.orm.attributes import InstrumentedAttribute
+from wtforms.validators import ValidationError
 from structlog import get_logger
 
 from src.core.db.model import Staff
@@ -79,3 +81,9 @@ def verify_reset_password_token(token):
         logger.warning(TOKEN_VALIDATION_ERROR, token=token, details=str(e))
         return
     return Staff.query.filter_by(login=login).first()
+
+
+def check_tag_uniqueness(model, existing_tags):
+    """Функция для проверки уникальности тега."""
+    if any(distance(tag.name.lower(), model.name.lower()) < 5 for tag in existing_tags):
+        raise ValidationError("В базе уже существует похожий тег!")

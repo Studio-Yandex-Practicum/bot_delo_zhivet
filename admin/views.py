@@ -27,6 +27,7 @@ from .messages import (
     SUGGEST_REGISTRATION,
 )
 from .utils import (
+    check_tag_uniqueness,
     get_readonly_dict,
     get_reset_password_token,
     get_sortable_fields_list,
@@ -266,6 +267,12 @@ class TagPollutionModelView(BaseModelView):
     can_create = True
     can_delete = True
 
+    def on_model_change(self, form, model, is_created):
+        if is_created:
+            existing_tags = Tag_Pollution.query.all()
+            check_tag_uniqueness(model, existing_tags)
+        super().on_model_change(form, model, is_created)
+
 
 class TagAssistanceModelView(BaseModelView):
     """Вью-класс тегов соц. помощи."""
@@ -276,6 +283,12 @@ class TagAssistanceModelView(BaseModelView):
     can_edit = True
     can_create = True
     can_delete = True
+
+    def on_model_change(self, form, model, is_created):
+        if is_created:
+            existing_tags = Tag_Assistance.query.all()
+            check_tag_uniqueness(model, existing_tags)
+        super().on_model_change(form, model, is_created)
 
 
 admin = flask_admin.Admin(
