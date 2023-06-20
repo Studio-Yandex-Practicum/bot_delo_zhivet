@@ -4,15 +4,24 @@ version: '3.8'
 services:
   db:
     image: postgis/postgis:14-3.3-alpine
+    platform: linux/amd64
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     env_file:
-      - ./.env
+      - ./infrastructure/.env.db
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:?err} -d ${POSTGRES_DB:?err}"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:?err} -d $${POSTGRES_DB:?err}"]
+      start_period: 30s
       timeout: 10s
       interval: 1s
       retries: 10
+    # ports:
+    #   - "5432:5432"
+
+  redis:
+    image: redis:alpine
+    volumes:
+      - redis_data:/data
 
   bot:
     image: delozhivet/delo_zhivet_bot_and_admin:${DOCKER_TAG}
