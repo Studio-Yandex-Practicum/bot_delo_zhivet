@@ -3,7 +3,7 @@ name: Deploy on dev server
 on:
   push:
     branches:
-      - develop
+      - test_server
 #      - feature/workflow_update
 
 env:
