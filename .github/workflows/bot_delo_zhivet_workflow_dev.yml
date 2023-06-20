@@ -115,7 +115,7 @@ jobs:
 
       - name: Copy files for deploy
         # if: github.ref == env.BRANCH
-        uses: appleboy/scp-action@master
+        uses: appleboy/scp-action@v0.1.3
         with:
           host: ${{ secrets.DEV_SERVER_HOST }}
           username: ${{ secrets.DEV_SERVER_USER }}
