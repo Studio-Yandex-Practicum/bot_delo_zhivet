@@ -96,8 +96,6 @@ async def check_and_update_volunteer(
     """Проверяет не забанен ли волонтер, есть ли данные для обновления"""
     volunteer = await crud_volunteer.get_volunteer_by_telegram_id(volunteer_data[TELEGRAM_ID], session)
     old_ticket_id = volunteer.ticketID
-    if volunteer.is_banned:
-        return None, old_ticket_id
     for attr in set(volunteer_data.keys()):
         if getattr(volunteer, attr) == volunteer_data[attr]:
             del volunteer_data[attr]
