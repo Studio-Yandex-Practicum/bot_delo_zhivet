@@ -113,30 +113,30 @@ jobs:
       - name: Checkout the repo
         uses: actions/checkout@v3
 
-      - name: Copy files for deploy
-        # if: github.ref == env.BRANCH
-        uses: appleboy/scp-action@v0.1.3
-        with:
-          host: ${{ secrets.DEV_SERVER_HOST }}
-          username: ${{ secrets.DEV_SERVER_USER }}
-          key: ${{ secrets.DEV_SERVER_SSH_KEY }}
-          passphrase: ${{ secrets.DEV_SERVER_PASSPHRASE }}
-          source: "infrastructure/*,!infrastructure/archive/*,!infrastructure/nginx/delo.conf"
-          target: ${{ env.PROJECT_FOLDER_PATH }}
-          overwrite: true
-          strip_components: 1
+      # - name: Copy files for deploy
+      #   # if: github.ref == env.BRANCH
+      #   uses: appleboy/scp-action@v0.1.3
+      #   with:
+      #     host: ${{ secrets.DEV_SERVER_HOST }}
+      #     username: ${{ secrets.DEV_SERVER_USER }}
+      #     key: ${{ secrets.DEV_SERVER_SSH_KEY }}
+      #     passphrase: ${{ secrets.DEV_SERVER_PASSPHRASE }}
+      #     source: "infrastructure/*,!infrastructure/archive/*,!infrastructure/nginx/delo.conf"
+      #     target: ${{ env.PROJECT_FOLDER_PATH }}
+      #     overwrite: true
+      #     strip_components: 1
 
-      - name: Copy file for nginx
-        # if: github.ref == env.BRANCH
-        uses: appleboy/scp-action@master
-        with:
-          host: ${{ secrets.DEV_SERVER_HOST }}
-          username: ${{ secrets.DEV_SERVER_USER }}
-          key: ${{ secrets.DEV_SERVER_SSH_KEY }}
-          passphrase: ${{ secrets.DEV_SERVER_PASSPHRASE }}
-          source: "infrastructure/nginx"
-          target: ${{ env.PROJECT_FOLDER_PATH }}
-          overwrite: true
+      # - name: Copy file for nginx
+      #   # if: github.ref == env.BRANCH
+      #   uses: appleboy/scp-action@master
+      #   with:
+      #     host: ${{ secrets.DEV_SERVER_HOST }}
+      #     username: ${{ secrets.DEV_SERVER_USER }}
+      #     key: ${{ secrets.DEV_SERVER_SSH_KEY }}
+      #     passphrase: ${{ secrets.DEV_SERVER_PASSPHRASE }}
+      #     source: "infrastructure/nginx"
+      #     target: ${{ env.PROJECT_FOLDER_PATH }}
+      #     overwrite: true
 
       - name: Executing remote ssh commands to deploy
         # if: github.ref == env.BRANCH
