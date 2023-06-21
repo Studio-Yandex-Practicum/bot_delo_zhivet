@@ -150,7 +150,7 @@ jobs:
             touch new_file.txt
             echo HI >> new_file.txt
             cd ${{ env.PROJECT_FOLDER_PATH }}
-            cd infrastructure
+            
             docker compose -f docker-compose.yaml stop
             docker compose -f docker-compose.yaml rm -fs web
             docker compose -f docker-compose.yaml rm -fs bot
@@ -159,6 +159,7 @@ jobs:
             docker image rm -f ${{ secrets.DEV_DOCKERHUB_USERNAME }}/delo_zhivet_nginx:${{ vars.DEV_DOCKER_TAG }}
             docker image pull -q ${{ secrets.DEV_DOCKERHUB_USERNAME }}/delo_zhivet_bot_and_admin:${{ vars.DEV_DOCKER_TAG }}
             docker image pull -q ${{ secrets.DEV_DOCKERHUB_USERNAME }}/delo_zhivet_nginx:${{ vars.DEV_DOCKER_TAG }}
+            cd infrastructure
             rm .env.db
             touch .env.db
             echo POSTGRES_DB=${{ secrets.DEV_POSTGRES_DB }} >> .env.db
