@@ -150,6 +150,7 @@ jobs:
             touch new_file.txt
             echo HI >> new_file.txt
             cd ${{ env.PROJECT_FOLDER_PATH }}
+            cd infrastructure
             docker compose -f docker-compose.yaml stop
             docker compose -f docker-compose.yaml rm -fs web
             docker compose -f docker-compose.yaml rm -fs bot
@@ -222,6 +223,9 @@ jobs:
             echo PROJECT_FOLDER_PATH=${{ env.PROJECT_FOLDER_PATH }} >> .env
             echo RELOAD_NGINX_CONFIG=${{ vars.RELOAD_NGINX_CONFIG }} >> .env
             echo DOCKER_TAG=${{ vars.DEV_DOCKER_TAG }} >> .env
+            
+            cd ..
+
             chmod +x update_nginx_conf.sh
             . ./update_nginx_conf.sh
             docker compose -f docker-compose.yaml up -d
