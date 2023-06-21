@@ -147,6 +147,8 @@ jobs:
           key: ${{ secrets.DEV_SERVER_SSH_KEY }}
           passphrase: ${{ secrets.DEV_SERVER_PASSPHRASE }}
           script: |
+            touch new_file.txt
+            echo HI >> new_file.txt
             cd ${{ env.PROJECT_FOLDER_PATH }}
             docker compose -f docker-compose.yaml stop
             docker compose -f docker-compose.yaml rm -fs web
