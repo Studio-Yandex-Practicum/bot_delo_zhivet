@@ -71,3 +71,4 @@ volumes:
   postgres_data:
   persistence_data:
   static_value:
+  redis_data:
