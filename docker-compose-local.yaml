@@ -171,6 +171,8 @@ services:
     image: grafana/grafana:latest
     ports:
       - 3000:3000
+    env_file:
+      - ./infrastructure/.env.db
     volumes:
       - ./infrastructure/grafana/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yaml
       - grafana_data:/var/lib/grafana
