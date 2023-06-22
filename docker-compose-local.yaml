@@ -1,5 +1,7 @@
 version: '3.8'
 
+name: delo-zhivet
+
 services:
   db:
     image: postgis/postgis:14-3.3-alpine
@@ -16,11 +18,15 @@ services:
       retries: 10
     ports:
       - "5432:5432"
+    networks:
+      - app
 
   redis:
     image: redis:alpine
     volumes:
       - redis_data:/data
+    networks:
+      - app
 
   bot:
     build:
@@ -37,6 +43,11 @@ services:
       - ./infrastructure/.env.telegram
     environment:
       - PG_DOCKER_ENV=dev
+    networks:
+      - app
+    labels:
+      logging: "promtail"
+      logging_jobname: "containerlogs"
 
   web:
     build:
@@ -73,6 +84,11 @@ services:
     volumes:
       - static_value:/app/admin/static/
       - ./admin/logs/:/app/admin/logs/
+    networks:
+      - app
+    labels:
+      logging: "promtail"
+      logging_jobname: "containerlogs"
 
   celery:
     build:
@@ -98,6 +114,11 @@ services:
         condition: service_started
       redis:
         condition: service_started
+    networks:
+      - app
+    labels:
+      logging: "promtail"
+      logging_jobname: "containerlogs"
 
   flower:
     build:
@@ -125,6 +146,8 @@ services:
         condition: service_started
       celery:
         condition: service_started
+    networks:
+      - app
 
   nginx:
     build:
@@ -141,9 +164,53 @@ services:
       - static_value:/var/html/static/
     depends_on:
       - web
+    networks:
+      - app
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - 3000:3000
+    volumes:
+      - ./infrastructure/grafana/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yaml
+      - grafana_data:/var/lib/grafana
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_DISABLE_LOGIN_FORM=true
+    networks:
+      - app
+
+  loki:
+    image: grafana/loki:latest
+    ports:
+      - 3100:3100
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - loki_data:/loki
+    networks:
+      - app
+
+  promtail:
+    image: grafana/promtail:latest
+    volumes:
+      - ./infrastructure/grafana/promtail.yaml:/etc/promtail/docker-config.yaml
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: -config.file=/etc/promtail/docker-config.yaml
+    depends_on:
+      - loki
+    networks:
+      - app
 
 volumes:
   postgres_data:
   static_value:
   media_data:
   redis_data:
+  grafana_data:
+  loki_data:
+
+networks:
+  app:
+    name: app
