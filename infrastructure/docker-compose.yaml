@@ -20,6 +20,8 @@ services:
 
   redis:
     image: redis:alpine
+    env_file:
+      - ./infrastructure/.env.redis
     volumes:
       - redis_data:/data
 

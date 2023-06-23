@@ -121,7 +121,7 @@ jobs:
           username: ${{ secrets.DEV_SERVER_USER }}
           key: ${{ secrets.DEV_SERVER_SSH_KEY }}
           passphrase: ${{ secrets.DEV_SERVER_PASSPHRASE }}
-          source: "infrastructure/*,!infrastructure/archive/*,!infrastructure/nginx/delo.conf"
+          source: "infrastructure/*,!infrastructure/archive/*,!infrastructure/nginx/delo.conf,!.env.*"
           target: ${{ env.PROJECT_FOLDER_PATH }}
           overwrite: true
           strip_components: 1
@@ -217,6 +217,10 @@ jobs:
             touch .env.dadata
             echo DADATA_TOKEN=${{ secrets.DEV_DADATA_TOKEN }} >> .env.dadata
             echo DADATA_SECRET=${{ secrets.DEV_DADATA_SECRET }} >> .env.dadata
+            rm .env.redis
+            touch .env.redis
+            echo REDIS_HOST=redis >> .env.redis
+            echo REDIS_PORT=6379 >> .env.redis
             rm .env
             touch .env
             echo HOST_NAME=${{ secrets.DEV_HOST_NAME }} >> .env
