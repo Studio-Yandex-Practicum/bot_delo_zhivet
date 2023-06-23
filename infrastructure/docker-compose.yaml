@@ -31,7 +31,7 @@ services:
       db:
         condition: service_healthy
     env_file:
-      - ./.env
+      - ./infrastructure/.env.telegram
     volumes:
       - persistence_data:/app/persistence_data/
       - media_data:/app/media/
@@ -54,15 +54,15 @@ services:
         condition: service_healthy
 
     env_file:
-      - ./infrastructure/.env.s3
-      - ./infrastructure/.env.dadata
-      - ./infrastructure/.env.flask
-      - ./infrastructure/.env.geocoder
-      - ./infrastructure/.env.mail
+      # - ./infrastructure/.env.s3
+      # - ./infrastructure/.env.dadata
+      # - ./infrastructure/.env.flask
+      # - ./infrastructure/.env.geocoder
+      # - ./infrastructure/.env.mail
       # - ./infrastructure/.env.nginx
-      - ./infrastructure/.env.redis
-      - ./infrastructure/.env.sentry
-      - ./infrastructure/.env.yatracker
+      # - ./infrastructure/.env.redis
+      # - ./infrastructure/.env.sentry
+      # - ./infrastructure/.env.yatracker
     volumes:
       - static_value:/app/admin/static/
       - ./flask_admin/logs/:/app/admin/logs/
@@ -102,8 +102,6 @@ services:
       ]
     ports:
       - "5555:5555"
-    environment:
-      - PG_DOCKER_ENV=dev
     depends_on:
       db:
         condition: service_healthy
