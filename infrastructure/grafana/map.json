@@ -29,7 +29,7 @@
       "title": "Панель адинистратора",
       "tooltip": "",
       "type": "link",
-      "url": "/admin/assistance_disabled/"
+      "url": "http://localhost/admin/"
     }
   ],
   "liveNow": false,
@@ -311,8 +311,8 @@
       {
         "current": {
           "selected": true,
-          "text": "pollution",
-          "value": "pollution"
+          "text": "assistance_disabled",
+          "value": "assistance_disabled"
         },
         "hide": 0,
         "includeAll": false,
@@ -321,7 +321,7 @@
         "name": "table",
         "options": [
           {
-            "selected": true,
+            "selected": false,
             "text": "pollution",
             "value": "pollution"
           },
@@ -331,7 +331,7 @@
             "value": "volunteer"
           },
           {
-            "selected": false,
+            "selected": true,
             "text": "assistance_disabled",
             "value": "assistance_disabled"
           }
@@ -351,6 +351,6 @@
   "timezone": "",
   "title": "Карта",
   "uid": "d2c81dee-4b61-4207-957c-4f310aabbb87",
-  "version": 4,
+  "version": 6,
   "weekStart": ""
 }
