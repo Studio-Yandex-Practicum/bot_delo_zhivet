@@ -195,8 +195,8 @@ jobs:
             echo TELEGRAM_BOT_TOKEN=${{ secrets.DEV_TELEGRAM_BOT_TOKEN }} >> .env.telegram
             echo HOST=${{ secrets.DEV_HOST }} >> .env.telegram
             echo WEBHOOK_PATH=${{ secrets.DEV_WEBHOOK_PATH }} >> .env.telegram
-            echo WEBHOOK_DOMAIN=${{ secrets.DEV_WEBHOOK_DOMAIN }} >> .env.telegram
-            echo WEBHOOK_PORT=${{ secrets.DEV_WEBHOOK_PORT }} >> .env.telegram
+            # echo WEBHOOK_DOMAIN=${{ secrets.DEV_WEBHOOK_DOMAIN }} >> .env.telegram
+            # echo WEBHOOK_PORT=${{ secrets.DEV_WEBHOOK_PORT }} >> .env.telegram
             rm .env.s3
             touch .env.s3
             echo AWS_ACCESS_KEY_ID=${{ secrets.DEV_AWS_ACCESS_KEY_ID }} >> .env.s3
