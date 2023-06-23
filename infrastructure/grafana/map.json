@@ -55,7 +55,7 @@
             {
               "targetBlank": true,
               "title": "",
-              "url": "https://tracker.yandex.ru/${__data.fields.ticketID}"
+              "url": "https://tracker.yandex.ru/${__data.fields[\"Тикет в TRACKER\"]}"
             }
           ],
           "mappings": [],
@@ -311,8 +311,8 @@
       {
         "current": {
           "selected": true,
-          "text": "assistance_disabled",
-          "value": "assistance_disabled"
+          "text": "pollution",
+          "value": "pollution"
         },
         "hide": 0,
         "includeAll": false,
@@ -321,7 +321,7 @@
         "name": "table",
         "options": [
           {
-            "selected": false,
+            "selected": true,
             "text": "pollution",
             "value": "pollution"
           },
@@ -331,7 +331,7 @@
             "value": "volunteer"
           },
           {
-            "selected": true,
+            "selected": false,
             "text": "assistance_disabled",
             "value": "assistance_disabled"
           }
@@ -351,6 +351,6 @@
   "timezone": "",
   "title": "Карта",
   "uid": "d2c81dee-4b61-4207-957c-4f310aabbb87",
-  "version": 2,
+  "version": 4,
   "weekStart": ""
 }
