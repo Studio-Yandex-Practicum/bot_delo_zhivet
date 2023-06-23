@@ -24,7 +24,7 @@ services:
       - redis_data:/data
 
   bot:
-    image: delozhivet/delo_zhivet_bot_and_admin:${DOCKER_TAG}
+    image: delozhivet/delo_zhivet_bot_and_admin:latest
     command: ["poetry", "run", "runbot"]
     restart: always
     depends_on:
@@ -34,10 +34,20 @@ services:
       - ./.env
     volumes:
       - persistence_data:/app/persistence_data/
+      - media_data:/app/media/
 
   web:
-    image: delozhivet/delo_zhivet_bot_and_admin:${DOCKER_TAG}
-    command: ["gunicorn", "--bind", "0.0.0.0:5000", "--access-logfile=-", "manage:app"]
+    image: delozhivet/delo_zhivet_bot_and_admin:latest
+    command:
+      [
+        "poetry",
+        "run",
+        "gunicorn",
+        "--bind",
+        "0.0.0.0:5000",
+        "--access-logfile=-",
+        "manage:app"
+      ]
     restart: always
     depends_on:
       db:
@@ -45,9 +55,67 @@ services:
       bot:
         condition: service_started
     env_file:
-      - ./.env
+      - ./infrastructure/.env.s3
+      - ./infrastructure/.env.dadata
+      - ./infrastructure/.env.flask
+      - ./infrastructure/.env.geocoder
+      - ./infrastructure/.env.mail
+      - ./infrastructure/.env.nginx
+      - ./infrastructure/.env.redis
+      - ./infrastructure/.env.sentry
+      - ./infrastructure/.env.yatracker
     volumes:
       - static_value:/app/admin/static/
+      - ./flask_admin/logs/:/app/admin/logs/
+
+  celery:
+    build:
+      image: delozhivet/delo_zhivet_bot_and_admin:latest
+    volumes:
+      - media_data:/app/media/
+    command:
+      [
+        "poetry",
+        "run",
+        "celery",
+        "-A",
+        "src.bot.tasks",
+        "worker"
+      ]
+    environment:
+      - PG_DOCKER_ENV=dev
+    depends_on:
+      db:
+        condition: service_healthy
+      bot:
+        condition: service_started
+      redis:
+        condition: service_started
+
+  flower:
+    image: delozhivet/delo_zhivet_bot_and_admin:latest
+    command:
+      [
+        "poetry",
+        "run",
+        "celery",
+        "-A",
+        "src.bot.tasks",
+        "flower"
+      ]
+    ports:
+      - "5555:5555"
+    environment:
+      - PG_DOCKER_ENV=dev
+    depends_on:
+      db:
+        condition: service_healthy
+      bot:
+        condition: service_started
+      redis:
+        condition: service_started
+      celery:
+        condition: service_started    
 
   nginx:
     image: delozhivet/delo_zhivet_nginx:latest
@@ -72,3 +140,4 @@ volumes:
   persistence_data:
   static_value:
   redis_data:
+  media_data:
