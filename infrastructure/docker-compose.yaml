@@ -59,7 +59,7 @@ services:
       - ./infrastructure/.env.flask
       - ./infrastructure/.env.geocoder
       - ./infrastructure/.env.mail
-      - ./infrastructure/.env.nginx
+      # - ./infrastructure/.env.nginx
       - ./infrastructure/.env.redis
       - ./infrastructure/.env.sentry
       - ./infrastructure/.env.yatracker
