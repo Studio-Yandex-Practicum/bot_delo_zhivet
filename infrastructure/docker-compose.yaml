@@ -52,8 +52,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
-      bot:
-        condition: service_started
+
     env_file:
       - ./infrastructure/.env.s3
       - ./infrastructure/.env.dadata
@@ -69,8 +68,7 @@ services:
       - ./flask_admin/logs/:/app/admin/logs/
 
   celery:
-    build:
-      image: delozhivet/delo_zhivet_bot_and_admin:latest
+    image: delozhivet/delo_zhivet_bot_and_admin:latest
     volumes:
       - media_data:/app/media/
     command:
@@ -82,8 +80,7 @@ services:
         "src.bot.tasks",
         "worker"
       ]
-    environment:
-      - PG_DOCKER_ENV=dev
+
     depends_on:
       db:
         condition: service_healthy
