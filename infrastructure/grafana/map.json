@@ -18,8 +18,20 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 1,
-  "links": [],
+  "links": [
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": false,
+      "keepTime": false,
+      "tags": [],
+      "targetBlank": true,
+      "title": "Панель адинистратора",
+      "tooltip": "",
+      "type": "link",
+      "url": "/admin/assistance_disabled/"
+    }
+  ],
   "liveNow": false,
   "panels": [
     {
@@ -39,6 +51,13 @@
             },
             "inspect": false
           },
+          "links": [
+            {
+              "targetBlank": true,
+              "title": "",
+              "url": "https://tracker.yandex.ru/${__data.fields.ticketID}"
+            }
+          ],
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
@@ -58,7 +77,7 @@
       },
       "gridPos": {
         "h": 22,
-        "w": 8,
+        "w": 4,
         "x": 0,
         "y": 0
       },
@@ -91,7 +110,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT telegram_id, \"ticketID\" FROM $table LIMIT 50 ",
+          "rawSql": "SELECT \"ticketID\" as \"Тикет в TRACKER\" FROM $table LIMIT 50 ",
           "refId": "A",
           "sql": {
             "columns": [
@@ -151,12 +170,17 @@
       },
       "gridPos": {
         "h": 22,
-        "w": 16,
-        "x": 8,
+        "w": 20,
+        "x": 4,
         "y": 0
       },
       "id": 1,
       "options": {
+        "basemap": {
+          "config": {},
+          "name": "Layer 0",
+          "type": "default"
+        },
         "controls": {
           "mouseWheelZoom": true,
           "showAttribution": true,
@@ -168,7 +192,7 @@
         "layers": [
           {
             "config": {
-              "showLegend": true,
+              "showLegend": false,
               "style": {
                 "color": {
                   "fixed": "dark-green"
@@ -186,23 +210,32 @@
                   "min": 2
                 },
                 "symbol": {
-                  "fixed": "img/icons/marker/circle.svg",
+                  "fixed": "img/icons/marker/x-mark.svg",
                   "mode": "fixed"
                 },
+                "text": {
+                  "field": "ticketID",
+                  "fixed": "",
+                  "mode": "field"
+                },
                 "textConfig": {
-                  "fontSize": 12,
+                  "fontSize": 10,
                   "offsetX": 0,
-                  "offsetY": 0,
+                  "offsetY": 10,
                   "textAlign": "center",
-                  "textBaseline": "middle"
+                  "textBaseline": "top"
                 }
               }
+            },
+            "filterData": {
+              "id": "byRefId",
+              "options": "B"
             },
             "location": {
               "mode": "auto"
             },
             "name": "Layer 1",
-            "tooltip": true,
+            "tooltip": false,
             "type": "markers"
           }
         ],
@@ -228,7 +261,7 @@
           "format": "table",
           "hide": false,
           "rawQuery": true,
-          "rawSql": "SELECT latitude, longitude FROM $table LIMIT 50 ",
+          "rawSql": "SELECT latitude, longitude, \"ticketID\" FROM $table LIMIT 50 ",
           "refId": "B",
           "sql": {
             "columns": [
@@ -318,6 +351,6 @@
   "timezone": "",
   "title": "Карта",
   "uid": "d2c81dee-4b61-4207-957c-4f310aabbb87",
-  "version": 6,
+  "version": 2,
   "weekStart": ""
 }
