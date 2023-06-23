@@ -171,11 +171,11 @@ jobs:
             touch .env.flask
             echo FLASK_APP=${{ secrets.DEV_FLASK_APP }} >> .env.flask
             echo FLASK_DEBUG=${{ secrets.DEV_FLASK_DEBUG }} >> .env.flask
+            echo FLASK_ENV=${{ secrets.DEV_FLASK_ENV }} >> .env.flask
             echo SUPER_USER_LOGIN=${{ secrets.DEV_SUPER_USER_LOGIN }} >> .env.flask
             echo SUPER_USER_EMAIL=${{ secrets.DEV_SUPER_USER_EMAIL }} >> .env.flask
             echo SUPER_USER_PASSWORD=${{ secrets.DEV_SUPER_USER_PASSWORD }} >> .env.flask
             echo ADMIN_SECRET_KEY=${{ secrets.DEV_ADMIN_SECRET_KEY }} >> .env.flask
-            echo FLASK_ENV=development >> .env.flask
             rm .env.mail
             touch .env.mail
             echo PASSWORD_RESET_TOKEN_TTL=${{ secrets.DEV_PASSWORD_RESET_TOKEN_TTL }} >> .env.mail
