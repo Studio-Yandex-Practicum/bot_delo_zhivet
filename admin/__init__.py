@@ -9,15 +9,14 @@ from structlog import get_logger
 import admin.logger
 import admin.manage  # noqa
 import admin.utils  # noqa
-from admin.config import Config
-from admin.database import create_roles_and_superuser, db, get_not_existing_required_tables
+from admin.config import settings
+from admin.database import (
+    create_roles_and_superuser, db, get_not_existing_required_tables,
+)
 from admin.messages import (
-    DB_NOT_READY_FOR_INIT_APP_ERROR,
-    DB_NOT_READY_FOR_INIT_APP_LOGGER,
-    MISSING_REQUIRED_TABLES_ERROR,
-    MISSING_REQUIRED_TABLES_LOGGER,
-    START_LOGGING,
-    STOP_LOGGING,
+    DB_NOT_READY_FOR_INIT_APP_ERROR, DB_NOT_READY_FOR_INIT_APP_LOGGER,
+    MISSING_REQUIRED_TABLES_ERROR, MISSING_REQUIRED_TABLES_LOGGER,
+    START_LOGGING, STOP_LOGGING,
 )
 
 import admin.database  # isort: skip # noqa
@@ -45,7 +44,7 @@ if not_existing_tables:
 
 def create_app():
     app = Flask(__name__)
-    app.config.from_object(Config)
+    app.config.from_object(settings)
     app.static_folder = os.path.join(app.root_path, "static")
     app.template_folder = os.path.join(app.root_path, "templates")
     app.static_url_path = None
@@ -55,9 +54,9 @@ def create_app():
     return app
 
 
-if Config.SENTRY_DSN_ADMIN:
+if settings.SENTRY_DSN_ADMIN:
     sentry_sdk.init(
-        dsn=Config.SENTRY_DSN_ADMIN,
+        dsn=settings.SENTRY_DSN_ADMIN,
         integrations=[
             FlaskIntegration(),
         ],

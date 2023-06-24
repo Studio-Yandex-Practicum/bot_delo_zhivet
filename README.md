@@ -182,12 +182,9 @@ docker compose -f docker-compose-local.yaml exec bot poetry run alembic upgrade 
 
 5. Если Flask-admin загружается без статики - ее можно собрать. Из корневой директории проекта с активным виртуальным окружением запустите скрипт collectstatic:
 ```bash
-python admin/manage.py collectstatic --static_folder static --overwrite
+docker compose -f docker-compose-local.yaml exec web poetry run python admin/manage.py collectstatic --static_folder static --overwrite
 ```
-И пересоберите web-контейнер:
-```bash
-docker compose -f docker-compose-local.yaml up -d --build web
-```
+
 
 6. *Если docker compose выбрасывает ошибку на стадии установки Poetry в runtime, попробуйте добавить в Dockerfile дополнительные пакеты для второй стадии сборки*:
 ```bash

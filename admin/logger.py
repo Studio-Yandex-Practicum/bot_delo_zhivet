@@ -5,9 +5,11 @@ from os import getpid
 import structlog
 from structlog import PrintLogger
 from structlog.contextvars import merge_contextvars
-from structlog.processors import JSONRenderer, TimeStamper, UnicodeDecoder, add_log_level
+from structlog.processors import (
+    JSONRenderer, TimeStamper, UnicodeDecoder, add_log_level,
+)
 
-from .config import Config
+from .config import settings
 
 DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S.%f"
 
@@ -28,7 +30,7 @@ structlog.configure(
         UnicodeDecoder(),
         JSONRenderer(serializer=partial(dumps, ensure_ascii=False)),
     ],
-    wrapper_class=structlog.make_filtering_bound_logger(Config.LOG_DEFAULT_LVL),
+    wrapper_class=structlog.make_filtering_bound_logger(settings.LOG_DEFAULT_LVL),
 )
 
 logger: PrintLogger = structlog.getLogger("admin_logger")
