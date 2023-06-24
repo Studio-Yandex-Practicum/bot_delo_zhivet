@@ -2,7 +2,7 @@
 .gitignore
 .pre-commit-config.yaml
 infrastructure/*
-!infrastructure/.env.*
+!infrastructure/.env_*
 .env.example
 .env*.example
 .venv
