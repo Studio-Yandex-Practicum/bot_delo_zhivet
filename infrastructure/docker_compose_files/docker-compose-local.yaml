@@ -7,7 +7,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     env_file:
-      - ./infrastructure/.env.db
+      - ../.env_files/.env.db
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:?err} -d $${POSTGRES_DB:?err}"]
       start_period: 30s
@@ -24,8 +24,8 @@ services:
 
   bot:
     build:
-      context: .
-      dockerfile: ./Dockerfile
+      context: ../../
+      dockerfile: Dockerfile_bot_admin
     volumes:
       - media_data:/app/media/
     command: [ "poetry", "run", "runbot" ]
@@ -34,14 +34,14 @@ services:
       db:
         condition: service_healthy
     env_file:
-      - ./infrastructure/.env.telegram
+      - ../.env_files/.env.telegram
     environment:
       - PG_DOCKER_ENV=dev
 
   web:
     build:
-      context: .
-      dockerfile: ./Dockerfile
+      context: ../../
+      dockerfile: Dockerfile_bot_admin
     command:
       [
         "poetry",
@@ -59,25 +59,25 @@ services:
       bot:
         condition: service_started
     env_file:
-      - ./infrastructure/.env.s3
-      - ./infrastructure/.env.dadata
-      - ./infrastructure/.env.flask
-      - ./infrastructure/.env.geocoder
-      - ./infrastructure/.env.mail
-      - ./infrastructure/.env.nginx
-      - ./infrastructure/.env.redis
-      - ./infrastructure/.env.sentry
-      - ./infrastructure/.env.yatracker
+      - ../.env_files/.env.s3
+      - ../.env_files/.env.dadata
+      - ../.env_files/.env.flask
+      - ../.env_files/.env.geocoder
+      - ../.env_files/.env.mail
+      - ../.env_files/.env.nginx
+      - ../.env_files/.env.redis
+      - ../.env_files/.env.sentry
+      - ../.env_files/.env.yatracker
     environment:
       - PG_DOCKER_ENV=dev
     volumes:
       - static_value:/app/admin/static/
-      - ./admin/logs/:/app/admin/logs/
+      - ../../admin/logs/:/app/admin/logs/
 
   celery:
     build:
-      context: .
-      dockerfile: ./Dockerfile
+      context: ../../
+      dockerfile: Dockerfile_bot_admin
     volumes:
       - media_data:/app/media/
     command:
@@ -101,8 +101,8 @@ services:
 
   flower:
     build:
-      context: .
-      dockerfile: ./Dockerfile
+      context: ../../
+      dockerfile: Dockerfile_bot_admin
     command:
       [
         "poetry",
@@ -128,16 +128,16 @@ services:
 
   nginx:
     build:
-      context: ./infrastructure/nginx
-      dockerfile: ./Dockerfile
+      context: ../nginx
+      dockerfile: Dockerfile_nginx
     restart: unless-stopped
     ports:
       - "80:80"
       - "443:443"
       - "8080:8080"
     volumes:
-      - ./infrastructure/nginx/delo-local.conf:/etc/nginx/servers/delo.conf:rw
-      - ./infrastructure/nginx/letsencrypt/:/etc/letsencrypt/:rw
+      - ../nginx/delo-local.conf:/etc/nginx/servers/delo.conf:rw
+      - ../nginx/letsencrypt/:/etc/letsencrypt/:rw
       - static_value:/var/html/static/
     depends_on:
       - web
