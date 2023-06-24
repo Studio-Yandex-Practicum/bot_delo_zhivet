@@ -2,15 +2,33 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.constants import ParseMode
 from telegram.ext import ContextTypes
 
+from api.tracker import client
 from bot.handlers.state_constants import (
-    ADD_SOCIAL_TAG, ADDRESS_TEMPORARY, BACK, CHECK_MARK, CITY, CITY_INPUT,
-    CITY_SOCIAL, CURRENT_FEATURE, END, FEATURES, SAVE, SECOND_LEVEL_TEXT,
-    SELECTING_FEATURE, SOCIAL_ADDRESS, SOCIAL_COMMENT, SOCIAL_PROBLEM_ADDRESS,
-    SOCIAL_PROBLEM_TYPING, SOCIAL_TAGS, START_OVER, TYPING_SOCIAL_CITY,
+    ADD_SOCIAL_TAG,
+    ADDRESS_INPUT,
+    ADDRESS_TEMPORARY,
+    BACK,
+    CHECK_MARK,
+    CITY,
+    CITY_SOCIAL,
+    CURRENT_FEATURE,
+    END,
+    FEATURES,
+    SAVE,
+    SECOND_LEVEL_TEXT,
+    SELECTING_FEATURE,
+    SOCIAL_ADDRESS,
+    SOCIAL_COMMENT,
+    SOCIAL_PROBLEM_ADDRESS,
+    SOCIAL_PROBLEM_TYPING,
+    SOCIAL_TAGS,
+    START_OVER,
+    TYPING_SOCIAL_CITY,
 )
 from bot.service.dadata import get_fields_from_dadata
 from src.bot.service.assistance_disabled import (
-    create_new_social, create_new_social_dict_from_data,
+    create_new_social,
+    create_new_social_dict_from_data,
     create_new_social_message_for_tracker,
 )
 from src.bot.service.save_new_user import get_or_create_user
@@ -19,12 +37,8 @@ from src.bot.service.tags import check_assistance_tags_are_in_db
 from src.bot.service.volunteer import volunteers_description
 from src.core.db.db import get_async_session
 from src.core.db.model import Assistance_disabled
-from src.core.db.repository.assistance_disabled_repository import (
-    crud_assistance_disabled,
-)
+from src.core.db.repository.assistance_disabled_repository import crud_assistance_disabled
 from src.core.db.repository.volunteer_repository import crud_volunteer
-
-from api.tracker import client
 
 
 async def input_social_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -70,7 +84,7 @@ async def address_confirmation(update: Update, context: ContextTypes.DEFAULT_TYP
         buttons = [
             [
                 InlineKeyboardButton(text="Да", callback_data=CITY_SOCIAL),
-                InlineKeyboardButton(text="Нет", callback_data=CITY_INPUT),
+                InlineKeyboardButton(text="Нет", callback_data=ADDRESS_INPUT),
             ],
             [InlineKeyboardButton(text="Назад", callback_data=BACK)],
         ]
@@ -83,7 +97,7 @@ async def address_confirmation(update: Update, context: ContextTypes.DEFAULT_TYP
         chat_text = "Не нашли такой адрес. Пожалуйста, укажи адрес подробнее:"
         buttons = [
             [
-                InlineKeyboardButton(text="Указать адрес заново", callback_data=CITY_INPUT),
+                InlineKeyboardButton(text="Указать адрес заново", callback_data=ADDRESS_INPUT),
             ],
             [
                 InlineKeyboardButton(text="Назад", callback_data=BACK),

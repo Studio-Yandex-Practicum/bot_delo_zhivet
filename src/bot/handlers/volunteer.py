@@ -4,15 +4,37 @@ from telegram.ext import ContextTypes
 
 from src.bot.handlers.start import start
 from src.bot.handlers.state_constants import (
-    ACTIVITY_RADIUS, ADDING_VOLUNTEER, ADDRESS_TEMPORARY, BACK, CAR_COMMAND,
-    CHECK_MARK, CITY, CITY_COMMAND, CITY_INPUT, CURRENT_FEATURE,
-    EDIT_PROFILE_GREETING, END, FEATURES, FEATURES_DESCRIPTION, IS_EXISTS,
-    PHONE_COMMAND, PHONE_INPUT, RADIUS_COMMAND, REGISTER_GREETING, SAVE,
+    ACTIVITY_RADIUS,
+    ADDING_VOLUNTEER,
+    ADDRESS_INPUT,
+    ADDRESS_TEMPORARY,
+    BACK,
+    CAR_COMMAND,
+    CHECK_MARK,
+    CITY,
+    CITY_COMMAND,
+    CURRENT_FEATURE,
+    EDIT_PROFILE_GREETING,
+    END,
+    FEATURES,
+    FEATURES_DESCRIPTION,
+    IS_EXISTS,
+    PHONE_COMMAND,
+    PHONE_INPUT,
+    RADIUS_COMMAND,
+    REGISTER_GREETING,
+    SAVE,
     SECOND_LEVEL_TEXT,
-    SECOND_LEVEL_UPDATE_TEXT, SELECTING_OVER, SPECIFY_ACTIVITY_RADIUS,
-    SPECIFY_CAR_AVAILABILITY, SPECIFY_CITY,
-    SPECIFY_PHONE_PERMISSION, START_OVER, TELEGRAM_ID, TELEGRAM_USERNAME,
-    TYPING_CITY, VALIDATE,
+    SECOND_LEVEL_UPDATE_TEXT,
+    SELECTING_OVER,
+    SPECIFY_ACTIVITY_RADIUS,
+    SPECIFY_CAR_AVAILABILITY,
+    SPECIFY_PHONE_PERMISSION,
+    START_OVER,
+    TELEGRAM_ID,
+    TELEGRAM_USERNAME,
+    TYPING_CITY,
+    VALIDATE,
 )
 from src.bot.service.dadata import get_fields_from_dadata
 from src.bot.service.get_issues_with_statuses import add_new_volunteer_to_issue
@@ -20,12 +42,14 @@ from src.bot.service.phone_number import format_numbers, phone_number_validate
 from src.bot.service.save_new_user import create_new_user
 from src.bot.service.save_tracker_id import save_tracker_id
 from src.bot.service.volunteer import (
-    check_and_update_volunteer, create_volunteer, get_tracker,
+    check_and_update_volunteer,
+    create_volunteer,
+    get_tracker,
     volunteer_data_preparation,
 )
 from src.core.db.db import get_async_session
-from src.core.db.repository.volunteer_repository import crud_volunteer
 from src.core.db.repository.user_repository import crud_user
+from src.core.db.repository.volunteer_repository import crud_volunteer
 
 
 def get_buttons_params(is_volunteer_exists: bool) -> tuple[str, str, str, str]:
@@ -50,8 +74,9 @@ async def add_volunteer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> s
         session_generator = get_async_session()
         session = await session_generator.asend(None)
         context.user_data[IS_EXISTS] = await crud_volunteer.get_exist_by_attribute(
-            TELEGRAM_ID, update.effective_chat.id, session)
-        context.chat_data['current_session'] = session
+            TELEGRAM_ID, update.effective_chat.id, session
+        )
+        context.chat_data["current_session"] = session
     action, save_action, text, second_level_text = get_buttons_params(context.user_data[IS_EXISTS])
 
     def check_feature(feature):
@@ -60,7 +85,7 @@ async def add_volunteer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> s
     buttons = [
         [
             InlineKeyboardButton(
-                text=f"{action} свой адрес {CHECK_MARK*check_feature(CITY)}", callback_data=SPECIFY_CITY
+                text=f"{action} свой адрес {CHECK_MARK*check_feature(CITY)}", callback_data=ADDRESS_INPUT
             ),
         ],
         [
@@ -203,7 +228,7 @@ async def handle_city_input(update: Update, context: ContextTypes.DEFAULT_TYPE) 
         buttons = [
             [
                 InlineKeyboardButton(text="Да", callback_data=CITY_COMMAND),
-                InlineKeyboardButton(text="Нет", callback_data=CITY_INPUT),
+                InlineKeyboardButton(text="Нет", callback_data=ADDRESS_INPUT),
             ],
             [
                 InlineKeyboardButton(text="Назад", callback_data=BACK),
@@ -219,7 +244,7 @@ async def handle_city_input(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 
         buttons = [
             [
-                InlineKeyboardButton(text="Указать адрес заново", callback_data=CITY_INPUT),
+                InlineKeyboardButton(text="Указать адрес заново", callback_data=ADDRESS_INPUT),
             ],
             [
                 InlineKeyboardButton(text="Назад", callback_data=BACK),

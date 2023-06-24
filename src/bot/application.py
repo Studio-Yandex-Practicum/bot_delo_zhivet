@@ -30,8 +30,8 @@ from bot.const import (
     REPORT_ECO_PROBLEM_CMD,
     SAVE_PERSISTENCE_INTERVAL,
     SPECIFY_ACTIVITY_RADIUS_CMD,
+    SPECIFY_ADDRESS_CMD,
     SPECIFY_CAR_AVAILABILITY_CMD,
-    SPECIFY_CITY_CMD,
     SPECIFY_PHONE_PERMISSION_CMD,
 )
 from bot.handlers.add_tags import pollution_tags_handler, social_tags_handler
@@ -63,10 +63,10 @@ from .handlers.state_constants import (
     ADD_SOCIAL_TAG,
     ADDING_SOCIAL_TASK,
     ADDING_VOLUNTEER,
+    ADDRESS_INPUT,
     BACK,
     CAR_COMMAND,
     CITY_COMMAND,
-    CITY_INPUT,
     CITY_SOCIAL,
     NO_TAG,
     PHONE_COMMAND,
@@ -113,7 +113,7 @@ def create_bot() -> Application:
         states={
             ADDING_VOLUNTEER: [
                 CallbackQueryHandler(ask_user_phone_number, pattern=SPECIFY_PHONE_PERMISSION_CMD),
-                CallbackQueryHandler(ask_for_input_city, pattern=SPECIFY_CITY_CMD),
+                CallbackQueryHandler(ask_for_input_city, pattern=SPECIFY_ADDRESS_CMD),
                 CallbackQueryHandler(handle_radius_input, pattern=SPECIFY_ACTIVITY_RADIUS_CMD),
                 CallbackQueryHandler(handle_car_input, pattern=SPECIFY_CAR_AVAILABILITY_CMD),
                 CallbackQueryHandler(save_volunteer, pattern="^" + SAVE + "$"),
@@ -131,7 +131,7 @@ def create_bot() -> Application:
             CallbackQueryHandler(end_describing, pattern=END_CMD),
             CommandHandler("stop", stop),
             CallbackQueryHandler(ask_user_phone_number, pattern=PHONE_INPUT),
-            CallbackQueryHandler(ask_for_input_city, pattern=CITY_INPUT),
+            CallbackQueryHandler(ask_for_input_city, pattern=ADDRESS_INPUT),
             CallbackQueryHandler(back_to_add_volunteer, pattern=BACK),
         ],
         persistent=True,
@@ -204,7 +204,7 @@ def create_bot() -> Application:
         fallbacks=[
             CallbackQueryHandler(end_describing, pattern=END_CMD),
             CommandHandler("stop", stop),
-            CallbackQueryHandler(ask_for_input_address, pattern=CITY_INPUT),
+            CallbackQueryHandler(ask_for_input_address, pattern=ADDRESS_INPUT),
             CallbackQueryHandler(back_to_add_social, pattern=BACK),
         ],
         persistent=True,

@@ -5,13 +5,20 @@ from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.bot.handlers.state_constants import (
-    CITY, COMMENT, GEOM, LATITUDE, LONGITUDE, NO_COMMENT_PHASE, SOCIAL,
-    SOCIAL_COMMENT, SOCIAL_TAGS, TAGS, TELEGRAM_ID,
+    CITY,
+    COMMENT,
+    GEOM,
+    LATITUDE,
+    LONGITUDE,
+    NO_COMMENT_PHASE,
+    SOCIAL,
+    SOCIAL_COMMENT,
+    SOCIAL_TAGS,
+    TAGS,
+    TELEGRAM_ID,
 )
 from src.core.db.model import Assistance_disabled
-from src.core.db.repository.assistance_disabled_repository import (
-    crud_assistance_disabled,
-)
+from src.core.db.repository.assistance_disabled_repository import crud_assistance_disabled
 from src.core.db.repository.tags_repository import crud_tag_assistance
 
 

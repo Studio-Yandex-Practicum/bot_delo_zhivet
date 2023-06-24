@@ -16,7 +16,6 @@ ADDING_SOCIAL_TASK = "adding_social_task"
 SELECTING_FEATURE = "selecting_feature"
 
 # Обозначим состояния второго диалога второго уровня
-SPECIFY_CITY = "specify_city"
 SPECIFY_ACTIVITY_RADIUS = "radius"
 SPECIFY_CAR_AVAILABILITY = "has_car"
 TYPING_CITY = "typing_city"
@@ -81,7 +80,7 @@ TELEGRAM_ID = "telegram_id"
 TELEGRAM_USERNAME = "telegram_username"
 FIRST_NAME = "first_name"
 LAST_NAME = "last_name"
-CITY_INPUT = "city_input"
+ADDRESS_INPUT = "address_input"
 BACK = "back"
 CITY = "city"
 VALIDATE = "validate"
@@ -108,10 +107,7 @@ EDIT_PROFILE_GREETING = "Выберите данные для изменения
 
 TOP_LEVEL_MENU_TEXT = "Можно выбрать новое действие или закончить разговор, набрав команду /stop"
 
-SECOND_LEVEL_TEXT_BASE = (
-    "Понял-принял! Укажите информацию для остальных пунктов или нажмите на кнопку "
-    "<b>{}</b>{}:"
-)
+SECOND_LEVEL_TEXT_BASE = "Понял-принял! Укажите информацию для остальных пунктов или нажмите на кнопку " "<b>{}</b>{}:"
 SECOND_LEVEL_TEXT = SECOND_LEVEL_TEXT_BASE.format("Отправить заявку", " (она появится, когда всё будет заполнено)")
 SECOND_LEVEL_UPDATE_TEXT = SECOND_LEVEL_TEXT_BASE.format("Сохранить", "")
 
