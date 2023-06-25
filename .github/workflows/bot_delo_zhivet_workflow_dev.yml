@@ -96,8 +96,8 @@ jobs:
         # if: github.ref == env.BRANCH
         uses: docker/build-push-action@v4
         with:
-          context: ./infrastructure/nginx/
-          file: Dockerfile_nginx
+          context: ./infrastructure/nginx
+          file: ./infrastructure/nginx/Dockerfile_nginx
           no-cache: true
           build-args: |
             NGINX_CONFIG=default.conf
