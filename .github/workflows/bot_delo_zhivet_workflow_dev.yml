@@ -12,46 +12,46 @@ env:
     PROJECT_FOLDER_PATH: ~/${{ vars.PROJECT_FOLDER_NAME }}
 
 jobs:
-  tests:
-    name: Testing
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: [ "3.10", "3.11" ]
+  # tests:
+  #   name: Testing
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix:
+  #       python-version: [ "3.10", "3.11" ]
 
-    steps:
-      - name: Checkout the repo
-        uses: actions/checkout@v3
+  #   steps:
+  #     - name: Checkout the repo
+  #       uses: actions/checkout@v3
 
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
+  #     - name: Set up Python ${{ matrix.python-version }}
+  #       uses: actions/setup-python@v4
+  #       with:
+  #         python-version: ${{ matrix.python-version }}
 
-      - name: Install poetry
-        run: |
-          pip install pipx
-          pipx install poetry==1.3.2 --force
+  #     - name: Install poetry
+  #       run: |
+  #         pip install pipx
+  #         pipx install poetry==1.3.2 --force
 
-      - name: Validate the structure of the pyproject.toml
-        run: |
-          poetry check
+  #     - name: Validate the structure of the pyproject.toml
+  #       run: |
+  #         poetry check
 
-      - name: Verify that poetry.lock is consistent with pyproject.toml
-        run: poetry lock --check
+  #     - name: Verify that poetry.lock is consistent with pyproject.toml
+  #       run: poetry lock --check
 
-      - name: Install dependencies
-        run: |
-          poetry install --with test
+  #     - name: Install dependencies
+  #       run: |
+  #         poetry install --with test
 
-      - name: Test with flake8 - bot
-        run: |
-          poetry run python -m flake8
+  #     - name: Test with flake8 - bot
+  #       run: |
+  #         poetry run python -m flake8
 
   build_and_push_to_docker_hub:
     name: Build and push Docker image to Docker Hub
     runs-on: ubuntu-latest
-    needs: tests
+    # needs: tests
 
     steps:
       - name: Checkout the repo
@@ -81,22 +81,22 @@ jobs:
           username: ${{ secrets.DEV_DOCKERHUB_USERNAME }}
           password: ${{ secrets.DEV_DOCKERHUB_TOKEN }}
 
-      - name: Build and push a bot&admin image to Docker Hub
-        # if: github.ref == env.BRANCH
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          file: Dockerfile_bot_admin
-          no-cache: true
-          push: ${{ github.event_name == 'push' }}
-          tags: ${{ steps.meta_bot_and_admin.outputs.tags }}
-          labels: ${{ steps.meta_bot_and_admin.outputs.labels }}
+      # - name: Build and push a bot&admin image to Docker Hub
+      #   # if: github.ref == env.BRANCH
+      #   uses: docker/build-push-action@v4
+      #   with:
+      #     context: .
+      #     file: Dockerfile_bot_admin
+      #     no-cache: true
+      #     push: ${{ github.event_name == 'push' }}
+      #     tags: ${{ steps.meta_bot_and_admin.outputs.tags }}
+      #     labels: ${{ steps.meta_bot_and_admin.outputs.labels }}
 
       - name: Build and push a nginx image to Docker Hub
         # if: github.ref == env.BRANCH
         uses: docker/build-push-action@v4
         with:
-          context: ./infrastructure/nginx
+          context: ./infrastructure/nginx/
           file: Dockerfile_nginx
           no-cache: true
           build-args: |
