@@ -113,6 +113,20 @@ jobs:
       - name: Checkout the repo
         uses: actions/checkout@v3
 
+      - name: stop all containers
+      # if: github.ref == env.BRANCH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.DEV_SERVER_HOST }}
+          username: ${{ secrets.DEV_SERVER_USER }}
+          key: ${{ secrets.DEV_SERVER_SSH_KEY }}
+          passphrase: ${{ secrets.DEV_SERVER_PASSPHRASE }}
+          script: |
+            cd ${{ env.PROJECT_FOLDER_PATH }}
+            cd docker_compose_files
+            docker compose -f docker-compose-local-images.yaml stop
+
+
       - name: Copy files for deploy
         # if: github.ref == env.BRANCH
         uses: appleboy/scp-action@v0.1.3
@@ -121,7 +135,7 @@ jobs:
           username: ${{ secrets.DEV_SERVER_USER }}
           key: ${{ secrets.DEV_SERVER_SSH_KEY }}
           passphrase: ${{ secrets.DEV_SERVER_PASSPHRASE }}
-          source: "infrastructure/*,!infrastructure/archive/*,!infrastructure/nginx/delo.conf,!.env.*"
+          source: "infrastructure/*,!infrastructure/archive/*,!infrastructure/nginx/delo.conf,!.env.examples/*"
           target: ${{ env.PROJECT_FOLDER_PATH }}
           overwrite: true
           strip_components: 1
@@ -135,7 +149,7 @@ jobs:
           key: ${{ secrets.DEV_SERVER_SSH_KEY }}
           passphrase: ${{ secrets.DEV_SERVER_PASSPHRASE }}
           source: "infrastructure/nginx"
-          target: ${{ env.PROJECT_FOLDER_PATH }}
+          target: ${{ env.PROJECT_FOLDER_PATH }}/nginx
           overwrite: true
 
       # - name: Executing remote ssh commands to deploy
@@ -147,8 +161,7 @@ jobs:
       #     key: ${{ secrets.DEV_SERVER_SSH_KEY }}
       #     passphrase: ${{ secrets.DEV_SERVER_PASSPHRASE }}
       #     script: |
-      #       touch new_file.txt
-      #       echo HI >> new_file.txt
+
       #       cd ${{ env.PROJECT_FOLDER_PATH }}
       #       cd docker_compose_files
       #       docker compose -f docker-compose-local-images.yaml stop
