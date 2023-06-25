@@ -57,7 +57,6 @@ class Settings(BaseSettings):
 
     class Config:
         env_file_encoding = "utf-8"
-        env_file_dir = "./infrastructure/.env_files/"
         env_files_names = (
             ".env.telegram",
             ".env.s3",
@@ -65,26 +64,17 @@ class Settings(BaseSettings):
             ".env.dadata",
             ".env.geocoder",
             ".env.yatracker",
+            ".env.db.local",
         )
-
-        @classmethod
-        def get_env_file(cls, env_db_file) -> set:
-            all_env_file_names = [file_name for file_name in cls.env_files_names]
-            all_env_file_names.append(env_db_file)
-            env_file = (cls.env_file_dir + file_name for file_name in all_env_file_names)
-            return env_file
+        env_file = ("./infrastructure/.env_files/" + file_name for file_name in env_files_names)
 
 
 class DevSettings(Settings):
-    class Config(Settings.Config):
-        env_db_file = ".env.db"
-        env_file = Settings.Config.get_env_file(env_db_file)
+    pass
 
 
 class LocalSettings(Settings):
-    class Config(Settings.Config):
-        env_db_file = ".env.db.local"
-        env_file = Settings.Config.get_env_file(env_db_file)
+    pass
 
 
 def get_settings():

@@ -33,11 +33,21 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    env_file:
-      - ../.env_files/.env.telegram
+
     environment:
       - PG_DOCKER_ENV=dev
-
+    env_file:
+      - ../.env_files/.env.s3
+      - ../.env_files/.env.flask
+      - ../.env_files/.env.mail  
+      - ../.env_files/.env.sentry
+      - ../.env_files/.env.db
+      - ../.env_files/.env.nginx
+      - ../.env_files/.env.redis
+      - ../.env_files/.env.yatracker
+      - ../.env_files/.env.geocoder
+      - ../.env_files/.env.dadata  
+      - ../.env_files/.env.telegram
   web:
     build:
       context: ../../
@@ -58,18 +68,22 @@ services:
         condition: service_healthy
       bot:
         condition: service_started
-    env_file:
-      - ../.env_files/.env.s3
-      - ../.env_files/.env.dadata
-      - ../.env_files/.env.flask
-      - ../.env_files/.env.geocoder
-      - ../.env_files/.env.mail
-      - ../.env_files/.env.nginx
-      - ../.env_files/.env.redis
-      - ../.env_files/.env.sentry
-      - ../.env_files/.env.yatracker
+
     environment:
       - PG_DOCKER_ENV=dev
+    env_file:
+      - ../.env_files/.env.s3
+      - ../.env_files/.env.flask
+      - ../.env_files/.env.mail  
+      - ../.env_files/.env.sentry
+      - ../.env_files/.env.db
+      - ../.env_files/.env.nginx
+      - ../.env_files/.env.redis
+      - ../.env_files/.env.yatracker
+      - ../.env_files/.env.geocoder
+      - ../.env_files/.env.dadata  
+      - ../.env_files/.env.telegram
+
     volumes:
       - static_value:/app/admin/static/
       - ../../admin/logs/:/app/admin/logs/
@@ -78,6 +92,7 @@ services:
     build:
       context: ../../
       dockerfile: Dockerfile_bot_admin
+
     volumes:
       - media_data:/app/media/
     command:
@@ -88,9 +103,7 @@ services:
         "-A",
         "src.bot.tasks",
         "worker"
-      ]
-    environment:
-      - PG_DOCKER_ENV=dev
+      ]    
     depends_on:
       db:
         condition: service_healthy
@@ -98,11 +111,28 @@ services:
         condition: service_started
       redis:
         condition: service_started
+    environment:
+      - PG_DOCKER_ENV=dev
+    env_file:
+      - ../.env_files/.env.s3
+      - ../.env_files/.env.flask
+      - ../.env_files/.env.mail  
+      - ../.env_files/.env.sentry
+      - ../.env_files/.env.db
+      - ../.env_files/.env.nginx
+      - ../.env_files/.env.redis
+      - ../.env_files/.env.yatracker
+      - ../.env_files/.env.geocoder
+      - ../.env_files/.env.dadata  
+      - ../.env_files/.env.telegram
+
+
 
   flower:
     build:
       context: ../../
       dockerfile: Dockerfile_bot_admin
+
     command:
       [
         "poetry",
@@ -114,8 +144,6 @@ services:
       ]
     ports:
       - "5555:5555"
-    environment:
-      - PG_DOCKER_ENV=dev
     depends_on:
       db:
         condition: service_healthy
@@ -124,7 +152,24 @@ services:
       redis:
         condition: service_started
       celery:
-        condition: service_started
+        condition: service_started  
+            
+    environment:
+      - PG_DOCKER_ENV=dev
+    env_file:
+      - ../.env_files/.env.s3
+      - ../.env_files/.env.flask
+      - ../.env_files/.env.mail  
+      - ../.env_files/.env.sentry
+      - ../.env_files/.env.db
+      - ../.env_files/.env.nginx
+      - ../.env_files/.env.redis
+      - ../.env_files/.env.yatracker
+      - ../.env_files/.env.geocoder
+      - ../.env_files/.env.dadata  
+      - ../.env_files/.env.telegram
+
+
 
   nginx:
     build:
