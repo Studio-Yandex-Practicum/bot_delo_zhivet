@@ -148,7 +148,7 @@ jobs:
           username: ${{ secrets.DEV_SERVER_USER }}
           key: ${{ secrets.DEV_SERVER_SSH_KEY }}
           passphrase: ${{ secrets.DEV_SERVER_PASSPHRASE }}
-          source: "infrastructure/nginx"
+          source: "infrastructure/nginx/*"
           target: ${{ env.PROJECT_FOLDER_PATH }}/nginx
           overwrite: true
 
