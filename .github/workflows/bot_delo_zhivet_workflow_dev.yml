@@ -148,8 +148,8 @@ jobs:
           username: ${{ secrets.DEV_SERVER_USER }}
           key: ${{ secrets.DEV_SERVER_SSH_KEY }}
           passphrase: ${{ secrets.DEV_SERVER_PASSPHRASE }}
-          source: "nginx/*"
-          target: ${{ env.PROJECT_FOLDER_PATH }}/nginx
+          source: "infrastructure/nginx/*"
+          target: ${{ env.PROJECT_FOLDER_PATH }}/gavhga
           overwrite: true
 
       - name: Executing remote ssh commands to deploy
