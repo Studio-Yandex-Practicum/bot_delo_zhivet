@@ -149,8 +149,9 @@ jobs:
           key: ${{ secrets.DEV_SERVER_SSH_KEY }}
           passphrase: ${{ secrets.DEV_SERVER_PASSPHRASE }}
           source: "infrastructure/nginx/*"
-          target: ${{ env.PROJECT_FOLDER_PATH }}/gavhga
+          target: ${{ env.PROJECT_FOLDER_PATH }}
           overwrite: true
+          strip_components: 1
 
       - name: Executing remote ssh commands to deploy
         # if: github.ref == env.BRANCH
