@@ -11,94 +11,48 @@ from starlette.routing import Route
 from structlog import contextvars
 from telegram import Update
 from telegram.ext import (
-    Application,
-    CallbackQueryHandler,
-    CommandHandler,
-    ConversationHandler,
-    InvalidCallbackData,
-    MessageHandler,
-    PicklePersistence,
-    filters,
+    Application, CallbackQueryHandler, CommandHandler, ConversationHandler,
+    InvalidCallbackData, MessageHandler, PicklePersistence, filters,
 )
 from telegram.ext.filters import Regex
 
 from bot.const import (
-    BECOME_VOLUNTEER_CMD,
-    DATA_PATH,
-    END_CMD,
-    MAKE_DONATION_CMD,
-    REPORT_ECO_PROBLEM_CMD,
-    SAVE_PERSISTENCE_INTERVAL,
-    SPECIFY_ACTIVITY_RADIUS_CMD,
-    SPECIFY_CAR_AVAILABILITY_CMD,
-    SPECIFY_CITY_CMD,
-    SPECIFY_PHONE_PERMISSION_CMD,
+    BECOME_VOLUNTEER_CMD, DATA_PATH, END_CMD, MAKE_DONATION_CMD,
+    REPORT_ECO_PROBLEM_CMD, SAVE_PERSISTENCE_INTERVAL,
+    SPECIFY_ACTIVITY_RADIUS_CMD, SPECIFY_CAR_AVAILABILITY_CMD,
+    SPECIFY_CITY_CMD, SPECIFY_PHONE_PERMISSION_CMD,
 )
 from bot.handlers.add_tags import pollution_tags_handler, social_tags_handler
 from bot.handlers.loggers import logger
 from core.config import settings
 
-from .handlers.common import end_describing, handle_invalid_button, help_command, stop
+from .handlers.common import (
+    end_describing, handle_invalid_button, help_command, stop,
+)
 from .handlers.participation import make_donation
 from .handlers.pollution import (
-    back_to_select_option_to_report_about_pollution,
-    input,
-    save_comment,
-    save_foto,
-    save_location,
-    select_option_to_report_about_pollution,
+    back_to_select_option_to_report_about_pollution, input, save_comment,
+    save_foto, save_location, select_option_to_report_about_pollution,
 )
 from .handlers.social import (
-    address_confirmation,
-    ask_for_input_address,
-    back_to_add_social,
-    input_social_data,
-    report_about_social_problem,
-    save_social_address_input,
+    address_confirmation, ask_for_input_address, back_to_add_social,
+    input_social_data, report_about_social_problem, save_social_address_input,
     save_social_problem_data,
 )
 from .handlers.start import start
 from .handlers.state_constants import (
-    ADD_POLLUTION_TAG,
-    ADD_SOCIAL_TAG,
-    ADDING_SOCIAL_TASK,
-    ADDING_VOLUNTEER,
-    BACK,
-    CAR_COMMAND,
-    CITY_COMMAND,
-    CITY_INPUT,
-    CITY_SOCIAL,
-    NO_TAG,
-    PHONE_COMMAND,
-    PHONE_INPUT,
-    POLLUTION_COMMENT,
-    POLLUTION_COORDINATES,
-    POLLUTION_FOTO,
-    RADIUS_COMMAND,
-    SAVE,
-    SELECTING_ACTION,
-    SELECTING_FEATURE,
-    SELECTING_OVER,
-    SOCIAL_ADDRESS,
-    SOCIAL_COMMENT,
-    SOCIAL_PROBLEM_ADDRESS,
-    SOCIAL_PROBLEM_TYPING,
-    TAG_ID_PATTERN,
-    TYPING,
-    TYPING_CITY,
-    TYPING_SOCIAL_CITY,
-    VALIDATE,
+    ADD_POLLUTION_TAG, ADD_SOCIAL_TAG, ADDING_SOCIAL_TASK, ADDING_VOLUNTEER,
+    BACK, CAR_COMMAND, CITY_COMMAND, CITY_INPUT, CITY_SOCIAL, NO_TAG,
+    PHONE_COMMAND, PHONE_INPUT, POLLUTION_COMMENT, POLLUTION_COORDINATES,
+    POLLUTION_FOTO, RADIUS_COMMAND, SAVE, SELECTING_ACTION, SELECTING_FEATURE,
+    SELECTING_OVER, SOCIAL_ADDRESS, SOCIAL_COMMENT, SOCIAL_PROBLEM_ADDRESS,
+    SOCIAL_PROBLEM_TYPING, TAG_ID_PATTERN, TYPING, TYPING_CITY,
+    TYPING_SOCIAL_CITY, VALIDATE,
 )
 from .handlers.volunteer import (
-    add_volunteer,
-    ask_for_input_city,
-    ask_user_phone_number,
-    back_to_add_volunteer,
-    handle_car_input,
-    handle_city_input,
-    handle_phone_input,
-    handle_radius_input,
-    save_input,
+    add_volunteer, ask_for_input_city, ask_user_phone_number,
+    back_to_add_volunteer, handle_car_input, handle_city_input,
+    handle_phone_input, handle_radius_input, save_input,
 )
 from .tasks import save_pollution, save_social_problem, save_volunteer
 
@@ -106,7 +60,7 @@ from .tasks import save_pollution, save_social_problem, save_volunteer
 def create_bot() -> Application:
     """Создание приложения бота"""
     persistence = PicklePersistence(filepath=DATA_PATH, update_interval=SAVE_PERSISTENCE_INTERVAL)
-    app = Application.builder().token(settings.TELEGRAM_BOT_TOKEN).persistence(persistence).build()
+    app = Application.builder().token(settings.TELEGRAM_BOT_TOKEN).persistence(persistence).read_timeout(30).write_timeout(30).build()
 
     add_volunteer_conv = ConversationHandler(
         entry_points=[CallbackQueryHandler(add_volunteer, pattern=BECOME_VOLUNTEER_CMD)],
