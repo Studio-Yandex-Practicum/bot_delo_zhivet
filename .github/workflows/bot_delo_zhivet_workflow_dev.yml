@@ -92,18 +92,18 @@ jobs:
       #     tags: ${{ steps.meta_bot_and_admin.outputs.tags }}
       #     labels: ${{ steps.meta_bot_and_admin.outputs.labels }}
 
-      - name: Build and push a nginx image to Docker Hub
-        # if: github.ref == env.BRANCH
-        uses: docker/build-push-action@v4
-        with:
-          context: ./infrastructure/nginx
-          file: ./infrastructure/nginx/Dockerfile_nginx
-          no-cache: true
-          build-args: |
-            NGINX_CONFIG=default.conf
-          push: ${{ github.event_name == 'push' }}
-          tags: ${{ steps.meta_nginx.outputs.tags }}
-          labels: ${{ steps.meta_nginx.outputs.labels }}
+      # - name: Build and push a nginx image to Docker Hub
+      #   # if: github.ref == env.BRANCH
+      #   uses: docker/build-push-action@v4
+      #   with:
+      #     context: ./infrastructure/nginx
+      #     file: ./infrastructure/nginx/Dockerfile_nginx
+      #     no-cache: true
+      #     build-args: |
+      #       NGINX_CONFIG=default.conf
+      #     push: ${{ github.event_name == 'push' }}
+      #     tags: ${{ steps.meta_nginx.outputs.tags }}
+      #     labels: ${{ steps.meta_nginx.outputs.labels }}
 
   deploy:
     name: Deploy
@@ -151,15 +151,16 @@ jobs:
             echo HI >> new_file.txt
             cd ${{ env.PROJECT_FOLDER_PATH }}
             
-            docker compose -f docker-compose.yaml stop
-            docker compose -f docker-compose.yaml rm -fs web
-            docker compose -f docker-compose.yaml rm -fs bot
-            docker compose -f docker-compose.yaml rm -fs nginx
+            docker compose -f docker-compose-local-images.yaml stop
+            docker compose -f docker-compose-local-images.yaml rm -fs web
+            docker compose -f docker-compose-local-images.yaml rm -fs bot
+            docker compose -f docker-compose-local-images.yaml rm -fs nginx
             docker image rm -f ${{ secrets.DEV_DOCKERHUB_USERNAME }}/delo_zhivet_bot_and_admin:${{ vars.DEV_DOCKER_TAG }}
             docker image rm -f ${{ secrets.DEV_DOCKERHUB_USERNAME }}/delo_zhivet_nginx:${{ vars.DEV_DOCKER_TAG }}
             docker image pull -q ${{ secrets.DEV_DOCKERHUB_USERNAME }}/delo_zhivet_bot_and_admin:${{ vars.DEV_DOCKER_TAG }}
             docker image pull -q ${{ secrets.DEV_DOCKERHUB_USERNAME }}/delo_zhivet_nginx:${{ vars.DEV_DOCKER_TAG }}
             cd infrastructure
+            cd .env_files
             rm .env.db
             touch .env.db
             echo POSTGRES_DB=${{ secrets.DEV_POSTGRES_DB }} >> .env.db
@@ -234,11 +235,12 @@ jobs:
             echo CERTBOT_EMAIL=${{ secrets.DEV_CERTBOT_EMAIL }} >> .env.nginx
             
             cd ..
+            cd ..
 
             chmod +x update_nginx_conf.sh
             . ./update_nginx_conf.sh
-            docker compose -f docker-compose.yaml up -d
+            docker compose -f docker-compose-local-images.yaml up -d
             chmod +x update_certificate.sh
             . ./update_certificate.sh
-            docker compose -f docker-compose.yaml exec bot alembic upgrade head
-            docker compose -f docker-compose.yaml exec web python admin/manage.py collectstatic --static_folder static --overwrite
+            docker compose -f docker-compose-local-images.yaml exec bot alembic upgrade head
+            docker compose -f docker-compose-local-images.yaml exec web python admin/manage.py collectstatic --static_folder static --overwrite
