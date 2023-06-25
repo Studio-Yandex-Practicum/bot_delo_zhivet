@@ -113,18 +113,18 @@ jobs:
       - name: Checkout the repo
         uses: actions/checkout@v3
 
-      - name: stop all containers
-      # if: github.ref == env.BRANCH
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.DEV_SERVER_HOST }}
-          username: ${{ secrets.DEV_SERVER_USER }}
-          key: ${{ secrets.DEV_SERVER_SSH_KEY }}
-          passphrase: ${{ secrets.DEV_SERVER_PASSPHRASE }}
-          script: |
-            cd ${{ env.PROJECT_FOLDER_PATH }}
-            cd docker_compose_files
-            docker compose -f docker-compose-local-images.yaml stop
+      # - name: stop all containers
+      # # if: github.ref == env.BRANCH
+      #   uses: appleboy/ssh-action@master
+      #   with:
+      #     host: ${{ secrets.DEV_SERVER_HOST }}
+      #     username: ${{ secrets.DEV_SERVER_USER }}
+      #     key: ${{ secrets.DEV_SERVER_SSH_KEY }}
+      #     passphrase: ${{ secrets.DEV_SERVER_PASSPHRASE }}
+      #     script: |
+      #       cd ${{ env.PROJECT_FOLDER_PATH }}
+      #       cd docker_compose_files
+      #       docker compose -f docker-compose-local-images.yaml stop
 
 
       - name: Copy files for deploy
