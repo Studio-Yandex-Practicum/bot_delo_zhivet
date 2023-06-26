@@ -8,8 +8,17 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.bot.const import QUALITY, TARGET_WIDTH
 from src.bot.handlers.state_constants import (
-    COMMENT, GEOM, LATITUDE, LONGITUDE, NO_COMMENT_PHASE, POLLUTION,
-    POLLUTION_COMMENT, POLLUTION_FOTO, POLLUTION_TAGS, TAGS, TELEGRAM_ID,
+    COMMENT,
+    GEOM,
+    LATITUDE,
+    LONGITUDE,
+    NO_COMMENT_PHASE,
+    POLLUTION,
+    POLLUTION_COMMENT,
+    POLLUTION_FOTO,
+    POLLUTION_TAGS,
+    TAGS,
+    TELEGRAM_ID,
 )
 from src.core.config import settings
 from src.core.db.model import Pollution, Tag_Pollution

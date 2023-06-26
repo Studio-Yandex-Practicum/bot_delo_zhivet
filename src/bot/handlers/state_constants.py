@@ -108,10 +108,7 @@ EDIT_PROFILE_GREETING = "Выберите данные для изменения
 
 TOP_LEVEL_MENU_TEXT = "Можно выбрать новое действие или закончить разговор, набрав команду /stop"
 
-SECOND_LEVEL_TEXT_BASE = (
-    "Понял-принял! Укажите информацию для остальных пунктов или нажмите на кнопку "
-    "<b>{}</b>{}:"
-)
+SECOND_LEVEL_TEXT_BASE = "Понял-принял! Укажите информацию для остальных пунктов или нажмите на кнопку " "<b>{}</b>{}:"
 SECOND_LEVEL_TEXT = SECOND_LEVEL_TEXT_BASE.format("Отправить заявку", " (она появится, когда всё будет заполнено)")
 SECOND_LEVEL_UPDATE_TEXT = SECOND_LEVEL_TEXT_BASE.format("Сохранить", "")
 

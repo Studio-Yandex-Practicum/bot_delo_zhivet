@@ -4,6 +4,7 @@ from typing import Optional
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.api.tracker import client
 from src.bot.handlers.state_constants import (
     FIRST_NAME,
     GEOM,
@@ -18,7 +19,6 @@ from src.bot.handlers.state_constants import (
     TELEGRAM_USERNAME,
     VOLUNTEER,
 )
-from src.api.tracker import client
 from src.core.db.model import Volunteer
 from src.core.db.repository.volunteer_repository import crud_volunteer
 
@@ -92,12 +92,16 @@ def volunteer_data_preparation(telegram_id: int, username: str, first_name: str,
 
 
 async def check_and_update_volunteer(
-        volunteer_data: dict, session: AsyncSession) -> tuple[Optional[Volunteer], Optional[str]]:
+    volunteer_data: dict, session: AsyncSession
+) -> tuple[Optional[Volunteer], Optional[str]]:
     """Проверяет не забанен ли волонтер, есть ли данные для обновления"""
     volunteer = await crud_volunteer.get_volunteer_by_telegram_id(volunteer_data[TELEGRAM_ID], session)
     old_ticket_id = volunteer.ticketID
+    old_volunteer = volunteer
     if volunteer.is_banned:
         return None, old_ticket_id
+    if not old_volunteer.is_banned and ("SPECIFY_ACTIVITY_RADIUS" in volunteer_data or "GEOM" in volunteer_data):
+        geo_update_volunteer(volunteer_data, old_volunteer, session)
     for attr in set(volunteer_data.keys()):
         if getattr(volunteer, attr) == volunteer_data[attr]:
             del volunteer_data[attr]
@@ -105,6 +109,15 @@ async def check_and_update_volunteer(
         return None, old_ticket_id
     volunteer = await update_volunteer(volunteer, volunteer_data, session)
     return volunteer, old_ticket_id
+
+
+def geo_update_volunteer(volunteer_data, volunteer, session):
+    updated_volunteer = volunteer.copy()
+    if SPECIFY_ACTIVITY_RADIUS in volunteer_data:
+        updated_volunteer.radius = volunteer_data[SPECIFY_ACTIVITY_RADIUS]
+    if GEOM in volunteer_data:
+        updated_volunteer.geom = volunteer_data[GEOM]
+    crud_volunteer.update(updated_volunteer, session)
 
 
 def get_tracker(volunteer: Volunteer, old_ticket_id: str):

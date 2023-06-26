@@ -3,8 +3,8 @@ from time import time
 import jwt
 from Levenshtein import distance
 from sqlalchemy.orm.attributes import InstrumentedAttribute
-from wtforms.validators import ValidationError
 from structlog import get_logger
+from wtforms.validators import ValidationError
 
 from src.core.db.model import Staff
 

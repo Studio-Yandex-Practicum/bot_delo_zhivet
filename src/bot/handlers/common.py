@@ -2,10 +2,7 @@ from telegram import Update
 from telegram.ext import ContextTypes
 
 from bot.handlers.start import start
-from bot.handlers.state_constants import (
-    CURRENT_FEATURE, END, FEATURES, HELP_TEXT, SITE_INFO, START_OVER,
-    STOP_TEXT,
-)
+from bot.handlers.state_constants import CURRENT_FEATURE, END, FEATURES, HELP_TEXT, SITE_INFO, START_OVER, STOP_TEXT
 
 
 async def stop(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
