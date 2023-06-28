@@ -255,8 +255,8 @@ jobs:
 
             # chmod +x update_nginx_conf.sh
             # . ./update_nginx_conf.sh
-            # docker compose -f docker-compose-local-images.yaml up -d
+            docker-compose -f docker-compose-local-images.yaml up -d
             # chmod +x update_certificate.sh
             # . ./update_certificate.sh
-            # docker compose -f docker-compose-local-images.yaml exec bot poetry run alembic upgrade head
-            # docker compose -f docker-compose-local-images.yaml exec web poetry run python admin/manage.py collectstatic --static_folder static --overwrite
+            docker-compose -f docker-compose-local-images.yaml exec bot poetry run alembic upgrade head
+            docker-compose -f docker-compose-local-images.yaml exec web poetry run python admin/manage.py collectstatic --static_folder static --overwrite
