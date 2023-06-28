@@ -251,7 +251,7 @@ jobs:
             echo CERTBOT_EMAIL=${{ secrets.DEV_CERTBOT_EMAIL }} >> .env.nginx
             
             cd ..
-            cd ..
+            cd docker_compose_files
 
             # chmod +x update_nginx_conf.sh
             # . ./update_nginx_conf.sh
