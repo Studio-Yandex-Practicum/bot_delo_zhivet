@@ -321,7 +321,7 @@ async def save_and_exit_volunteer(
         update_volunteer_ticket(volunteer, old_ticket_id)
     else:
         volunteer = await create_volunteer(volunteer_data, session)
-        tracker = create_volunteer_ticket (volunteer)
+        tracker = create_volunteer_ticket(volunteer)
         await save_tracker_id(crud_volunteer, tracker.key, volunteer.telegram_id, session)
 
     await add_new_volunteer_to_issue(volunteer, session)
