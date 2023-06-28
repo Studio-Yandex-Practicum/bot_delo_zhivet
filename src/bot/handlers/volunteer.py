@@ -20,8 +20,8 @@ from src.bot.service.phone_number import format_numbers, phone_number_validate
 from src.bot.service.save_new_user import create_new_user
 from src.bot.service.save_tracker_id import save_tracker_id
 from src.bot.service.volunteer import (
-    check_and_update_volunteer, create_volunteer, get_tracker,
-    volunteer_data_preparation,
+    check_and_update_volunteer, create_volunteer, create_volunteer_ticket,
+    update_volunteer_ticket, volunteer_data_preparation,
 )
 from src.core.db.db import get_async_session
 from src.core.db.repository.volunteer_repository import crud_volunteer
@@ -318,12 +318,12 @@ async def save_and_exit_volunteer(
         volunteer, old_ticket_id = await check_and_update_volunteer(volunteer_data, session)
         if volunteer is None:
             return
+        update_volunteer_ticket(volunteer, old_ticket_id)
     else:
         volunteer = await create_volunteer(volunteer_data, session)
-        old_ticket_id = None
+        tracker = create_volunteer_ticket (volunteer)
+        await save_tracker_id(crud_volunteer, tracker.key, volunteer.telegram_id, session)
 
-    tracker = get_tracker(volunteer, old_ticket_id)
-    await save_tracker_id(crud_volunteer, tracker.key, volunteer.telegram_id, session)
     await add_new_volunteer_to_issue(volunteer, session)
 
 
