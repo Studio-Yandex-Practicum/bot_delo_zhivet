@@ -39,9 +39,22 @@ async def delete_volunteer_from_issue(volunteer: Volunteer, session: AsyncSessio
             )
             description += f"\n<{volunteer.telegram_username}, {volunteer.ticketID}>"
             issue.update(description=description)
+            # Уведомляем, что волонтер больше не поможет
+            notify_volunteer_deleted(issue, volunteer)
+
+
+def notify_volunteer_deleted(issue, volunteer):
+    comment_text = f"{volunteer.telegram_username} больше не может помочь..."
+    if comment_text not in [c.text for c in issue.comments]:
+        add_comment(issue, comment_text)
+
+
+def add_comment(issue, text):
+    issue.comments.create(text=text)
 
 
 def form_new_description(issue, volunteer):
+    """Формирование нового описания задачи без удаленного волонтера."""
     description = ""
 
     for vol in issue.volunteers:
