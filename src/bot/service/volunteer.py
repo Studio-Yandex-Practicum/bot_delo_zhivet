@@ -3,6 +3,7 @@ from typing import Optional
 
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
+from yandex_tracker_client.exceptions import NotFound
 
 from src.api.tracker import client
 from src.bot.handlers.state_constants import (
@@ -73,7 +74,13 @@ def volunteers_description(volunteers):
     return description
 
 
-def volunteer_data_preparation(telegram_id: int, username: str, first_name: str, last_name: str, data: dict) -> dict:
+def volunteer_data_preparation(
+    telegram_id: int,
+    username: str,
+    first_name: str,
+    last_name: str,
+    data: dict,
+) -> dict:
     """Подготовка данных волонтера"""
     data[TELEGRAM_ID] = telegram_id
     data[TELEGRAM_USERNAME] = username
@@ -97,11 +104,6 @@ async def check_and_update_volunteer(
     """Проверяет не забанен ли волонтер, есть ли данные для обновления"""
     volunteer = await crud_volunteer.get_volunteer_by_telegram_id(volunteer_data[TELEGRAM_ID], session)
     old_ticket_id = volunteer.ticketID
-    old_volunteer = volunteer
-    if volunteer.is_banned:
-        return None, old_ticket_id
-    if not old_volunteer.is_banned and ("SPECIFY_ACTIVITY_RADIUS" in volunteer_data or "GEOM" in volunteer_data):
-        geo_update_volunteer(volunteer_data, old_volunteer, session)
     for attr in set(volunteer_data.keys()):
         if getattr(volunteer, attr) == volunteer_data[attr]:
             del volunteer_data[attr]
@@ -111,34 +113,44 @@ async def check_and_update_volunteer(
     return volunteer, old_ticket_id
 
 
-def geo_update_volunteer(volunteer_data, volunteer, session):
-    updated_volunteer = volunteer.copy()
-    if SPECIFY_ACTIVITY_RADIUS in volunteer_data:
-        updated_volunteer.radius = volunteer_data[SPECIFY_ACTIVITY_RADIUS]
-    if GEOM in volunteer_data:
-        updated_volunteer.geom = volunteer_data[GEOM]
-    crud_volunteer.update(updated_volunteer, session)
-
-
-def get_tracker(volunteer: Volunteer, old_ticket_id: str):
+def form_description(volunteer: Volunteer):
     user_name = volunteer.telegram_username
-    if user_name is None:
+    if volunteer.telegram_username is None:
         user_name = "Никнейм скрыт"
-    summary = f"{user_name} - {volunteer.full_address}"
     description = f"""
-    Ник в телеграмме: {user_name}
-    Адрес: {volunteer.full_address}
-    Наличие машины: {"Да" if volunteer.has_car else "Нет"}
-    Радиус выезда: {volunteer.radius / 1000} км
-    """
+        Ник в телеграмме: {user_name}
+        Адрес: {volunteer.full_address}
+        Наличие машины: {"Да" if volunteer.has_car else "Нет"}
+        Радиус выезда: {volunteer.radius / 1000} км
+        """
     if volunteer.phone is None:
         description += "Номер телефона: Не указан\n"
     else:
         description += f"Номер телефона: {volunteer.phone}\n"
-    if old_ticket_id:
-        description += f"Старый тикет: {old_ticket_id}"
+    return description
+
+
+def form_summary(volunteer: Volunteer):
+    user_name = volunteer.telegram_username
+    if user_name is None:
+        user_name = "Никнейм скрыт"
+    return f"{user_name} - {volunteer.full_address}"
+
+
+def create_volunteer_ticket(volunteer: Volunteer):
     return client.issues.create(
         queue=VOLUNTEER,
-        summary=summary,
-        description=description,
+        summary=form_summary(volunteer),
+        description=form_description(volunteer),
     )
+
+
+def update_volunteer_ticket(volunteer: Volunteer, ticket_id: str):
+    try:
+        issue = client.issues[ticket_id]
+        return issue.update(
+            summary=form_summary(volunteer),
+            description=form_description(volunteer),
+        )
+    except NotFound:
+        return create_volunteer_ticket(volunteer)

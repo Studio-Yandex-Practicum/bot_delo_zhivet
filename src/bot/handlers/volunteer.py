@@ -87,7 +87,8 @@ async def add_volunteer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> s
     buttons = [
         [
             InlineKeyboardButton(
-                text=f"{action} свой адрес {CHECK_MARK*check_feature(CITY)}", callback_data=SPECIFY_CITY
+                text=f"{action} свой адрес {CHECK_MARK*check_feature(CITY)}",
+                callback_data=SPECIFY_CITY,
             ),
         ],
         [
@@ -129,10 +130,16 @@ async def add_volunteer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> s
             buttons.append([InlineKeyboardButton(text=f"{save_action}", callback_data=SAVE)])
             keyboard = InlineKeyboardMarkup(buttons)
         if update.message is not None:
-            await update.message.reply_text(text=second_level_text, reply_markup=keyboard, parse_mode=ParseMode.HTML)
+            await update.message.reply_text(
+                text=second_level_text,
+                reply_markup=keyboard,
+                parse_mode=ParseMode.HTML,
+            )
         else:
             await update.callback_query.edit_message_text(
-                text=second_level_text, reply_markup=keyboard, parse_mode=ParseMode.HTML
+                text=second_level_text,
+                reply_markup=keyboard,
+                parse_mode=ParseMode.HTML,
             )
 
     context.user_data[START_OVER] = False
@@ -363,4 +370,13 @@ async def back_to_add_volunteer(update: Update, context: ContextTypes.DEFAULT_TY
 
 
 def check_data(user_data) -> bool:
-    return all((feature in user_data for feature in (CITY, SPECIFY_ACTIVITY_RADIUS, SPECIFY_CAR_AVAILABILITY)))
+    return all(
+        (
+            feature in user_data
+            for feature in (
+                CITY,
+                SPECIFY_ACTIVITY_RADIUS,
+                SPECIFY_CAR_AVAILABILITY,
+            )
+        )
+    )
