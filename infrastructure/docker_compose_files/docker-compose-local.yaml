@@ -186,6 +186,9 @@ services:
       - static_value:/var/html/static/
     depends_on:
       - web
+    env_file:
+      - ../.env_files/.env.nginx
+      - ../.env_files/.env.telegram
 
 volumes:
   postgres_data:

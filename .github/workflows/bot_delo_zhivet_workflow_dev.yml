@@ -9,7 +9,13 @@ on:
 env:
     BRANCH: 'refs/heads/develop'
 #    BRANCH: 'refs/heads/feature/workflow_update'
+
+# на сервер в директорию с именем PROJECT_FOLDER_NAME будет скопировано содержимое директории infrastructure
     PROJECT_FOLDER_PATH: ~/${{ vars.PROJECT_FOLDER_NAME }}
+    DOCKER_COMPOSE_FILES_PATH: ~/${{ vars.PROJECT_FOLDER_NAME }}/docker_compose_files
+    NGINX_CONFIG_FILES_PATH: ~/${{ vars.PROJECT_FOLDER_NAME }}/nginx
+    ENV_FILES_DIR_NAME: .env_files
+    INFRASTRUCTURE: infrastructure
 
 jobs:
   # tests:
@@ -113,18 +119,16 @@ jobs:
       - name: Checkout the repo
         uses: actions/checkout@v3
 
-      # - name: stop all containers
-      # # if: github.ref == env.BRANCH
-      #   uses: appleboy/ssh-action@master
-      #   with:
-      #     host: ${{ secrets.DEV_SERVER_HOST }}
-      #     username: ${{ secrets.DEV_SERVER_USER }}
-      #     key: ${{ secrets.DEV_SERVER_SSH_KEY }}
-      #     passphrase: ${{ secrets.DEV_SERVER_PASSPHRASE }}
-      #     script: |
-      #       cd ${{ env.PROJECT_FOLDER_PATH }}
-      #       cd docker_compose_files
-      #       docker compose -f docker-compose-local-images.yaml stop
+      - name: stop all containers
+      # if: github.ref == env.BRANCH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.DEV_SERVER_HOST }}
+          username: ${{ secrets.DEV_SERVER_USER }}
+          key: ${{ secrets.DEV_SERVER_SSH_KEY }}
+          passphrase: ${{ secrets.DEV_SERVER_PASSPHRASE }}
+          script: |
+            docker compose -f ${{ env.DOCKER_COMPOSE_FILES_PATH }}/${{vars.DOCKER_COMPOSE_FILE_DEV}}  stop
 
 
       - name: Copy files for deploy
@@ -135,7 +139,7 @@ jobs:
           username: ${{ secrets.DEV_SERVER_USER }}
           key: ${{ secrets.DEV_SERVER_SSH_KEY }}
           passphrase: ${{ secrets.DEV_SERVER_PASSPHRASE }}
-          source: "infrastructure/*,!infrastructure/archive/*,!infrastructure/nginx/*,!infrastructure/.env.examples/*"
+          source: "${{ENV.INFRASTRUCTURE}}/*,!${{ENV.INFRASTRUCTURE}}/archive/*,!${{ENV.INFRASTRUCTURE}}/nginx/*,!${{ENV.INFRASTRUCTURE}}/.env.examples/*"
           target: ${{ env.PROJECT_FOLDER_PATH }}
           overwrite: true
           strip_components: 1
@@ -148,7 +152,7 @@ jobs:
           username: ${{ secrets.DEV_SERVER_USER }}
           key: ${{ secrets.DEV_SERVER_SSH_KEY }}
           passphrase: ${{ secrets.DEV_SERVER_PASSPHRASE }}
-          source: "infrastructure/nginx/*"
+          source: "${{ENV.INFRASTRUCTURE}}/nginx/*"
           target: ${{ env.PROJECT_FOLDER_PATH }}
           overwrite: true
           strip_components: 1
@@ -163,20 +167,20 @@ jobs:
           passphrase: ${{ secrets.DEV_SERVER_PASSPHRASE }}
           script: |
 
-            cd ${{ env.PROJECT_FOLDER_PATH }}
-            cd docker_compose_files
-            # docker compose -f docker-compose-local-images.yaml stop
-            # docker compose -f docker-compose-local-images.yaml rm -fs web
-            # docker compose -f docker-compose-local-images.yaml rm -fs bot
-            # docker compose -f docker-compose-local-images.yaml rm -fs nginx
+            cd ${{ env.DOCKER_COMPOSE_FILES_PATH }}
+            # docker compose -f ${{vars.DOCKER_COMPOSE_FILE_DEV}} stop
+            # docker compose -f ${{vars.DOCKER_COMPOSE_FILE_DEV}} rm -fs web
+            # docker compose -f ${{vars.DOCKER_COMPOSE_FILE_DEV}} rm -fs bot
+            # docker compose -f ${{vars.DOCKER_COMPOSE_FILE_DEV}} rm -fs nginx
             # docker image rm -f ${{ secrets.DEV_DOCKERHUB_USERNAME }}/delo_zhivet_bot_and_admin:${{ vars.DEV_DOCKER_TAG }}
             # docker image rm -f ${{ secrets.DEV_DOCKERHUB_USERNAME }}/delo_zhivet_nginx:${{ vars.DEV_DOCKER_TAG }}
             docker image pull -q ${{ secrets.DEV_DOCKERHUB_USERNAME }}/delo_zhivet_bot_and_admin:${{ vars.DEV_DOCKER_TAG }}
             docker image pull -q ${{ secrets.DEV_DOCKERHUB_USERNAME }}/delo_zhivet_nginx:${{ vars.DEV_DOCKER_TAG }}
             
-            cd ..
-            mkdir .env_files
-            cd .env_files
+            cd ${{env.PROJECT_FOLDER_PATH}}
+            mkdir ${{env.ENV_FILES_DIR_NAME}}
+            cd ${{env.PROJECT_FOLDER_PATH}}/${{env.ENV_FILES_DIR_NAME}}
+
             rm .env.db
             touch .env.db
             echo POSTGRES_DB=${{ secrets.DEV_POSTGRES_DB }} >> .env.db
@@ -184,6 +188,7 @@ jobs:
             echo POSTGRES_PASSWORD=${{ secrets.DEV_POSTGRES_PASSWORD }} >> .env.db
             echo DB_HOST=${{ secrets.DEV_DB_HOST }} >> .env.db
             echo DB_PORT=${{ secrets.DEV_DB_PORT }} >> .env.db
+
             rm .env.flask
             touch .env.flask
             echo FLASK_APP=${{ secrets.DEV_FLASK_APP }} >> .env.flask
@@ -193,6 +198,7 @@ jobs:
             echo SUPER_USER_EMAIL=${{ secrets.DEV_SUPER_USER_EMAIL }} >> .env.flask
             echo SUPER_USER_PASSWORD=${{ secrets.DEV_SUPER_USER_PASSWORD }} >> .env.flask
             echo ADMIN_SECRET_KEY=${{ secrets.DEV_ADMIN_SECRET_KEY }} >> .env.flask
+
             rm .env.mail
             touch .env.mail
             echo PASSWORD_RESET_TOKEN_TTL=${{ secrets.DEV_PASSWORD_RESET_TOKEN_TTL }} >> .env.mail
@@ -203,10 +209,12 @@ jobs:
             echo MAIL_USERNAME=${{ secrets.DEV_MAIL_USERNAME }} >> .env.mail
             echo MAIL_PASSWORD=${{ secrets.DEV_MAIL_PASSWORD }} >> .env.mail
             echo MAIL_DEBUG=${{ secrets.DEV_MAIL_DEBUG }} >> .env.mail
+
             rm .env.sentry
             touch .env.sentry
             echo SENTRY_DSN_ADMIN=${{ secrets.DEV_SENTRY_DSN_ADMIN }} >> .env.sentry
             echo SENTRY_DSN_BOT=${{ secrets.DEV_SENTRY_DSN_BOT }} >> .env.sentry
+
             rm .env.telegram
             touch .env.telegram
             echo TELEGRAM_BOT_TOKEN=${{ secrets.DEV_TELEGRAM_BOT_TOKEN }} >> .env.telegram
@@ -214,6 +222,7 @@ jobs:
             echo WEBHOOK_PATH=${{ secrets.DEV_WEBHOOK_PATH }} >> .env.telegram
             # echo WEBHOOK_DOMAIN=${{ secrets.DEV_WEBHOOK_DOMAIN }} >> .env.telegram
             # echo WEBHOOK_PORT=${{ secrets.DEV_WEBHOOK_PORT }} >> .env.telegram
+
             rm .env.s3
             touch .env.s3
             echo AWS_ACCESS_KEY_ID=${{ secrets.DEV_AWS_ACCESS_KEY_ID }} >> .env.s3
@@ -221,42 +230,48 @@ jobs:
             echo AWS_SERVICE_NAME=${{ secrets.DEV_AWS_SERVICE_NAME }} >> .env.s3
             echo AWS_ENDPOINT_URL=${{ secrets.DEV_AWS_ENDPOINT_URL }} >> .env.s3
             echo AWS_BUCKET_NAME=${{ secrets.DEV_AWS_BUCKET_NAME }} >> .env.s3
+
             rm .env.yatracker
             touch .env.yatracker
             echo OAUTH_TOKEN=${{ secrets.DEV_OAUTH_TOKEN }} >> .env.yatracker
             echo ORG_ID=${{ secrets.DEV_ORG_ID }} >> .env.yatracker
+
             rm .env.geocoder
             touch .env.geocoder
             echo GEOCODER_APIKEY=${{ secrets.DEV_GEOCODER_APIKEY }} >> .env.geocoder
             echo GEOCODER_BASE_URL=${{ secrets.DEV_GEOCODER_BASE_URL }} >> .env.geocoder
             echo MAXIMUM_OBJECTS_FROM_GEOCODER=${{ secrets.DEV_MAXIMUM_OBJECTS_FROM_GEOCODER }} >> .env.geocoder
+
             rm .env.dadata
             touch .env.dadata
             echo DADATA_TOKEN=${{ secrets.DEV_DADATA_TOKEN }} >> .env.dadata
             echo DADATA_SECRET=${{ secrets.DEV_DADATA_SECRET }} >> .env.dadata
+
             rm .env.redis
             touch .env.redis
             echo REDIS_HOST=redis >> .env.redis
             echo REDIS_PORT=6379 >> .env.redis
-            rm .env
-            touch .env
-            echo HOST_NAME=${{ secrets.DEV_HOST_NAME }} >> .env
-            echo CERTBOT_EMAIL=${{ secrets.DEV_CERTBOT_EMAIL }} >> .env
-            echo PROJECT_FOLDER_PATH=${{ env.PROJECT_FOLDER_PATH }} >> .env
-            echo RELOAD_NGINX_CONFIG=${{ vars.RELOAD_NGINX_CONFIG }} >> .env
-            echo DOCKER_TAG=${{ vars.DEV_DOCKER_TAG }} >> .env
+
             rm .env.nginx
             touch .env.nginx
             echo HOST_NAME=${{ secrets.DEV_HOST_NAME }} >> .env.nginx
             echo CERTBOT_EMAIL=${{ secrets.DEV_CERTBOT_EMAIL }} >> .env.nginx
-            
-            cd ..
-            cd docker_compose_files
+            echo RELOAD_NGINX_CONFIG ${{vars.RELOAD_NGINX_CONFIG}}>> .env.nginx
+            echo PROJECT_FOLDER_PATH=${{env.PROJECT_FOLDER_PATH}} >> .env.nginx
+            echo DOCKER_COMPOSE_FILE=${{vars.DOCKER_COMPOSE_FILE_DEV}} >> .env.nginx
+            echo DOCKER_TAG=${{ vars.DEV_DOCKER_TAG }} >> .env
 
+            
+            # вызов скрипта по обновлению конфига нгинкса
+            cd ${{env.PROJECT_FOLDER_PATH}}
             # chmod +x update_nginx_conf.sh
             # . ./update_nginx_conf.sh
-            docker compose -f docker-compose-local-images.yaml up -d
+
             # chmod +x update_certificate.sh
             # . ./update_certificate.sh
-            docker compose -f docker-compose-local-images.yaml exec bot poetry run alembic upgrade head
-            docker compose -f docker-compose-local-images.yaml exec web poetry run python admin/manage.py collectstatic --static_folder static --overwrite
+            cd ..
+            cd ${{env.PROJECT_FOLDER_PATH}}
+            cd docker_compose_files
+            docker compose -f ${{vars.DOCKER_COMPOSE_FILE_DEV}} up -d
+            docker compose -f ${{vars.DOCKER_COMPOSE_FILE_DEV}} exec bot poetry run alembic upgrade head
+            docker compose -f ${{vars.DOCKER_COMPOSE_FILE_DEV}} exec web poetry run python admin/manage.py collectstatic --static_folder static --overwrite
