@@ -256,7 +256,7 @@ jobs:
             touch .env.nginx
             echo HOST_NAME=${{ secrets.DEV_HOST_NAME }} >> .env.nginx
             echo CERTBOT_EMAIL=${{ secrets.DEV_CERTBOT_EMAIL }} >> .env.nginx
-            echo RELOAD_NGINX_CONFIG ${{vars.RELOAD_NGINX_CONFIG}}>> .env.nginx
+            echo RELOAD_NGINX_CONFIG=${{vars.RELOAD_NGINX_CONFIG}}>> .env.nginx
             echo PROJECT_FOLDER_PATH=${{env.PROJECT_FOLDER_PATH}} >> .env.nginx
             echo DOCKER_COMPOSE_FILE=${{vars.DOCKER_COMPOSE_FILE_DEV}} >> .env.nginx
             echo DOCKER_TAG=${{ vars.DEV_DOCKER_TAG }} >> .env
