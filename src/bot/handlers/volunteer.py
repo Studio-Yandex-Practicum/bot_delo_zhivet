@@ -6,13 +6,12 @@ from src.bot.handlers.start import start
 from src.bot.handlers.state_constants import (
     ACTIVITY_RADIUS,
     ADDING_VOLUNTEER,
+    ADDRESS,
     ADDRESS_INPUT,
     ADDRESS_TEMPORARY,
     BACK,
     CAR_COMMAND,
     CHECK_MARK,
-    CITY,
-    CITY_COMMAND,
     CURRENT_FEATURE,
     EDIT_PROFILE_GREETING,
     END,
@@ -33,10 +32,8 @@ from src.bot.handlers.state_constants import (
     START_OVER,
     TELEGRAM_ID,
     TELEGRAM_USERNAME,
-    TYPING_CITY,
     VALIDATE,
 )
-from src.bot.service.dadata import get_fields_from_dadata
 from src.bot.service.get_issues_with_statuses import add_new_volunteer_to_issue
 from src.bot.service.phone_number import format_numbers, phone_number_validate
 from src.bot.service.save_new_user import create_new_user
@@ -85,7 +82,7 @@ async def add_volunteer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> s
     buttons = [
         [
             InlineKeyboardButton(
-                text=f"{action} свой адрес {CHECK_MARK*check_feature(CITY)}", callback_data=ADDRESS_INPUT
+                text=f"{action} свой адрес {CHECK_MARK*check_feature(ADDRESS)}", callback_data=ADDRESS_INPUT
             ),
         ],
         [
@@ -200,64 +197,6 @@ async def handle_phone_input(update: Update, context: ContextTypes.DEFAULT_TYPE)
     return SELECTING_OVER
 
 
-async def ask_for_input_city(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
-    """Предложить пользователю ввести данные о населенном пункте."""
-    context.user_data[CURRENT_FEATURE] = update.callback_query.data
-    text = "Укажите свой адрес:"
-    button = [[InlineKeyboardButton(text="Назад", callback_data=BACK)]]
-    keyboard = InlineKeyboardMarkup(button)
-
-    await update.callback_query.answer()
-    await update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
-
-    return TYPING_CITY
-
-
-async def handle_city_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
-    """Обработчик данных о населенном пункте с выводом возможных вариантов."""
-    user_input = update.message.text
-    address = get_fields_from_dadata(user_input)
-    if address is not None:
-        text = (
-            f"Это правильный адрес: {address['full_address']}? "
-            'Если адрес не правильный, то выберите "Нет" и укажите более подробный вариант адреса, '
-            "а мы постараемся определить его правильно!"
-        )
-        context.user_data[ADDRESS_TEMPORARY] = address
-
-        buttons = [
-            [
-                InlineKeyboardButton(text="Да", callback_data=CITY_COMMAND),
-                InlineKeyboardButton(text="Нет", callback_data=ADDRESS_INPUT),
-            ],
-            [
-                InlineKeyboardButton(text="Назад", callback_data=BACK),
-            ],
-        ]
-
-        keyboard = InlineKeyboardMarkup(buttons)
-
-        await update.message.reply_text(text=text, reply_markup=keyboard)
-
-    else:
-        chat_text = "Не нашли такой адрес. Пожалуйста, укажи адрес подробнее:"
-
-        buttons = [
-            [
-                InlineKeyboardButton(text="Указать адрес заново", callback_data=ADDRESS_INPUT),
-            ],
-            [
-                InlineKeyboardButton(text="Назад", callback_data=BACK),
-            ],
-        ]
-
-        keyboard = InlineKeyboardMarkup(buttons)
-
-        await update.message.reply_text(text=chat_text, reply_markup=keyboard)
-
-    return SELECTING_OVER
-
-
 async def handle_radius_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     """Обработчик данных о радиусе действия."""
     context.user_data[CURRENT_FEATURE] = update.callback_query.data
@@ -361,4 +300,4 @@ async def back_to_add_volunteer(update: Update, context: ContextTypes.DEFAULT_TY
 
 
 def check_data(user_data) -> bool:
-    return all((feature in user_data for feature in (CITY, SPECIFY_ACTIVITY_RADIUS, SPECIFY_CAR_AVAILABILITY)))
+    return all((feature in user_data for feature in (ADDRESS, SPECIFY_ACTIVITY_RADIUS, SPECIFY_CAR_AVAILABILITY)))

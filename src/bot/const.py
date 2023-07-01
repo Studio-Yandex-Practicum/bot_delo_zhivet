@@ -16,7 +16,6 @@ REPORT_SOCIAL_PROBLEM_CMD = BASE_PATTERN.format(command="Сообщить о с�
 REPORT_ECO_PROBLEM_CMD = BASE_PATTERN.format(command=ADDING_ECO_TASK)
 BECOME_VOLUNTEER_CMD = BASE_PATTERN.format(command=ADDING_VOLUNTEER)
 MAKE_DONATION_CMD = BASE_PATTERN.format(command="Сделать пожертвование")
-SPECIFY_CITY_CMD = BASE_PATTERN.format(command="Указать город")
 END_CMD = BASE_PATTERN.format(command=END)
 
 SPECIFY_ADDRESS_CMD = BASE_PATTERN.format(command=ADDRESS_INPUT)

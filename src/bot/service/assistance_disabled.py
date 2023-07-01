@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.bot.handlers.state_constants import (
-    CITY,
+    ADDRESS,
     COMMENT,
     GEOM,
     LATITUDE,
@@ -46,7 +46,7 @@ async def create_new_social(
 
 async def create_new_social_dict_from_data(user_id: int, data: dict, session) -> dict:
     """Перекладывает данные из data в словарь который подходит для создания Assistance_disabled"""
-    mandatory_fields = [LATITUDE, LONGITUDE, CITY, "full_address"]
+    mandatory_fields = [LATITUDE, LONGITUDE, ADDRESS, "city"]
     new_social_dict: dict = {TELEGRAM_ID: user_id}
     new_social_dict[GEOM] = f"POINT({data[LONGITUDE]} {data[LATITUDE]})"
     for field in mandatory_fields:

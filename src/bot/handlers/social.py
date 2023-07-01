@@ -5,27 +5,22 @@ from telegram.ext import ContextTypes
 from api.tracker import client
 from bot.handlers.state_constants import (
     ADD_SOCIAL_TAG,
+    ADDRESS,
     ADDRESS_INPUT,
     ADDRESS_TEMPORARY,
     BACK,
     CHECK_MARK,
-    CITY,
-    CITY_SOCIAL,
     CURRENT_FEATURE,
     END,
     FEATURES,
     SAVE,
     SECOND_LEVEL_TEXT,
     SELECTING_FEATURE,
-    SOCIAL_ADDRESS,
     SOCIAL_COMMENT,
-    SOCIAL_PROBLEM_ADDRESS,
     SOCIAL_PROBLEM_TYPING,
     SOCIAL_TAGS,
     START_OVER,
-    TYPING_SOCIAL_CITY,
 )
-from bot.service.dadata import get_fields_from_dadata
 from src.bot.service.assistance_disabled import (
     create_new_social,
     create_new_social_dict_from_data,
@@ -56,61 +51,6 @@ async def input_social_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return SOCIAL_PROBLEM_TYPING
 
 
-async def ask_for_input_address(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
-    """Предложить пользователю ввести данные о населенном пункте."""
-    context.user_data[CURRENT_FEATURE] = update.callback_query.data
-    text = "Укажите адрес, по которому нужно оказать помощь:"
-    button = [[InlineKeyboardButton(text="Назад", callback_data=BACK)]]
-    keyboard = InlineKeyboardMarkup(button)
-
-    await update.callback_query.answer()
-    await update.callback_query.edit_message_text(text=text, reply_markup=keyboard)
-
-    return TYPING_SOCIAL_CITY
-
-
-async def address_confirmation(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
-    """Обработчик данных о населенном пункте с выводом возможных вариантов."""
-    user_input = update.message.text
-    address = get_fields_from_dadata(user_input)
-    if address is not None:
-        text = (
-            f"Это правильный адрес: {address['full_address']}? "
-            'Если адрес не правильный, то выберите "Нет" и укажите более подробный вариант адреса, '
-            "а мы постараемся определить его правильно!"
-        )
-        context.user_data[ADDRESS_TEMPORARY] = address
-
-        buttons = [
-            [
-                InlineKeyboardButton(text="Да", callback_data=CITY_SOCIAL),
-                InlineKeyboardButton(text="Нет", callback_data=ADDRESS_INPUT),
-            ],
-            [InlineKeyboardButton(text="Назад", callback_data=BACK)],
-        ]
-
-        keyboard = InlineKeyboardMarkup(buttons)
-
-        await update.message.reply_text(text=text, reply_markup=keyboard)
-
-    else:
-        chat_text = "Не нашли такой адрес. Пожалуйста, укажи адрес подробнее:"
-        buttons = [
-            [
-                InlineKeyboardButton(text="Указать адрес заново", callback_data=ADDRESS_INPUT),
-            ],
-            [
-                InlineKeyboardButton(text="Назад", callback_data=BACK),
-            ],
-        ]
-
-        keyboard = InlineKeyboardMarkup(buttons)
-
-        await update.message.reply_text(text=chat_text, reply_markup=keyboard)
-
-    return SOCIAL_PROBLEM_ADDRESS
-
-
 async def save_social_problem_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_data = context.user_data
     user_data[FEATURES][user_data[CURRENT_FEATURE]] = update.message.text
@@ -122,11 +62,11 @@ async def save_social_problem_data(update: Update, context: ContextTypes.DEFAULT
 async def save_social_address_input(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Сохранение данных в контексте."""
 
-    city = update.callback_query.data
+    address = update.callback_query.data
 
     user_data = context.user_data
     user_data[FEATURES] |= context.user_data.pop(ADDRESS_TEMPORARY, {})
-    user_data[FEATURES][user_data[CURRENT_FEATURE]] = city
+    user_data[FEATURES][user_data[CURRENT_FEATURE]] = address
 
     user_data[START_OVER] = True
 
@@ -140,7 +80,9 @@ async def report_about_social_problem(update: Update, context: ContextTypes.DEFA
     text = "Заполните данные об обращении"
     buttons = [
         [
-            InlineKeyboardButton(text=f"Указать адрес {CHECK_MARK*check_feature(CITY)}", callback_data=SOCIAL_ADDRESS),
+            InlineKeyboardButton(
+                text=f"Указать адрес {CHECK_MARK*check_feature(ADDRESS)}", callback_data=ADDRESS_INPUT
+            ),
         ],
         [
             InlineKeyboardButton(
@@ -199,7 +141,6 @@ async def save_and_exit_from_social_problem(
     user_data,
 ) -> None:
     """Сохранение данных в базу и отправка в трекер"""
-
     session_generator = get_async_session()
     session = await session_generator.asend(None)
 
@@ -224,7 +165,7 @@ async def back_to_add_social(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
 
 def check_data(user_data):
-    if CITY in user_data and SOCIAL_COMMENT in user_data:
+    if ADDRESS in user_data and SOCIAL_COMMENT in user_data:
         return True
     else:
         return False
