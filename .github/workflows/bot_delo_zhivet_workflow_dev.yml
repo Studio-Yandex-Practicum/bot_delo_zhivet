@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - develop
-      - test_server
 #      - feature/workflow_update
 
 env:
@@ -17,7 +16,7 @@ env:
     NGINX_CONFIG_FILES_PATH: ~/${{ vars.PROJECT_FOLDER_NAME }}/nginx
     ENV_FILES_DIR_NAME: .env_files
     INFRASTRUCTURE: infrastructure
-    DOCKER_COMPOSE_FILE: docker-compose-local-images.yaml
+    DOCKER_COMPOSE_FILE: docker-compose-dev-deploy.yaml
 
 jobs:
   tests:
@@ -176,15 +175,6 @@ jobs:
           key: ${{ secrets.DEV_SERVER_SSH_KEY }}
           passphrase: ${{ secrets.DEV_SERVER_PASSPHRASE }}
           script: |
-
-            # cd ${{ env.DOCKER_COMPOSE_FILES_PATH }}
-            # docker compose -f ${{env.DOCKER_COMPOSE_FILE}} stop
-            # docker compose -f ${{env.DOCKER_COMPOSE_FILE}} rm -fs web
-            # docker compose -f ${{env.DOCKER_COMPOSE_FILE}} rm -fs nginx
-            # docker image rm -f ${{ secrets.DEV_DOCKERHUB_USERNAME }}/delo_zhivet_bot_and_admin:${{ vars.DEV_DOCKER_TAG }}
-            # docker image rm -f ${{ secrets.DEV_DOCKERHUB_USERNAME }}/delo_zhivet_nginx:${{ vars.DEV_DOCKER_TAG }}
-            # docker image pull -q ${{ secrets.DEV_DOCKERHUB_USERNAME }}/delo_zhivet_bot_and_admin:${{ vars.DEV_DOCKER_TAG }}
-            # docker image pull -q ${{ secrets.DEV_DOCKERHUB_USERNAME }}/delo_zhivet_nginx:${{ vars.DEV_DOCKER_TAG }}
             
             cd ${{env.PROJECT_FOLDER_PATH}}
             mkdir ${{env.ENV_FILES_DIR_NAME}}
@@ -267,11 +257,10 @@ jobs:
             echo CERTBOT_EMAIL=${{ secrets.DEV_CERTBOT_EMAIL }} >> .env.nginx
             echo RELOAD_NGINX_CONFIG=${{vars.RELOAD_NGINX_CONFIG}}>> .env.nginx
             echo PROJECT_FOLDER_PATH=${{env.PROJECT_FOLDER_PATH}} >> .env.nginx
-            echo DOCKER_COMPOSE_FILE=${{env.DOCKER_COMPOSE_FILE}} >> .env.nginx
             echo DOCKER_TAG=${{ vars.DEV_DOCKER_TAG }} >> .env
 
             
-            # вызов скрипта по обновлению конфига нгинкса
+            # вызов скрипта по обновлению конфига нгинкса сейчас не вызывается и не факт что работает
             cd ${{env.PROJECT_FOLDER_PATH}}
             # chmod +x update_nginx_conf.sh
             # . ./update_nginx_conf.sh
