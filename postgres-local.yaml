@@ -1,0 +1,23 @@
+version: '3.8'
+
+volumes:
+  postgis_local_data:
+
+services:
+  postgis-local:
+    platform: linux/amd64
+    container_name: postgis-local
+    image: postgis/postgis:14-3.3-alpine
+    restart: always
+    volumes:
+      - postgis_local_data:/var/lib/postgresql/data/
+    env_file:
+      - ./infrastructure/.env.db.local
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:?err} -d $${POSTGRES_DB:?err}"]
+      start_period: 30s
+      timeout: 10s
+      interval: 5s
+      retries: 10
+    ports:
+      - "5432:5432"

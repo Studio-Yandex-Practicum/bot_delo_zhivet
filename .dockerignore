@@ -1,0 +1,12 @@
+.github
+.gitignore
+.pre-commit-config.yaml
+infrastructure/*
+!infrastructure/.env.*
+.env.example
+.env*.example
+.venv
+venv
+env
+.DS_Store
+.idea

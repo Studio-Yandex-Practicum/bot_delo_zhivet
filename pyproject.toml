@@ -1,0 +1,94 @@
+[tool.poetry]
+name = "bot-delo-zhivet"
+version = "0.1.0"
+description = "Телеграм-бот для организации эко-субботников."
+authors = ["Александр Ниязов <alexander.niyazov@gmail.com>",
+           "Александр Тихонов <aleksandrtikhonov@users.noreply.github.com>",
+           "Андрей Изотов <andreyizotov@users.noreply.github.com>",
+           "Денис Швецов <denshvetsov@users.noreply.github.com>",
+           "Владислав Василенко <vasilekx@users.noreply.github.com>",
+           "Ilya Simonov <ilya-simonov@users.noreply.github.com>",
+           "Petr Lukakhin <ZakonGyka@users.noreply.github.com>",
+           "Alexander Loshchilov <ALoshchilov@users.noreply.github.com>",
+           "Dmitry Konstantinov <dvkonstantinov@users.noreply.github.com>",
+           "Andrey Bychkov <AndreyVnk@users.noreply.github.com>",
+           "Egor Kordiy <Rengoky@users.noreply.github.com>",
+           "Pavel Filipovich <PavelFil98@users.noreply.github.com>",
+           "Alexander Gorynichev <px2005@users.noreply.github.com>",
+           "Никита <Gwynrey@users.noreply.github.com>",
+           "Григорий <lefaur@users.noreply.github.com>",
+           "Igor Redkin <igredk@users.noreply.github.com>",
+           "Evgenii Istomin <EvgenIstom@users.noreply.github.com>",
+           "Anna Simanova <ani-zia@users.noreply.github.com>",
+           "Maksim Sandalov <Bujikuh@users.noreply.github.com>"]
+readme = "README.md"
+packages = [{include = "*", from = "src"}, {include = "**/*.py", from = "."}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pre-commit = "^2.20.0"
+fastapi = "0.82.0"
+python-telegram-bot = "20.0"
+pydantic = "1.10.4"
+requests = "2.28.1"
+python-dotenv = "^0.21.0"
+sqlalchemy = "^1.4.36"
+flake8 = "^6.0.0"
+alembic = "^1.9.2"
+asyncpg = "^0.27.0"
+flask = "^2.2.2"
+flask-sqlalchemy = "^3.0.2"
+flask-admin = "^1.6.0"
+psycopg2-binary = "^2.9.5"
+yandex-tracker-client = "^2.3"
+dadata = "^21.10.1"
+pathlib = "^1.0.1"
+flask-security = "^3.0.0"
+email-validator = "^1.3.1"
+flask-migrate = "^4.0.4"
+gunicorn = "^20.1.0"
+backoff = "^2.2.1"
+backoff-utils = "^1.0.1"
+postgis = "^1.0.4"
+geoalchemy2 = "^0.13.1"
+sentry-sdk = "^1.15.0"
+boto3 = "^1.26.75"
+uvicorn = "^0.20.0"
+greenlet = "^2.0.2"
+flask-mail = "^0.9.1"
+pyjwt = "^2.6.0"
+celery = "^5.2.7"
+redis = "^4.5.4"
+flower = "^1.2.0"
+structlog = "^23.1.0"
+pillow = "^9.5.0"
+levenshtein = "^0.21.1"
+
+[tool.poetry.group.prod]
+optional = true
+
+[tool.poetry.group.prod.dependencies]
+psycopg2 = "^2.9.5"
+
+[tool.poetry.group.test]
+optional = true
+
+[tool.poetry.group.test.dependencies]
+flake8 = "^6.0.0"
+pep8-naming = "^0.13.3"
+flake8-return = "^1.2.0"
+
+[tool.poetry.group.dev]
+optional = true
+
+[tool.poetry.group.dev.dependencies]
+psycopg2-binary = "^2.9.5"
+flake8 = "^6.0.0"
+gevent = "^22.10.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+runbot = "main:start_bot"

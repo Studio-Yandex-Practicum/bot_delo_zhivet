@@ -1,0 +1,149 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgis/postgis:14-3.3-alpine
+    platform: linux/amd64
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - ./infrastructure/.env.db
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:?err} -d $${POSTGRES_DB:?err}"]
+      start_period: 30s
+      timeout: 10s
+      interval: 5s
+      retries: 10
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:alpine
+    volumes:
+      - redis_data:/data
+
+  bot:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    volumes:
+      - media_data:/app/media/
+    command: [ "poetry", "run", "runbot" ]
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - ./infrastructure/.env.telegram
+    environment:
+      - PG_DOCKER_ENV=dev
+
+  web:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    command:
+      [
+        "poetry",
+        "run",
+        "gunicorn",
+        "--bind",
+        "0.0.0.0:5000",
+        "--access-logfile=-",
+        "manage:app"
+      ]
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+      bot:
+        condition: service_started
+    env_file:
+      - ./infrastructure/.env.s3
+      - ./infrastructure/.env.dadata
+      - ./infrastructure/.env.flask
+      - ./infrastructure/.env.geocoder
+      - ./infrastructure/.env.mail
+      - ./infrastructure/.env.nginx
+      - ./infrastructure/.env.redis
+      - ./infrastructure/.env.sentry
+      - ./infrastructure/.env.yatracker
+    environment:
+      - PG_DOCKER_ENV=dev
+    volumes:
+      - static_value:/app/admin/static/
+      - ./admin/logs/:/app/admin/logs/
+
+  celery:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    volumes:
+      - media_data:/app/media/
+    command:
+      [
+        "poetry",
+        "run",
+        "celery",
+        "-A",
+        "src.bot.tasks",
+        "worker"
+      ]
+    environment:
+      - PG_DOCKER_ENV=dev
+    depends_on:
+      db:
+        condition: service_healthy
+      bot:
+        condition: service_started
+      redis:
+        condition: service_started
+
+  flower:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    command:
+      [
+        "poetry",
+        "run",
+        "celery",
+        "-A",
+        "src.bot.tasks",
+        "flower"
+      ]
+    ports:
+      - "5555:5555"
+    environment:
+      - PG_DOCKER_ENV=dev
+    depends_on:
+      db:
+        condition: service_healthy
+      bot:
+        condition: service_started
+      redis:
+        condition: service_started
+      celery:
+        condition: service_started
+
+  nginx:
+    build:
+      context: ./infrastructure/nginx
+      dockerfile: ./Dockerfile
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    volumes:
+      - ./infrastructure/nginx/delo-local.conf:/etc/nginx/servers/delo.conf:rw
+      - ./infrastructure/nginx/letsencrypt/:/etc/letsencrypt/:rw
+      - static_value:/var/html/static/
+    depends_on:
+      - web
+
+volumes:
+  postgres_data:
+  static_value:
+  media_data:
+  redis_data:
