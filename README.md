@@ -152,15 +152,30 @@ ___
 
 ### 1. Настройка env-файлов
 
-1. В папке infrastructure/ лежат файлы `.env.X.example` с константами, которые необходимо заполнить тестовыми значениями. Удалите из имени файлов `.example` после окончания их настройки.
+1. В папке infrastructure/ есть директория `.env.examples` с константами, которые необходимо заполнить тестовыми значениями. Создайте рядом с ней НОВУЮ директорию с именем
+```
+.env_files
+```
+скопируйте в нее все файлы из `.env.examples`
+Удалите из имени файлов `.example` после окончания их настройки.
 Инструкция и примеры значений: https://www.notion.so/env-8b7403f73b604daf90253041de4fec19
+НЕ ИЗМЕНЯЙТЕ файлы в `.env.examples`
 
 2. Запускать бота можно в режимах **polling** и **webhook**. Для режима webhook в файле `.env.telegram` должны быть указаны параметры WEBHOOK_DOMAIN и WEBHOOK_PORT. Подробнее [в официальном гайде Telegram](https://core.telegram.org/bots/webhooks).
 
 ### 2. Запуск сервисов бота в Docker
+ВАЖНО файлы docker-compose переехали!!!!
+что бы запускать/останавливать контейнеры надо зайти в директорию 
+`infrastructure/docker_compose_files`
 1. Запустить Docker
 
 2. Если был запущен локальный контейнер с базой, остановить его:
+   
+   зайти в `infrastructure/docker_compose_files`
+```bash
+cd infrastructure/docker_compose_files
+```
+остановить контейнер
 ```bash
 docker compose -f postgres-local.yaml stop
 # для остановки и удаления контейнера, тома и связей:
@@ -168,11 +183,18 @@ docker compose -f postgres-local.yaml stop
 ```
 
 3. Запуск сервисов бота (database, bot, flask admin, redis, celery, flower):
+   
+   зайти в `infrastructure/docker_compose_files`
+```bash
+cd infrastructure/docker_compose_files
+```
+запустить 
 ```bash
 docker compose -f docker-compose-local.yaml up -d --build
 ```
 
 4. Установить миграции (и активировать Flask админ панель):
+в директории `infrastructure/docker_compose_files`
 ```bash
 docker compose -f docker-compose-local.yaml exec bot poetry run alembic upgrade head
 ```
@@ -181,6 +203,7 @@ docker compose -f docker-compose-local.yaml exec bot poetry run alembic upgrade 
 Доступ к админ панели Flask: http://localhost/admin/
 
 5. Если Flask-admin загружается без статики - ее можно собрать. Из корневой директории проекта с активным виртуальным окружением запустите скрипт collectstatic:
+в директории `infrastructure/docker_compose_files`
 ```bash
 docker compose -f docker-compose-local.yaml exec web poetry run python admin/manage.py collectstatic --static_folder static --overwrite
 ```
@@ -202,11 +225,15 @@ RUN apk update && apk add --no-cache \
 1. Запустить Docker
 
 2. Поднять контейнер с базой:
+
+в директории `infrastructure/docker_compose_files`
 ```bash
 docker compose -f postgres-local.yaml up -d --build
 ```
 
 3. Применить миграции:
+
+из КОРНЯ проекта
 ```bash
 alembic upgrade head
 ```
@@ -251,17 +278,16 @@ ___
 [:arrow_up: Оглавление](#оглавление)
 
 ---
-## Deprecated
 
-### Запуск Flask-admin
-Если виртуальное окружение активно и все контейнеры из `docker-compose-local.yaml` запущены или запущен `postgres-local.yaml`:
-1. Проверить .env-файл, значение `DB_HOST` должно быть `localhost`
-```
-DB_HOST=localhost
-```
-2. Выполнить в теринале
+### Локальный Запуск Flask-admin с базой в докере
+Если виртуальное окружение активно и запущен `postgres-local.yaml`:
+
+1. Выполнить в теринале
+
+из КОРНЯ проекта
 ```
 flask run
 ```
-3. Перейти по ссылке из терминала, ввести логин и пароль.
+2. Перейти по ссылке из терминала, ввести логин и пароль.
 ___
+
