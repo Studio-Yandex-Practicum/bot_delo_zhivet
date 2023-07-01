@@ -107,10 +107,21 @@ async def check_and_update_volunteer(
     for attr in set(volunteer_data.keys()):
         if getattr(volunteer, attr) == volunteer_data[attr]:
             del volunteer_data[attr]
-    if not volunteer_data:
-        return None, old_ticket_id
-    volunteer = await update_volunteer(volunteer, volunteer_data, session)
+    if not volunteer.is_banned and (SPECIFY_ACTIVITY_RADIUS in volunteer_data or GEOM in volunteer_data):
+        volunteer = await geo_update_volunteer(volunteer, volunteer_data, session)
+    elif not volunteer.is_banned:
+        volunteer = await update_volunteer(volunteer, volunteer_data, session)
+
     return volunteer, old_ticket_id
+
+
+def geo_update_volunteer(volunteer_data, volunteer, session):
+    updated_volunteer = volunteer.copy()
+    if SPECIFY_ACTIVITY_RADIUS in volunteer_data:
+        updated_volunteer.radius = volunteer_data[SPECIFY_ACTIVITY_RADIUS]
+    if GEOM in volunteer_data:
+        updated_volunteer.geom = volunteer_data[GEOM]
+    crud_volunteer.update(updated_volunteer, session)
 
 
 def form_description(volunteer: Volunteer):
