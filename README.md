@@ -164,48 +164,38 @@ ___
 2. Запускать бота можно в режимах **polling** и **webhook**. Для режима webhook в файле `.env.telegram` должны быть указаны параметры WEBHOOK_DOMAIN и WEBHOOK_PORT. Подробнее [в официальном гайде Telegram](https://core.telegram.org/bots/webhooks).
 
 ### 2. Запуск сервисов бота в Docker
-ВАЖНО файлы docker-compose переехали!!!!
-что бы запускать/останавливать контейнеры надо зайти в директорию 
-`infrastructure/docker_compose_files`
+
 1. Запустить Docker
 
 2. Если был запущен локальный контейнер с базой, остановить его:
-   
-   зайти в `infrastructure/docker_compose_files`
-```bash
-cd infrastructure/docker_compose_files
-```
+
 остановить контейнер
 ```bash
-docker compose -f postgres-local.yaml stop
+docker compose -f infrastructure/docker_compose_files/postgres-local.yaml stop
 # для остановки и удаления контейнера, тома и связей:
-# docker compose -f postgres-local.yaml down
+# docker compose -f infrastructure/docker_compose_files/postgres-local.yaml down
 ```
 
 3. Запуск сервисов бота (database, bot, flask admin, redis, celery, flower):
    
-   зайти в `infrastructure/docker_compose_files`
+
 ```bash
-cd infrastructure/docker_compose_files
-```
-запустить 
-```bash
-docker compose -f docker-compose-local.yaml up -d --build
+docker compose -f infrastructure/docker_compose_files/docker-compose-local.yaml up -d --build
 ```
 
 4. Установить миграции (и активировать Flask админ панель):
-в директории `infrastructure/docker_compose_files`
+
 ```bash
-docker compose -f docker-compose-local.yaml exec bot poetry run alembic upgrade head
+docker compose -f infrastructure/docker_compose_files/docker-compose-local.yaml exec bot poetry run alembic upgrade head
 ```
 
 Смотреть заполненные заявки, прошедшие celery, можно во flower: http://localhost:5555/ <br/>
 Доступ к админ панели Flask: http://localhost/admin/
 
 5. Если Flask-admin загружается без статики - ее можно собрать. Из корневой директории проекта с активным виртуальным окружением запустите скрипт collectstatic:
-в директории `infrastructure/docker_compose_files`
+
 ```bash
-docker compose -f docker-compose-local.yaml exec web poetry run python admin/manage.py collectstatic --static_folder static --overwrite
+docker compose -f infrastructure/docker_compose_files/docker-compose-local.yaml exec web poetry run python admin/manage.py collectstatic --static_folder static --overwrite
 ```
 
 
@@ -226,9 +216,9 @@ RUN apk update && apk add --no-cache \
 
 2. Поднять контейнер с базой:
 
-в директории `infrastructure/docker_compose_files`
+
 ```bash
-docker compose -f postgres-local.yaml up -d --build
+docker compose -f infrastructure/docker_compose_files/postgres-local.yaml up -d --build
 ```
 
 3. Применить миграции:
