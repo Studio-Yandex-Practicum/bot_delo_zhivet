@@ -5,13 +5,20 @@ from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.bot.handlers.state_constants import (
-    CITY, COMMENT, GEOM, LATITUDE, LONGITUDE, NO_COMMENT_PHASE, SOCIAL,
-    SOCIAL_COMMENT, SOCIAL_TAGS, TAGS, TELEGRAM_ID,
+    ADDRESS,
+    COMMENT,
+    GEOM,
+    LATITUDE,
+    LONGITUDE,
+    NO_COMMENT_PHASE,
+    SOCIAL,
+    SOCIAL_COMMENT,
+    SOCIAL_TAGS,
+    TAGS,
+    TELEGRAM_ID,
 )
 from src.core.db.model import Assistance_disabled
-from src.core.db.repository.assistance_disabled_repository import (
-    crud_assistance_disabled,
-)
+from src.core.db.repository.assistance_disabled_repository import crud_assistance_disabled
 from src.core.db.repository.tags_repository import crud_tag_assistance
 
 
@@ -39,7 +46,7 @@ async def create_new_social(
 
 async def create_new_social_dict_from_data(user_id: int, data: dict, session) -> dict:
     """Перекладывает данные из data в словарь который подходит для создания Assistance_disabled"""
-    mandatory_fields = [LATITUDE, LONGITUDE, CITY, "full_address"]
+    mandatory_fields = [LATITUDE, LONGITUDE, ADDRESS, "city"]
     new_social_dict: dict = {TELEGRAM_ID: user_id}
     new_social_dict[GEOM] = f"POINT({data[LONGITUDE]} {data[LATITUDE]})"
     for field in mandatory_fields:
