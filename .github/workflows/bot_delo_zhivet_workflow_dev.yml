@@ -153,18 +153,20 @@ jobs:
           overwrite: true
           strip_components: 1
 
-      - name: Copy file for nginx
-        if: github.ref == env.BRANCH
-        uses: appleboy/scp-action@master
-        with:
-          host: ${{ secrets.DEV_SERVER_HOST }}
-          username: ${{ secrets.DEV_SERVER_USER }}
-          key: ${{ secrets.DEV_SERVER_SSH_KEY }}
-          passphrase: ${{ secrets.DEV_SERVER_PASSPHRASE }}
-          source: "${{ENV.INFRASTRUCTURE}}/nginx/*"
-          target: ${{ env.PROJECT_FOLDER_PATH }}
-          overwrite: true
-          strip_components: 1
+# ВРЕМЕННО ОТКЛЮЧЕНО КОПИРОВАНИЕ ФАЙЛОВ для NGINX 
+# нужно сделать нормальный конфиг и тогда можно раскоментить
+      # - name: Copy file for nginx
+      #   if: github.ref == env.BRANCH
+      #   uses: appleboy/scp-action@master
+      #   with:
+      #     host: ${{ secrets.DEV_SERVER_HOST }}
+      #     username: ${{ secrets.DEV_SERVER_USER }}
+      #     key: ${{ secrets.DEV_SERVER_SSH_KEY }}
+      #     passphrase: ${{ secrets.DEV_SERVER_PASSPHRASE }}
+      #     source: "${{ENV.INFRASTRUCTURE}}/nginx/*"
+      #     target: ${{ env.PROJECT_FOLDER_PATH }}
+      #     overwrite: true
+      #     strip_components: 1
 
       - name: Executing remote ssh commands to deploy
         if: github.ref == env.BRANCH
