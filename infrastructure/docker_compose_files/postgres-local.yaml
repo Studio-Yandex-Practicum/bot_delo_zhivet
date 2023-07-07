@@ -12,7 +12,7 @@ services:
     volumes:
       - postgis_local_data:/var/lib/postgresql/data/
     env_file:
-      - ./infrastructure/.env.db.local
+      - ../.env_files/.env.db.local
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:?err} -d $${POSTGRES_DB:?err}"]
       start_period: 30s

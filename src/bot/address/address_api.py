@@ -1,13 +1,11 @@
-import os
 from copy import deepcopy
 
 import requests
-from dotenv import load_dotenv
 
-load_dotenv("./infrastructure/.env.geocoder")
+from core.config import settings
 
-ENDPOINT = os.getenv("GEOCODER_BASE_URL", default="None")
-GEOCODER_APIKEY = os.getenv("GEOCODER_APIKEY", default="None")
+ENDPOINT = settings.GEOCODER_BASE_URL
+GEOCODER_APIKEY = settings.GEOCODER_APIKEY
 GEOCODER_INPUT_PARAMS = dict(
     geocode=None,  # Обязательный параметр
     apikey=None,  # Обязательный параметр
@@ -23,7 +21,7 @@ GEOCODER_INPUT_PARAMS = dict(
     lang=None,  # Значение по умолчанию: ru_RU.
     callback=None,
 )
-MAXIMUM_OBJECTS = os.getenv("MAXIMUM_OBJECTS_FROM_GEOCODER", default="10")
+MAXIMUM_OBJECTS = settings.MAXIMUM_OBJECTS_FROM_GEOCODER
 DATA_EXTRACTION_ERROR_MESSAGE = "Ошибка извлечения адресных данных: {error}"
 NETWORK_ERROR_MESSAGE = "Сетевая ошибка: {error}. " "Параметры get запроса: ENDPOINT: {url}; params: {params}."
 

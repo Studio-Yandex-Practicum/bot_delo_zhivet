@@ -6,19 +6,12 @@ import sys
 import flask_admin
 from structlog import get_logger
 
-from admin.config import Config
+from admin.config import settings
 from admin.messages import (
-    APP_TEMPLATE_FOLDER_COPY_SUCCESS,
-    APP_TEMPLATE_FOLDER_NOT_FOUND,
-    COLLECT_STATIC_CLEAR_DIR_INFO,
-    COLLECT_STATIC_DIR_ALREADY_EXIST,
-    COLLECT_STATIC_ERROR,
-    COLLECT_STATIC_INFO,
-    COLLECT_TEMPLATES_ERROR,
-    COLLECT_TEMPLATES_SUCCESS,
-    COMMON_ERROR,
-    START_LOGGING,
-    STOP_LOGGING,
+    APP_TEMPLATE_FOLDER_COPY_SUCCESS, APP_TEMPLATE_FOLDER_NOT_FOUND,
+    COLLECT_STATIC_CLEAR_DIR_INFO, COLLECT_STATIC_DIR_ALREADY_EXIST,
+    COLLECT_STATIC_ERROR, COLLECT_STATIC_INFO, COLLECT_TEMPLATES_ERROR,
+    COLLECT_TEMPLATES_SUCCESS, COMMON_ERROR, START_LOGGING, STOP_LOGGING,
     UNKNOWN_COMMAND,
 )
 
@@ -40,7 +33,6 @@ def flush_folder(folder):
 
 
 def recursive_copy_not_existing_items(src, dst):
-
     """Рекурсивное копирование несуществующих файлов и папок"""
     logger.debug("start recurse copying")
     for item in os.listdir(src):
@@ -189,7 +181,7 @@ class Manage(object):
         merge = args.merge
         dst = os.path.join(os.path.dirname(os.path.abspath(__file__)), templates_folder)
         src_common = os.path.join(os.path.dirname(flask_admin.__file__), "templates")
-        src = os.path.join(src_common, Config.BOOTSTRAP_VERSION)
+        src = os.path.join(src_common, settings.BOOTSTRAP_VERSION)
         try:
             if not os.path.exists(dst):
                 os.mkdir(dst)
