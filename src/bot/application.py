@@ -11,94 +11,60 @@ from starlette.routing import Route
 from structlog import contextvars
 from telegram import Update
 from telegram.ext import (
-    Application,
-    CallbackQueryHandler,
-    CommandHandler,
-    ConversationHandler,
-    InvalidCallbackData,
-    MessageHandler,
-    PicklePersistence,
-    filters,
+    Application, CallbackQueryHandler, CommandHandler, ConversationHandler,
+    InvalidCallbackData, MessageHandler, PicklePersistence, filters,
 )
 from telegram.ext.filters import Regex
 
 from bot.const import (
-    BECOME_VOLUNTEER_CMD,
-    DATA_PATH,
-    END_CMD,
-    MAKE_DONATION_CMD,
-    REPORT_ECO_PROBLEM_CMD,
-    SAVE_PERSISTENCE_INTERVAL,
-    SPECIFY_ACTIVITY_RADIUS_CMD,
-    SPECIFY_CAR_AVAILABILITY_CMD,
-    SPECIFY_CITY_CMD,
-    SPECIFY_PHONE_PERMISSION_CMD,
+    BECOME_VOLUNTEER_CMD, DATA_PATH, END_CMD, MAKE_DONATION_CMD,
+    REPORT_ECO_PROBLEM_CMD, SAVE_PERSISTENCE_INTERVAL,
+    SPECIFY_ACTIVITY_RADIUS_CMD, SPECIFY_CAR_AVAILABILITY_CMD,
+    SPECIFY_CITY_CMD, SPECIFY_PHONE_PERMISSION_CMD,
 )
 from bot.handlers.add_tags import pollution_tags_handler, social_tags_handler
 from bot.handlers.loggers import logger
 from core.config import settings
 
-from .handlers.common import end_describing, handle_invalid_button, help_command, stop
+from .handlers.common import (
+    end_describing, handle_invalid_button, help_command, stop,
+)
+from .handlers.holiday import (
+    ask_to_input_end_date, ask_to_input_start_date, cancel_holiday_ask,
+    endless_holiday_end_ask, endless_holiday_end_save, endless_holiday_now_ask,
+    endless_holiday_now_save, handle_autodate_end_button,
+    handle_autodate_start_button, holiday_main_screen, manage_holiday_dates,
+    parse_end_date_message, parse_start_date_message, save_end_date,
+    save_start_date, stop_holiday_today_ask, stop_holiday_today_save,
+)
 from .handlers.participation import make_donation
 from .handlers.pollution import (
-    back_to_select_option_to_report_about_pollution,
-    input,
-    save_comment,
-    save_foto,
-    save_location,
-    select_option_to_report_about_pollution,
+    back_to_select_option_to_report_about_pollution, input, save_comment,
+    save_foto, save_location, select_option_to_report_about_pollution,
 )
 from .handlers.social import (
-    address_confirmation,
-    ask_for_input_address,
-    back_to_add_social,
-    input_social_data,
-    report_about_social_problem,
-    save_social_address_input,
+    address_confirmation, ask_for_input_address, back_to_add_social,
+    input_social_data, report_about_social_problem, save_social_address_input,
     save_social_problem_data,
 )
 from .handlers.start import start
 from .handlers.state_constants import (
-    ADD_POLLUTION_TAG,
-    ADD_SOCIAL_TAG,
-    ADDING_SOCIAL_TASK,
-    ADDING_VOLUNTEER,
-    BACK,
-    CAR_COMMAND,
-    CITY_COMMAND,
-    CITY_INPUT,
-    CITY_SOCIAL,
-    NO_TAG,
-    PHONE_COMMAND,
-    PHONE_INPUT,
-    POLLUTION_COMMENT,
-    POLLUTION_COORDINATES,
-    POLLUTION_FOTO,
-    RADIUS_COMMAND,
-    SAVE,
-    SELECTING_ACTION,
-    SELECTING_FEATURE,
-    SELECTING_OVER,
-    SOCIAL_ADDRESS,
-    SOCIAL_COMMENT,
-    SOCIAL_PROBLEM_ADDRESS,
-    SOCIAL_PROBLEM_TYPING,
-    TAG_ID_PATTERN,
-    TYPING,
-    TYPING_CITY,
-    TYPING_SOCIAL_CITY,
+    ADD_HOLIDAY_DATES, ADD_POLLUTION_TAG, ADD_SOCIAL_TAG, ADDING_SOCIAL_TASK,
+    ADDING_VOLUNTEER, BACK, CANCEL_HOLIDAY, CAR_COMMAND, CITY_COMMAND,
+    CITY_INPUT, CITY_SOCIAL, ENTER_HOLIDAY_MAIN, HOLIDAY, HOLIDAY_END,
+    HOLIDAY_END_PATTERN, HOLIDAY_ENDLESS, HOLIDAY_NOW, HOLIDAY_START,
+    HOLIDAY_START_PATTERN, INPUT_HOLIDAY_END, INPUT_HOLIDAY_START, NO_TAG,
+    PHONE_COMMAND, PHONE_INPUT, POLLUTION_COMMENT, POLLUTION_COORDINATES,
+    POLLUTION_FOTO, RADIUS_COMMAND, SAVE, SAVE_HOLIDAY, SELECTING_ACTION,
+    SELECTING_FEATURE, SELECTING_OVER, SOCIAL_ADDRESS, SOCIAL_COMMENT,
+    SOCIAL_PROBLEM_ADDRESS, SOCIAL_PROBLEM_TYPING, START_ENDLESS_HOLIDAY_NOW,
+    STOP_HOLIDAY_NOW, TAG_ID_PATTERN, TYPING, TYPING_CITY, TYPING_SOCIAL_CITY,
     VALIDATE,
 )
 from .handlers.volunteer import (
-    add_volunteer,
-    ask_for_input_city,
-    ask_user_phone_number,
-    back_to_add_volunteer,
-    handle_car_input,
-    handle_city_input,
-    handle_phone_input,
-    handle_radius_input,
-    save_input,
+    add_volunteer, ask_for_input_city, ask_user_phone_number,
+    back_to_add_volunteer, handle_car_input, handle_city_input,
+    handle_phone_input, handle_radius_input, save_input,
 )
 from .tasks import save_pollution, save_social_problem, save_volunteer
 
@@ -116,6 +82,7 @@ def create_bot() -> Application:
                 CallbackQueryHandler(ask_for_input_city, pattern=SPECIFY_CITY_CMD),
                 CallbackQueryHandler(handle_radius_input, pattern=SPECIFY_ACTIVITY_RADIUS_CMD),
                 CallbackQueryHandler(handle_car_input, pattern=SPECIFY_CAR_AVAILABILITY_CMD),
+                CallbackQueryHandler(holiday_main_screen, pattern=ENTER_HOLIDAY_MAIN),
                 CallbackQueryHandler(save_volunteer, pattern="^" + SAVE + "$"),
             ],
             TYPING_CITY: [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_city_input)],
@@ -126,6 +93,32 @@ def create_bot() -> Application:
                 CallbackQueryHandler(save_input, pattern="^" + RADIUS_COMMAND),
                 CallbackQueryHandler(save_input, pattern="^" + CAR_COMMAND),
             ],
+            HOLIDAY: [
+                CallbackQueryHandler(manage_holiday_dates, pattern="^" + ADD_HOLIDAY_DATES + "$"),
+                CallbackQueryHandler(ask_to_input_start_date, pattern="^" + HOLIDAY_START + "$"),
+                CallbackQueryHandler(ask_to_input_end_date, pattern="^" + HOLIDAY_END + "$"),
+                CallbackQueryHandler(endless_holiday_now_ask, pattern="^" + START_ENDLESS_HOLIDAY_NOW + "$"),
+                CallbackQueryHandler(stop_holiday_today_ask, pattern="^" + STOP_HOLIDAY_NOW + "$"),
+                CallbackQueryHandler(cancel_holiday_ask, pattern=CANCEL_HOLIDAY),
+            ],
+            SAVE_HOLIDAY: [
+                CallbackQueryHandler(endless_holiday_now_save, pattern="^" + START_ENDLESS_HOLIDAY_NOW + "$"),
+                CallbackQueryHandler(stop_holiday_today_save, pattern="^" + STOP_HOLIDAY_NOW + "$"),
+                CallbackQueryHandler(endless_holiday_end_save, pattern="^" + HOLIDAY_ENDLESS + "$"),
+            ],
+            INPUT_HOLIDAY_START: [
+                CallbackQueryHandler(save_start_date, pattern=HOLIDAY_START_PATTERN),
+                CallbackQueryHandler(handle_autodate_start_button, pattern=HOLIDAY_NOW),
+                CallbackQueryHandler(ask_to_input_start_date, pattern="^" + HOLIDAY_START + "$"),
+                MessageHandler(filters.TEXT & ~filters.COMMAND, parse_start_date_message),
+            ],
+            INPUT_HOLIDAY_END: [
+                CallbackQueryHandler(save_end_date, pattern=HOLIDAY_END_PATTERN),
+                CallbackQueryHandler(endless_holiday_end_ask, pattern="^" + HOLIDAY_ENDLESS + "$"),
+                CallbackQueryHandler(handle_autodate_end_button, pattern=HOLIDAY_ENDLESS),
+                CallbackQueryHandler(ask_to_input_end_date, pattern="^" + HOLIDAY_END + "$"),
+                MessageHandler(filters.TEXT & ~filters.COMMAND, parse_end_date_message),
+            ],
         },
         fallbacks=[
             CallbackQueryHandler(end_describing, pattern=END_CMD),
@@ -133,6 +126,7 @@ def create_bot() -> Application:
             CallbackQueryHandler(ask_user_phone_number, pattern=PHONE_INPUT),
             CallbackQueryHandler(ask_for_input_city, pattern=CITY_INPUT),
             CallbackQueryHandler(back_to_add_volunteer, pattern=BACK),
+            CallbackQueryHandler(holiday_main_screen, pattern="^" + ENTER_HOLIDAY_MAIN),
         ],
         persistent=True,
         name="add_volunteer_conv",

@@ -40,6 +40,26 @@ SHOWING = "showing"
 END = ConversationHandler.END
 
 # Различные константы для проекта
+ENTER_HOLIDAY_MAIN = "ENTER_HOLIDAY_MAIN"
+ADD_HOLIDAY_DATES = "ADD_HOLIDAY_DATES"
+START_ENDLESS_HOLIDAY_NOW = "START_ENDLESS_HOLIDAY_NOW"
+STOP_HOLIDAY_NOW = "STOP_HOLIDAY_NOW"
+SAVE_HOLIDAY = "SAVE_HOLIDAY"
+CANCEL_HOLIDAY = "CANCEL_HOLIDAY"
+HOLIDAY_NOW = "HOLIDAY_NOW"
+HOLIDAY_START = "HOLIDAY_START"
+HOLIDAY_END = "HOLIDAY_END"
+HOLIDAY_ENDLESS = "ENDLESS_HOLIDAY"
+INPUT_HOLIDAY_START = "INPUT_HOLIDAY_START"
+INPUT_HOLIDAY_END = "INPUT_HOLIDAY_END"
+HOLIDAY = "HOLIDAY"
+HOLIDAY_START_PATTERN_RAW = f"{HOLIDAY_START}=(?P<{HOLIDAY_START}>" + r"\d\d\.\d\d\.\d\d\d\d)"
+HOLIDAY_END_PATTERN_RAW = f"{HOLIDAY_END}=(?P<{HOLIDAY_END}>" + r"\d\d\.\d\d\.\d\d\d\d)"
+HOLIDAY_START_PATTERN = re.compile(HOLIDAY_START_PATTERN_RAW)
+HOLIDAY_END_PATTERN = re.compile(HOLIDAY_END_PATTERN_RAW)
+ENDLESS = "ENDLESS"
+
+
 NO_COMMENT_PHASE = "Комментариев не оставили"
 ADD_POLLUTION_TAG = "ADD_POLLUTION_TAG"
 ADD_SOCIAL_TAG = "ADD_SOCIAL_TAG"
@@ -108,10 +128,7 @@ EDIT_PROFILE_GREETING = "Выберите данные для изменения
 
 TOP_LEVEL_MENU_TEXT = "Можно выбрать новое действие или закончить разговор, набрав команду /stop"
 
-SECOND_LEVEL_TEXT_BASE = (
-    "Понял-принял! Укажите информацию для остальных пунктов или нажмите на кнопку "
-    "<b>{}</b>{}:"
-)
+SECOND_LEVEL_TEXT_BASE = "Понял-принял! Укажите информацию для остальных пунктов или нажмите на кнопку " "<b>{}</b>{}:"
 SECOND_LEVEL_TEXT = SECOND_LEVEL_TEXT_BASE.format("Отправить заявку", " (она появится, когда всё будет заполнено)")
 SECOND_LEVEL_UPDATE_TEXT = SECOND_LEVEL_TEXT_BASE.format("Сохранить", "")
 
