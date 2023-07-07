@@ -30,8 +30,8 @@ from bot.const import (
     REPORT_ECO_PROBLEM_CMD,
     SAVE_PERSISTENCE_INTERVAL,
     SPECIFY_ACTIVITY_RADIUS_CMD,
+    SPECIFY_ADDRESS_CMD,
     SPECIFY_CAR_AVAILABILITY_CMD,
-    SPECIFY_CITY_CMD,
     SPECIFY_PHONE_PERMISSION_CMD,
 )
 from bot.handlers.add_tags import pollution_tags_handler, social_tags_handler
@@ -49,8 +49,6 @@ from .handlers.pollution import (
     select_option_to_report_about_pollution,
 )
 from .handlers.social import (
-    address_confirmation,
-    ask_for_input_address,
     back_to_add_social,
     input_social_data,
     report_about_social_problem,
@@ -63,11 +61,10 @@ from .handlers.state_constants import (
     ADD_SOCIAL_TAG,
     ADDING_SOCIAL_TASK,
     ADDING_VOLUNTEER,
+    ADDRESS_COMMAND,
+    ADDRESS_INPUT,
     BACK,
     CAR_COMMAND,
-    CITY_COMMAND,
-    CITY_INPUT,
-    CITY_SOCIAL,
     NO_TAG,
     PHONE_COMMAND,
     PHONE_INPUT,
@@ -79,27 +76,23 @@ from .handlers.state_constants import (
     SELECTING_ACTION,
     SELECTING_FEATURE,
     SELECTING_OVER,
-    SOCIAL_ADDRESS,
     SOCIAL_COMMENT,
-    SOCIAL_PROBLEM_ADDRESS,
     SOCIAL_PROBLEM_TYPING,
     TAG_ID_PATTERN,
     TYPING,
-    TYPING_CITY,
-    TYPING_SOCIAL_CITY,
+    TYPING_ADDRESS,
     VALIDATE,
 )
 from .handlers.volunteer import (
     add_volunteer,
-    ask_for_input_city,
     ask_user_phone_number,
     back_to_add_volunteer,
     handle_car_input,
-    handle_city_input,
     handle_phone_input,
     handle_radius_input,
     save_input,
 )
+from .service.common_functions import address_confirmation, ask_for_input_address
 from .tasks import save_pollution, save_social_problem, save_volunteer
 
 
@@ -113,16 +106,16 @@ def create_bot() -> Application:
         states={
             ADDING_VOLUNTEER: [
                 CallbackQueryHandler(ask_user_phone_number, pattern=SPECIFY_PHONE_PERMISSION_CMD),
-                CallbackQueryHandler(ask_for_input_city, pattern=SPECIFY_CITY_CMD),
+                CallbackQueryHandler(ask_for_input_address, pattern=SPECIFY_ADDRESS_CMD),
                 CallbackQueryHandler(handle_radius_input, pattern=SPECIFY_ACTIVITY_RADIUS_CMD),
                 CallbackQueryHandler(handle_car_input, pattern=SPECIFY_CAR_AVAILABILITY_CMD),
                 CallbackQueryHandler(save_volunteer, pattern="^" + SAVE + "$"),
             ],
-            TYPING_CITY: [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_city_input)],
+            TYPING_ADDRESS: [MessageHandler(filters.TEXT & ~filters.COMMAND, address_confirmation)],
             VALIDATE: [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_phone_input)],
             SELECTING_OVER: [
                 CallbackQueryHandler(save_input, pattern="^" + PHONE_COMMAND),
-                CallbackQueryHandler(save_input, pattern="^" + CITY_COMMAND),
+                CallbackQueryHandler(save_input, pattern="^" + ADDRESS_COMMAND),
                 CallbackQueryHandler(save_input, pattern="^" + RADIUS_COMMAND),
                 CallbackQueryHandler(save_input, pattern="^" + CAR_COMMAND),
             ],
@@ -131,7 +124,7 @@ def create_bot() -> Application:
             CallbackQueryHandler(end_describing, pattern=END_CMD),
             CommandHandler("stop", stop),
             CallbackQueryHandler(ask_user_phone_number, pattern=PHONE_INPUT),
-            CallbackQueryHandler(ask_for_input_city, pattern=CITY_INPUT),
+            CallbackQueryHandler(ask_for_input_address, pattern=ADDRESS_INPUT),
             CallbackQueryHandler(back_to_add_volunteer, pattern=BACK),
         ],
         persistent=True,
@@ -183,7 +176,7 @@ def create_bot() -> Application:
         ],
         states={
             SELECTING_FEATURE: [
-                CallbackQueryHandler(ask_for_input_address, pattern="^" + SOCIAL_ADDRESS + "$"),
+                CallbackQueryHandler(ask_for_input_address, pattern=SPECIFY_ADDRESS_CMD),
                 CallbackQueryHandler(input_social_data, pattern="^" + SOCIAL_COMMENT + "$"),
                 CallbackQueryHandler(save_social_problem, pattern="^" + SAVE + "$"),
                 CallbackQueryHandler(social_tags_handler.enter_tags, ADD_SOCIAL_TAG),
@@ -191,8 +184,8 @@ def create_bot() -> Application:
             SOCIAL_PROBLEM_TYPING: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, save_social_problem_data),
             ],
-            SOCIAL_PROBLEM_ADDRESS: [CallbackQueryHandler(save_social_address_input, pattern="^" + CITY_SOCIAL)],
-            TYPING_SOCIAL_CITY: [
+            SELECTING_OVER: [CallbackQueryHandler(save_social_address_input, pattern="^" + ADDRESS_COMMAND)],
+            TYPING_ADDRESS: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, address_confirmation),
             ],
             ADD_SOCIAL_TAG: [
@@ -204,7 +197,7 @@ def create_bot() -> Application:
         fallbacks=[
             CallbackQueryHandler(end_describing, pattern=END_CMD),
             CommandHandler("stop", stop),
-            CallbackQueryHandler(ask_for_input_address, pattern=CITY_INPUT),
+            CallbackQueryHandler(ask_for_input_address, pattern=ADDRESS_INPUT),
             CallbackQueryHandler(back_to_add_social, pattern=BACK),
         ],
         persistent=True,

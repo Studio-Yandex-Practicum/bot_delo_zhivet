@@ -1,9 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.db.model import AbstractTag, Tag_Assistance, Tag_Pollution
-from src.core.db.repository.tags_repository import (
-    crud_tag_assistance, crud_tag_pollution,
-)
+from src.core.db.repository.tags_repository import crud_tag_assistance, crud_tag_pollution
 
 
 async def get_all_assistance_tags(session: AsyncSession) -> list[Tag_Assistance]:

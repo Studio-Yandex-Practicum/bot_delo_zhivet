@@ -5,7 +5,9 @@ from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from yandex_tracker_client.exceptions import NotFound
 
+from src.api.tracker import client
 from src.bot.handlers.state_constants import (
+    ADDRESS_INPUT,
     FIRST_NAME,
     GEOM,
     LAST_NAME,
@@ -13,13 +15,11 @@ from src.bot.handlers.state_constants import (
     LONGITUDE,
     SPECIFY_ACTIVITY_RADIUS,
     SPECIFY_CAR_AVAILABILITY,
-    SPECIFY_CITY,
     SPECIFY_PHONE_PERMISSION,
     TELEGRAM_ID,
     TELEGRAM_USERNAME,
     VOLUNTEER,
 )
-from src.api.tracker import client
 from src.core.db.model import Volunteer
 from src.core.db.repository.volunteer_repository import crud_volunteer
 
@@ -88,12 +88,13 @@ def volunteer_data_preparation(telegram_id: int, username: str, first_name: str,
         data[SPECIFY_CAR_AVAILABILITY] = True if data[SPECIFY_CAR_AVAILABILITY][4:] == "Да" else False
     if SPECIFY_PHONE_PERMISSION in data:
         data[SPECIFY_PHONE_PERMISSION] = data[SPECIFY_PHONE_PERMISSION][6:]
-    data.pop(SPECIFY_CITY, None)
+    data.pop(ADDRESS_INPUT, None)
     return data
 
 
 async def check_and_update_volunteer(
-        volunteer_data: dict, session: AsyncSession) -> tuple[Optional[Volunteer], Optional[str]]:
+    volunteer_data: dict, session: AsyncSession
+) -> tuple[Optional[Volunteer], Optional[str]]:
     """Проверяет не забанен ли волонтер, есть ли данные для обновления"""
     volunteer = await crud_volunteer.get_volunteer_by_telegram_id(volunteer_data[TELEGRAM_ID], session)
     old_ticket_id = volunteer.ticketID
