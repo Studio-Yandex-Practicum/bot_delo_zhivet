@@ -154,7 +154,7 @@ jobs:
           strip_components: 1
 
 # ВРЕМЕННО ОТКЛЮЧЕНО КОПИРОВАНИЕ ФАЙЛОВ для NGINX 
-# нужно сделать нормальный конфиг и тогда можно раскоментить
+# нужно сделать нормальный конфиг и тогда можно раскоментить 
       # - name: Copy file for nginx
       #   if: github.ref == env.BRANCH
       #   uses: appleboy/scp-action@master
