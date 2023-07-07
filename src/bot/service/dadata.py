@@ -1,13 +1,8 @@
-import os
-
 from dadata import Dadata
-from dotenv import load_dotenv
 
-load_dotenv("./infrastructure/.env.dadata")
+from core.config import settings
 
-token = os.environ["DADATA_TOKEN"]
-secret = os.environ["DADATA_SECRET"]
-dadata = Dadata(token, secret)
+dadata = Dadata(settings.DADATA_TOKEN, settings.DADATA_SECRET)
 
 
 def get_fields_from_dadata(data):

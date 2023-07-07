@@ -11,14 +11,29 @@ from src.api.tracker import client
 from src.bot.const import KB_IN_MB, MAXIMUM_SIZE_OF_IMAGE_KB
 from src.bot.handlers.start import start
 from src.bot.handlers.state_constants import (
-    ADD_POLLUTION_TAG, BACK, CHECK_MARK, CURRENT_FEATURE, END, FEATURES,
-    LATITUDE, LONGITUDE, POLLUTION_COMMENT, POLLUTION_COORDINATES,
-    POLLUTION_FOTO, POLLUTION_TAGS, SAVE, SECOND_LEVEL_TEXT, SELECTING_FEATURE,
-    START_OVER, TYPING,
+    ADD_POLLUTION_TAG,
+    BACK,
+    CHECK_MARK,
+    CURRENT_FEATURE,
+    END,
+    FEATURES,
+    LATITUDE,
+    LONGITUDE,
+    POLLUTION_COMMENT,
+    POLLUTION_COORDINATES,
+    POLLUTION_FOTO,
+    POLLUTION_TAGS,
+    SAVE,
+    SECOND_LEVEL_TEXT,
+    SELECTING_FEATURE,
+    START_OVER,
+    TYPING,
 )
 from src.bot.service.pollution import (
-    create_new_pollution, create_new_pollution_dict_from_data,
-    create_new_pollution_message_for_tracker, download_to_object_storage,
+    create_new_pollution,
+    create_new_pollution_dict_from_data,
+    create_new_pollution_message_for_tracker,
+    download_to_object_storage,
     resize_downloaded_image,
 )
 from src.bot.service.save_new_user import get_or_create_user

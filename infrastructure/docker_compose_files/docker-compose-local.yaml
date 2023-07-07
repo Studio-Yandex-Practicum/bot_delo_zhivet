@@ -1,0 +1,197 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgis/postgis:14-3.3-alpine
+    platform: linux/amd64
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - ../.env_files/.env.db
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:?err} -d $${POSTGRES_DB:?err}"]
+      start_period: 30s
+      timeout: 10s
+      interval: 5s
+      retries: 10
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:alpine
+    volumes:
+      - redis_data:/data
+
+  bot:
+    build:
+      context: ../../
+      dockerfile: Dockerfile_bot_admin
+    volumes:
+      - media_data:/app/media/
+    command: [ "poetry", "run", "runbot" ]
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+
+    environment:
+      - PG_DOCKER_ENV=dev
+    env_file:
+      - ../.env_files/.env.s3
+      - ../.env_files/.env.flask
+      - ../.env_files/.env.mail  
+      - ../.env_files/.env.sentry
+      - ../.env_files/.env.db
+      - ../.env_files/.env.nginx
+      - ../.env_files/.env.redis
+      - ../.env_files/.env.yatracker
+      - ../.env_files/.env.geocoder
+      - ../.env_files/.env.dadata  
+      - ../.env_files/.env.telegram
+  web:
+    build:
+      context: ../../
+      dockerfile: Dockerfile_bot_admin
+    command:
+      [
+        "poetry",
+        "run",
+        "gunicorn",
+        "--bind",
+        "0.0.0.0:5000",
+        "--access-logfile=-",
+        "manage:app"
+      ]
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+      bot:
+        condition: service_started
+
+    environment:
+      - PG_DOCKER_ENV=dev
+    env_file:
+      - ../.env_files/.env.s3
+      - ../.env_files/.env.flask
+      - ../.env_files/.env.mail  
+      - ../.env_files/.env.sentry
+      - ../.env_files/.env.db
+      - ../.env_files/.env.nginx
+      - ../.env_files/.env.redis
+      - ../.env_files/.env.yatracker
+      - ../.env_files/.env.geocoder
+      - ../.env_files/.env.dadata  
+      - ../.env_files/.env.telegram
+
+    volumes:
+      - static_value:/app/admin/static/
+      - ../../admin/logs/:/app/admin/logs/
+
+  celery:
+    build:
+      context: ../../
+      dockerfile: Dockerfile_bot_admin
+
+    volumes:
+      - media_data:/app/media/
+    command:
+      [
+        "poetry",
+        "run",
+        "celery",
+        "-A",
+        "src.bot.tasks",
+        "worker"
+      ]    
+    depends_on:
+      db:
+        condition: service_healthy
+      bot:
+        condition: service_started
+      redis:
+        condition: service_started
+    environment:
+      - PG_DOCKER_ENV=dev
+    env_file:
+      - ../.env_files/.env.s3
+      - ../.env_files/.env.flask
+      - ../.env_files/.env.mail  
+      - ../.env_files/.env.sentry
+      - ../.env_files/.env.db
+      - ../.env_files/.env.nginx
+      - ../.env_files/.env.redis
+      - ../.env_files/.env.yatracker
+      - ../.env_files/.env.geocoder
+      - ../.env_files/.env.dadata  
+      - ../.env_files/.env.telegram
+
+
+
+  flower:
+    build:
+      context: ../../
+      dockerfile: Dockerfile_bot_admin
+
+    command:
+      [
+        "poetry",
+        "run",
+        "celery",
+        "-A",
+        "src.bot.tasks",
+        "flower"
+      ]
+    ports:
+      - "5555:5555"
+    depends_on:
+      db:
+        condition: service_healthy
+      bot:
+        condition: service_started
+      redis:
+        condition: service_started
+      celery:
+        condition: service_started  
+            
+    environment:
+      - PG_DOCKER_ENV=dev
+    env_file:
+      - ../.env_files/.env.s3
+      - ../.env_files/.env.flask
+      - ../.env_files/.env.mail  
+      - ../.env_files/.env.sentry
+      - ../.env_files/.env.db
+      - ../.env_files/.env.nginx
+      - ../.env_files/.env.redis
+      - ../.env_files/.env.yatracker
+      - ../.env_files/.env.geocoder
+      - ../.env_files/.env.dadata  
+      - ../.env_files/.env.telegram
+
+
+
+  nginx:
+    build:
+      context: ../nginx
+      dockerfile: Dockerfile_nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    volumes:
+      - ../nginx/delo-local.conf:/etc/nginx/servers/delo.conf:rw
+      - ../nginx/letsencrypt/:/etc/letsencrypt/:rw
+      - static_value:/var/html/static/
+    depends_on:
+      - web
+    env_file:
+      - ../.env_files/.env.nginx
+      - ../.env_files/.env.telegram
+
+volumes:
+  postgres_data:
+  static_value:
+  media_data:
+  redis_data:
