@@ -7,20 +7,11 @@ from yandex_tracker_client.exceptions import NotFound
 
 from src.api.tracker import client
 from src.bot.handlers.state_constants import (
-    ADDRESS_INPUT,
-    FIRST_NAME,
-    GEOM,
-    HOLIDAY_START,
-    LAST_NAME,
-    LATITUDE,
-    LONGITUDE,
-    SPECIFY_ACTIVITY_RADIUS,
-    SPECIFY_CAR_AVAILABILITY,
-    SPECIFY_PHONE_PERMISSION,
-    TELEGRAM_ID,
-    TELEGRAM_USERNAME,
-    VOLUNTEER,
+    ADDRESS_INPUT, FIRST_NAME, GEOM, HOLIDAY_START, LAST_NAME, LATITUDE,
+    LONGITUDE, SPECIFY_ACTIVITY_RADIUS, SPECIFY_CAR_AVAILABILITY,
+    SPECIFY_PHONE_PERMISSION, TELEGRAM_ID, TELEGRAM_USERNAME, VOLUNTEER,
 )
+from src.bot.service.holiday import chek_and_update_holiday_status
 from src.core.db.model import Volunteer
 from src.core.db.repository.volunteer_repository import crud_volunteer
 
@@ -146,6 +137,7 @@ def create_volunteer_ticket(volunteer: Volunteer):
 def update_volunteer_ticket(volunteer: Volunteer, ticket_id: str):
     try:
         issue = client.issues[ticket_id]
+        chek_and_update_holiday_status(volunteer, issue)
         return issue.update(
             summary=form_summary(volunteer),
             description=form_description(volunteer),
