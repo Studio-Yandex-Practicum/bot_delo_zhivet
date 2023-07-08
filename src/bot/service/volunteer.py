@@ -10,6 +10,7 @@ from src.bot.handlers.state_constants import (
     ADDRESS_INPUT,
     FIRST_NAME,
     GEOM,
+    HOLIDAY_START,
     LAST_NAME,
     LATITUDE,
     LONGITUDE,
@@ -89,6 +90,9 @@ def volunteer_data_preparation(telegram_id: int, username: str, first_name: str,
     if SPECIFY_PHONE_PERMISSION in data:
         data[SPECIFY_PHONE_PERMISSION] = data[SPECIFY_PHONE_PERMISSION][6:]
     data.pop(ADDRESS_INPUT, None)
+    if HOLIDAY_START in data:
+        if data[HOLIDAY_START] is not None:
+            data[HOLIDAY_START] = datetime.fromtimestamp(data[HOLIDAY_START])
     return data
 
 
