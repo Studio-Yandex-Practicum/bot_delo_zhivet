@@ -64,7 +64,7 @@ b) remove the `drop_index` statement in the `downgrade()` function <br/>
 должен быть запущен хоть какой то контейнер с базой
 docker-compose-local.yaml или postgres-local.yaml , какой будет запущен к тому фласк и присоеденится
 ```bash
-flask run
+flask --app manage run
 ```
 
 ### Локальный запуск бота:

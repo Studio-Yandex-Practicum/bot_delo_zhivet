@@ -1,6 +1,5 @@
 version: '3.8'
 
-
 services:
   db:
     image: postgis/postgis:14-3.3-alpine
@@ -10,7 +9,11 @@ services:
     env_file:
       - ./infrastructure/.env.db
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:?err} -d $${POSTGRES_DB:?err}"]
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U $${POSTGRES_USER:?err} -d $${POSTGRES_DB:?err}"
+        ]
       start_period: 30s
       timeout: 10s
       interval: 1s
@@ -27,7 +30,7 @@ services:
 
   bot:
     image: delozhivet/delo_zhivet_bot_and_admin:latest
-    command: ["poetry", "run", "runbot"]
+    command: [ "poetry", "run", "runbot" ]
     restart: always
     depends_on:
       db:
@@ -62,7 +65,6 @@ services:
       - ./infrastructure/.env.s3
       - ./infrastructure/.env.dadata
       - ./infrastructure/.env.flask
-      - ./infrastructure/.env.geocoder
       - ./infrastructure/.env.mail
       - ./infrastructure/.env.nginx
       - ./infrastructure/.env.redis
@@ -115,7 +117,7 @@ services:
       redis:
         condition: service_started
       celery:
-        condition: service_started    
+        condition: service_started
 
   nginx:
     image: delozhivet/delo_zhivet_nginx:latest
@@ -133,7 +135,6 @@ services:
     env_file:
       - ./.env
     command: /bin/sh -c "envsubst '$${HOST_NAME} $${WEBHOOK_PATH}' < /etc/nginx/conf.d/delo.temp > /etc/nginx/servers/delo.conf && crond -b && nginx -g 'daemon off;'"
-
 
 volumes:
   postgres_data:

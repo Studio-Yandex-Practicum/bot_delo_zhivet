@@ -9,7 +9,11 @@ services:
     env_file:
       - ../.env_files/.env.db
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:?err} -d $${POSTGRES_DB:?err}"]
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U $${POSTGRES_USER:?err} -d $${POSTGRES_DB:?err}"
+        ]
       start_period: 30s
       timeout: 10s
       interval: 5s
@@ -39,14 +43,13 @@ services:
     env_file:
       - ../.env_files/.env.s3
       - ../.env_files/.env.flask
-      - ../.env_files/.env.mail  
+      - ../.env_files/.env.mail
       - ../.env_files/.env.sentry
       - ../.env_files/.env.db
       - ../.env_files/.env.nginx
       - ../.env_files/.env.redis
       - ../.env_files/.env.yatracker
-      - ../.env_files/.env.geocoder
-      - ../.env_files/.env.dadata  
+      - ../.env_files/.env.dadata
       - ../.env_files/.env.telegram
   web:
     build:
@@ -74,14 +77,13 @@ services:
     env_file:
       - ../.env_files/.env.s3
       - ../.env_files/.env.flask
-      - ../.env_files/.env.mail  
+      - ../.env_files/.env.mail
       - ../.env_files/.env.sentry
       - ../.env_files/.env.db
       - ../.env_files/.env.nginx
       - ../.env_files/.env.redis
       - ../.env_files/.env.yatracker
-      - ../.env_files/.env.geocoder
-      - ../.env_files/.env.dadata  
+      - ../.env_files/.env.dadata
       - ../.env_files/.env.telegram
 
     volumes:
@@ -103,7 +105,7 @@ services:
         "-A",
         "src.bot.tasks",
         "worker"
-      ]    
+      ]
     depends_on:
       db:
         condition: service_healthy
@@ -116,17 +118,14 @@ services:
     env_file:
       - ../.env_files/.env.s3
       - ../.env_files/.env.flask
-      - ../.env_files/.env.mail  
+      - ../.env_files/.env.mail
       - ../.env_files/.env.sentry
       - ../.env_files/.env.db
       - ../.env_files/.env.nginx
       - ../.env_files/.env.redis
       - ../.env_files/.env.yatracker
-      - ../.env_files/.env.geocoder
-      - ../.env_files/.env.dadata  
+      - ../.env_files/.env.dadata
       - ../.env_files/.env.telegram
-
-
 
   flower:
     build:
@@ -152,24 +151,21 @@ services:
       redis:
         condition: service_started
       celery:
-        condition: service_started  
-            
+        condition: service_started
+
     environment:
       - PG_DOCKER_ENV=dev
     env_file:
       - ../.env_files/.env.s3
       - ../.env_files/.env.flask
-      - ../.env_files/.env.mail  
+      - ../.env_files/.env.mail
       - ../.env_files/.env.sentry
       - ../.env_files/.env.db
       - ../.env_files/.env.nginx
       - ../.env_files/.env.redis
       - ../.env_files/.env.yatracker
-      - ../.env_files/.env.geocoder
-      - ../.env_files/.env.dadata  
+      - ../.env_files/.env.dadata
       - ../.env_files/.env.telegram
-
-
 
   nginx:
     build:
