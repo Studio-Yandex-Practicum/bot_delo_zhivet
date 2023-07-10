@@ -3,12 +3,12 @@ name: Deploy on dev server
 on:
   push:
     branches:
-      - develop
-#      - feature/workflow_update
+#      - develop
+      - fix/dev_polling_mode
 
 env:
-    BRANCH: 'refs/heads/develop'
-#    BRANCH: 'refs/heads/feature/workflow_update'
+#    BRANCH: 'refs/heads/develop'
+    BRANCH: 'refs/heads/fix/dev_polling_mode'
 
 # на сервер в директорию с именем PROJECT_FOLDER_NAME будет скопировано содержимое Из директории с именем INFRASTRUCTURE
     PROJECT_FOLDER_PATH: ~/${{ vars.PROJECT_FOLDER_NAME }}
@@ -153,8 +153,8 @@ jobs:
           overwrite: true
           strip_components: 1
 
-# ВРЕМЕННО ОТКЛЮЧЕНО КОПИРОВАНИЕ ФАЙЛОВ для NGINX 
-# нужно сделать нормальный конфиг и тогда можно раскоментить 
+# ВРЕМЕННО ОТКЛЮЧЕНО КОПИРОВАНИЕ ФАЙЛОВ для NGINX
+# нужно сделать нормальный конфиг и тогда можно раскоментить
       # - name: Copy file for nginx
       #   if: github.ref == env.BRANCH
       #   uses: appleboy/scp-action@master
@@ -177,7 +177,7 @@ jobs:
           key: ${{ secrets.DEV_SERVER_SSH_KEY }}
           passphrase: ${{ secrets.DEV_SERVER_PASSPHRASE }}
           script: |
-            
+
             cd ${{env.PROJECT_FOLDER_PATH}}
             mkdir ${{env.ENV_FILES_DIR_NAME}}
             cd ${{env.PROJECT_FOLDER_PATH}}/${{env.ENV_FILES_DIR_NAME}}
@@ -221,8 +221,8 @@ jobs:
             echo TELEGRAM_BOT_TOKEN=${{ secrets.DEV_TELEGRAM_BOT_TOKEN }} >> .env.telegram
             echo HOST=${{ secrets.DEV_HOST }} >> .env.telegram
             echo WEBHOOK_PATH=${{ secrets.DEV_WEBHOOK_PATH }} >> .env.telegram
-            echo WEBHOOK_DOMAIN=${{ secrets.DEV_WEBHOOK_DOMAIN }} >> .env.telegram
-            echo WEBHOOK_PORT=${{ secrets.DEV_WEBHOOK_PORT }} >> .env.telegram
+            # echo WEBHOOK_DOMAIN=${{ secrets.DEV_WEBHOOK_DOMAIN }} >> .env.telegram
+            # echo WEBHOOK_PORT=${{ secrets.DEV_WEBHOOK_PORT }} >> .env.telegram
 
             rm .env.s3
             touch .env.s3
@@ -255,7 +255,7 @@ jobs:
             echo PROJECT_FOLDER_PATH=${{env.PROJECT_FOLDER_PATH}} >> .env.nginx
             echo DOCKER_TAG=${{ vars.DEV_DOCKER_TAG }} >> .env
 
-            
+
             # вызов скрипта по обновлению конфига нгинкса сейчас не вызывается и не факт что работает
             cd ${{env.PROJECT_FOLDER_PATH}}
             # chmod +x update_nginx_conf.sh
