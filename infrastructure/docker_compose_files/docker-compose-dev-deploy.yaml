@@ -47,7 +47,6 @@ services:
       - ../.env_files/.env.nginx
       - ../.env_files/.env.redis
       - ../.env_files/.env.yatracker
-      - ../.env_files/.env.geocoder
       - ../.env_files/.env.dadata
       - ../.env_files/.env.telegram
   web:
@@ -80,7 +79,6 @@ services:
       - ../.env_files/.env.nginx
       - ../.env_files/.env.redis
       - ../.env_files/.env.yatracker
-      - ../.env_files/.env.geocoder
       - ../.env_files/.env.dadata
       - ../.env_files/.env.telegram
 
@@ -120,7 +118,6 @@ services:
       - ../.env_files/.env.nginx
       - ../.env_files/.env.redis
       - ../.env_files/.env.yatracker
-      - ../.env_files/.env.geocoder
       - ../.env_files/.env.dadata
       - ../.env_files/.env.telegram
 
@@ -159,7 +156,6 @@ services:
       - ../.env_files/.env.nginx
       - ../.env_files/.env.redis
       - ../.env_files/.env.yatracker
-      - ../.env_files/.env.geocoder
       - ../.env_files/.env.dadata
       - ../.env_files/.env.telegram
 
