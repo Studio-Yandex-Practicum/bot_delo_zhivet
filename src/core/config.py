@@ -32,11 +32,6 @@ class Settings(BaseSettings):
     DADATA_TOKEN: str
     DADATA_SECRET: str
 
-    # GEOCODER
-    GEOCODER_BASE_URL: str = None
-    GEOCODER_APIKEY: str = None
-    MAXIMUM_OBJECTS_FROM_GEOCODER: int = 10
-
     # YaTracker
     OAUTH_TOKEN: str
     ORG_ID: str
@@ -62,7 +57,6 @@ class Settings(BaseSettings):
             ".env.s3",
             ".env.sentry",
             ".env.dadata",
-            ".env.geocoder",
             ".env.yatracker",
             ".env.db.local",
         )
