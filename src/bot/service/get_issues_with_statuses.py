@@ -21,21 +21,27 @@ def get_issues_with_statuses(
 async def add_new_volunteer_to_issue(
     volunteer: Volunteer,
     session: AsyncSession
-):
+) -> None:
     FORMAT = "%d/%m/%Y"
     open_issues = get_issues_with_statuses()
     issues_in_radius = await crud_volunteer.get_issues_in_radius(
         volunteer, session
     )
+    telegram_link = f'https://t.me/{volunteer.telegram_username}'
     for issue in open_issues:
         if issue.key in issues_in_radius:
-            description = issue.description
-            description += (
-                '\n\n' + date.today().strftime(FORMAT)
-                + ' Найден новый волонтер '
+            issue_description_list = issue.description.split('\n\n')
+            updated_issue_description_list = []
+
+            for description in issue_description_list:
+                if description == 'Волонтёров поблизости не нашлось':
+                    updated_issue_description_list.append('Волонтёры поблизости')
+                elif telegram_link not in description:
+                    updated_issue_description_list.append(description)
+            new_volunteer_description = (
+                date.today().strftime(FORMAT) + ' Найден новый волонтер'
+                + f'\nhttps://t.me/{volunteer.telegram_username}, {volunteer.ticketID}'
             )
-            description += 'с машиной' if volunteer.has_car else 'без машины'
-            description += '\n' + (
-                f'https://t.me/{volunteer.telegram_username}, {volunteer.ticketID}'
-            )
-            issue.update(description=description)
+            updated_issue_description_list.append(new_volunteer_description)
+            updated_issue_description = '\n\n'.join(updated_issue_description_list)
+            issue.update(description=updated_issue_description)
