@@ -33,7 +33,7 @@ async def address_processor(
 ) -> tuple[str, InlineKeyboardMarkup]:
     """
     Процесс проверки адреса и добавления данных в контекст.
-    Возвращает текст сообщение и клавиатуру.
+    Возвращает текст сообщения и клавиатуру.
     """
     try:
         address = await get_fields_from_dadata(unrestricted_address)
