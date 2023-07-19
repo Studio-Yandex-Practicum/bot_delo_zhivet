@@ -120,7 +120,7 @@ def form_summary(volunteer: Volunteer) -> str:
         volunteer_telegram_username = "Username не указан"
     if volunteer.has_car:
         has_car = "есть автомобиль"
-    if not has_car:
+    else:
         has_car = "нет автомобиля"
     return f"{volunteer_telegram_username}, {has_car} - {volunteer.full_address}"
 
