@@ -1,25 +1,33 @@
-from dadata import Dadata
+from dadata import DadataAsync
+from httpx import ConnectError
 
+from bot.exceptions import DadataUnavailabilityError
 from core.config import settings
 
-dadata = Dadata(settings.DADATA_TOKEN, settings.DADATA_SECRET)
 
-
-def get_fields_from_dadata(data):
-    try:
-        result = dadata.suggest("address", data)[0]
-        if result["data"]["settlement_with_type"] is not None:
-            city = result["data"]["settlement_with_type"]
+async def get_fields_from_dadata(data: str) -> dict[str, float | str] | None:
+    async with DadataAsync(
+        settings.DADATA_TOKEN,
+        settings.DADATA_SECRET,
+    ) as dadata:
+        try:
+            addresses = await dadata.suggest("address", data)
+            address = addresses[0]
+            if address["data"]["settlement_with_type"] is not None:
+                city = address["data"]["settlement_with_type"]
+            else:
+                city = address["data"]["city_with_type"]
+            full_address = address["unrestricted_value"]
+            latitude = float(address["data"]["geo_lat"])
+            longitude = float(address["data"]["geo_lon"])
+        except (IndexError, TypeError):
+            return None
+        except ConnectError:
+            raise DadataUnavailabilityError
         else:
-            city = result["data"]["city_with_type"]
-        full_address = result["unrestricted_value"]
-        latitude = float(result["data"]["geo_lat"])
-        longitude = float(result["data"]["geo_lon"])
-        return dict(
-            city=city,
-            full_address=full_address,
-            latitude=latitude,
-            longitude=longitude,
-        )
-    except (IndexError, TypeError):
-        return None
+            return dict(
+                city=city,
+                full_address=full_address,
+                latitude=latitude,
+                longitude=longitude,
+            )
