@@ -22,24 +22,24 @@ RETRY_INPUT_ADDRESS_BTN = InlineKeyboardButton(
 )
 
 # Keyboards
-BACK_KB = InlineKeyboardMarkup(
+BACK = InlineKeyboardMarkup(
     [
         [BACK_BTN],
     ]
 )
-DADATA_UNAVAILABLE_KB = InlineKeyboardMarkup(
+DADATA_UNAVAILABLE = InlineKeyboardMarkup(
     [
         [RETRY_BTN],
         [BACK_BTN],
     ],
 )
-ADDRESS_FOUND_KB = InlineKeyboardMarkup(
+ADDRESS_FOUND = InlineKeyboardMarkup(
     [
         [CONFIRM_ADDRESS_BTN, CANCEL_ADDRESS_BTN],
         [BACK_BTN],
     ]
 )
-ADDRESS_NOT_FOUND_KB = InlineKeyboardMarkup(
+ADDRESS_NOT_FOUND = InlineKeyboardMarkup(
     [
         [RETRY_INPUT_ADDRESS_BTN],
         [BACK_BTN],
