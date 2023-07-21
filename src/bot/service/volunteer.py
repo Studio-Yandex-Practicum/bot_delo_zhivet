@@ -11,7 +11,7 @@ from src.bot.handlers.state_constants import (
     LONGITUDE, SPECIFY_ACTIVITY_RADIUS, SPECIFY_CAR_AVAILABILITY,
     SPECIFY_PHONE_PERMISSION, TELEGRAM_ID, TELEGRAM_USERNAME, VOLUNTEER,
 )
-from src.bot.service.holiday import chek_and_update_holiday_status
+from src.bot.service.holiday import check_and_update_holiday_status
 from src.core.db.model import Volunteer
 from src.core.db.repository.volunteer_repository import crud_volunteer
 
@@ -81,9 +81,8 @@ def volunteer_data_preparation(telegram_id: int, username: str, first_name: str,
     if SPECIFY_PHONE_PERMISSION in data:
         data[SPECIFY_PHONE_PERMISSION] = data[SPECIFY_PHONE_PERMISSION][6:]
     data.pop(ADDRESS_INPUT, None)
-    if HOLIDAY_START in data:
-        if data[HOLIDAY_START] is not None:
-            data[HOLIDAY_START] = datetime.fromtimestamp(data[HOLIDAY_START])
+    if HOLIDAY_START in data and data[HOLIDAY_START] is not None:
+        data[HOLIDAY_START] = datetime.fromtimestamp(data[HOLIDAY_START])
     return data
 
 
@@ -137,7 +136,7 @@ def create_volunteer_ticket(volunteer: Volunteer):
 def update_volunteer_ticket(volunteer: Volunteer, ticket_id: str):
     try:
         issue = client.issues[ticket_id]
-        chek_and_update_holiday_status(volunteer, issue)
+        issue = check_and_update_holiday_status(volunteer, issue)
         return issue.update(
             summary=form_summary(volunteer),
             description=form_description(volunteer),

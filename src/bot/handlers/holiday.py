@@ -16,7 +16,7 @@ async def endless_holiday_now_save(update: Update, context: ContextTypes.DEFAULT
     return await add_volunteer(update, context)
 
 
-async def stop_holiday_today_save(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
+async def stop_holiday_now_save(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     if HOLIDAY_START not in context.user_data[FEATURES]:
         context.user_data[FEATURES][HOLIDAY_START] = None
     else:
