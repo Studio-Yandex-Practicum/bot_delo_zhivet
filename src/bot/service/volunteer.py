@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Sequence
 
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -53,7 +53,7 @@ async def update_volunteer(db_obj: Volunteer, data: VolunteerCreate, session: As
     return await crud_volunteer.update(db_obj, data, session)
 
 
-def volunteers_description(volunteers: list[Volunteer]) -> str:
+def volunteers_description(volunteers: Sequence[Volunteer]) -> str:
     if not volunteers:
         return "\n---- \n\nВолонтёров поблизости не нашлось"
     description = "\n---- \n\nВолонтёры поблизости\n\n"
@@ -118,10 +118,7 @@ def form_summary(volunteer: Volunteer) -> str:
     volunteer_telegram_username = volunteer.telegram_username
     if not volunteer_telegram_username:
         volunteer_telegram_username = "Username не указан"
-    if volunteer.has_car:
-        has_car = "есть автомобиль"
-    else:
-        has_car = "нет автомобиля"
+    has_car = "есть автомобиль" if volunteer.has_car else "нет автомобиля"
     return f"{volunteer_telegram_username}, {has_car} - {volunteer.full_address}"
 
 
