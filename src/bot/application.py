@@ -29,6 +29,7 @@ from core.config import settings
 from .handlers.common import (
     end_describing, handle_invalid_button, help_command, stop,
 )
+from .handlers.holiday import endless_holiday_now_save, stop_holiday_now_save
 from .handlers.participation import make_donation
 from .handlers.pollution import (
     back_to_select_option_to_report_about_pollution, input, save_comment,
@@ -41,7 +42,8 @@ from .handlers.social import (
 from .handlers.start import start
 from .handlers.state_constants import (
     ADD_POLLUTION_TAG, ADD_SOCIAL_TAG, ADDING_SOCIAL_TASK, ADDING_VOLUNTEER,
-    ADDRESS_COMMAND, ADDRESS_INPUT, BACK, CAR_COMMAND, NO_TAG, PHONE_COMMAND,
+    ADDRESS_COMMAND, ADDRESS_INPUT, BACK, CAR_COMMAND,
+    ENDLESS_HOLIDAY_START_NOW, HOLIDAY_STOP_NOW, NO_TAG, PHONE_COMMAND,
     PHONE_INPUT, POLLUTION_COMMENT, POLLUTION_COORDINATES, POLLUTION_FOTO,
     RADIUS_COMMAND, SAVE, SELECTING_ACTION, SELECTING_FEATURE, SELECTING_OVER,
     SOCIAL_COMMENT, SOCIAL_PROBLEM_TYPING, TAG_ID_PATTERN, TYPING,
@@ -60,7 +62,14 @@ from .tasks import save_pollution, save_social_problem, save_volunteer
 def create_bot() -> Application:
     """Создание приложения бота"""
     persistence = PicklePersistence(filepath=DATA_PATH, update_interval=SAVE_PERSISTENCE_INTERVAL)
-    app = Application.builder().token(settings.TELEGRAM_BOT_TOKEN).persistence(persistence).read_timeout(30).write_timeout(30).build()
+    app = (
+        Application.builder()
+        .token(settings.TELEGRAM_BOT_TOKEN)
+        .persistence(persistence)
+        .read_timeout(30)
+        .write_timeout(30)
+        .build()
+    )
 
     add_volunteer_conv = ConversationHandler(
         entry_points=[CallbackQueryHandler(add_volunteer, pattern=BECOME_VOLUNTEER_CMD)],
@@ -71,6 +80,8 @@ def create_bot() -> Application:
                 CallbackQueryHandler(handle_radius_input, pattern=SPECIFY_ACTIVITY_RADIUS_CMD),
                 CallbackQueryHandler(handle_car_input, pattern=SPECIFY_CAR_AVAILABILITY_CMD),
                 CallbackQueryHandler(save_volunteer, pattern="^" + SAVE + "$"),
+                CallbackQueryHandler(endless_holiday_now_save, pattern=ENDLESS_HOLIDAY_START_NOW),
+                CallbackQueryHandler(stop_holiday_now_save, pattern=HOLIDAY_STOP_NOW)
             ],
             TYPING_ADDRESS: [MessageHandler(filters.TEXT & ~filters.COMMAND, address_confirmation)],
             VALIDATE: [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_phone_input)],
