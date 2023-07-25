@@ -23,6 +23,8 @@ from src.bot.handlers.state_constants import (
 from src.core.db.model import Volunteer
 from src.core.db.repository.volunteer_repository import crud_volunteer
 
+VOLUNTEER_UPDATE = "https://t.me/{tlg_username}, \n{ticketID}\n\n"
+
 
 class VolunteerCreate(BaseModel):
     telegram_id = int
@@ -53,24 +55,16 @@ async def update_volunteer(db_obj: Volunteer, data: VolunteerCreate, session: As
     return await crud_volunteer.update(db_obj, data, session)
 
 
-def volunteers_description(volunteers):
+def volunteers_description(volunteers: list[Volunteer]):
+    description = "\n---- \n\nВолонтёры поблизости:\n\n"
     if not volunteers:
-        return "\n---- \n\nВолонтёров поблизости не нашлось"
-    description = "\n---- \n\nВолонтёры поблизости\n\n"
-    description_add_hascar = ""
-    description_add_nocar = ""
+        description += "\n\nВолонтёров поблизости не нашлось."
+        return description
     for volunteer in volunteers:
-        volunteer_description = (
-            f"https://t.me/{volunteer.telegram_username}, {volunteer.city}\n{volunteer.ticketID}\n\n"
+        description += VOLUNTEER_UPDATE.format(
+            tlg_username=volunteer.telegram_username,
+            ticketID=volunteer.ticketID
         )
-        if volunteer.has_car:
-            description_add_hascar += volunteer_description
-        else:
-            description_add_nocar += volunteer_description
-    if description_add_hascar:
-        description += "* с авто:\n\n" + description_add_hascar
-    if description_add_nocar:
-        description += "* без авто:\n\n" + description_add_nocar
     return description
 
 

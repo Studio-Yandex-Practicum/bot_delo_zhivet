@@ -34,7 +34,7 @@ from src.bot.handlers.state_constants import (
     TELEGRAM_USERNAME,
     VALIDATE,
 )
-from src.bot.service.get_issues_with_statuses import add_new_volunteer_to_issue
+from src.bot.service.get_issues_with_statuses import processing_volunteer
 from src.bot.service.phone_number import format_numbers, phone_number_validate
 from src.bot.service.save_new_user import create_new_user
 from src.bot.service.save_tracker_id import save_tracker_id
@@ -288,8 +288,7 @@ async def save_and_exit_volunteer(
         volunteer = await create_volunteer(volunteer_data, session)
         tracker = create_volunteer_ticket(volunteer)
         await save_tracker_id(crud_volunteer, tracker.key, volunteer.telegram_id, session)
-
-    await add_new_volunteer_to_issue(volunteer, session)
+        await processing_volunteer(volunteer, session)
 
 
 async def back_to_add_volunteer(update: Update, context: ContextTypes.DEFAULT_TYPE):
