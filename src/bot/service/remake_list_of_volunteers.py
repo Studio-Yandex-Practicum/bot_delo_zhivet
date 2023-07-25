@@ -34,7 +34,7 @@ async def reshape_issues_description(
             desc, _ = issue.description.split(
                 '\n\nВолонтёры поблизости'
             )
-        volunteers = crud_volunteer.get_volunteers_by_point(
+        volunteers = await crud_volunteer.get_volunteers_by_point(
             obj.longitude, obj.latitude, session
         )
         desc += volunteers_description(volunteers)
