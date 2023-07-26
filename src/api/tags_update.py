@@ -43,7 +43,7 @@ class TrackerTagUpdater:
 
     def remove_tag_from_tracker(self, tag_name: str) -> bool:
         if self.check_any_issues_with_tag_exist(tag_name):
-            logger.info(f"No issues with tag {tag_name} exist in queue {self.queue}")
+            logger.info(f"Can't remove tag '{tag_name}'. There are issues with tag {tag_name} in queue {self.queue}")
             return False
         queue = client.queues[self.queue]
         try:
