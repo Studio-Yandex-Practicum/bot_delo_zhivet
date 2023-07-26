@@ -4,13 +4,12 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from structlog import get_logger
 
 from admin.config import settings
-from src.core.db.db import Base
-from src.core.db.model import Role, Staff
-
-from .messages import (
+from admin.messages import (
     DB_COMMON_ERROR, DB_COMMON_LOGGER, DBAPI_ERROR, DBAPI_LOGGER,
     START_LOGGING, STOP_LOGGING,
 )
+from src.core.db.db import Base
+from src.core.db.model import Role, Staff
 
 logger = get_logger("admin_logger")
 logger.info(START_LOGGING)
