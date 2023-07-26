@@ -35,14 +35,14 @@ class TrackerTagUpdater:
             f"Bulk update tag: from {old_tag_name} to {new_tag_name} in {self.queue}. Status: {bulk_change.status}"
         )
 
-    def chek_any_issues_with_tag_exist(self, tag_name: str) -> bool:
+    def check_any_issues_with_tag_exist(self, tag_name: str) -> bool:
         issues = client.issues.find(filter={"queue": self.queue, "tags": tag_name})
         if issues == []:
             False
         True
 
     def remove_tag_from_tracker(self, tag_name: str) -> bool:
-        if self.chek_any_issues_with_tag_exist(tag_name):
+        if self.check_any_issues_with_tag_exist(tag_name):
             logger.info(f"No issues with tag {tag_name} exist in queue {self.queue}")
             return False
         queue = client.queues[self.queue]
