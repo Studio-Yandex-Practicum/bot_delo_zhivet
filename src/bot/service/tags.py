@@ -16,12 +16,12 @@ async def get_all_pollution_tags(session: AsyncSession) -> list[Tag_Pollution]:
     return tags
 
 
-def get_chosen_tags_names(all_tags_list: list[AbstractTag], chosen_tags_ids_list: list) -> list[str]:
+def get_chosen_tags_names(all_tags_list: list[AbstractTag], chosen_tags_ids_list: list) -> str:
     names = []
     for tag in all_tags_list:
         if str(tag.id) in chosen_tags_ids_list:
             names.append(str(tag.name))
-    return names
+    return ', '.join(names)
 
 
 async def check_pollution_tags_are_in_db(session: AsyncSession) -> bool:
