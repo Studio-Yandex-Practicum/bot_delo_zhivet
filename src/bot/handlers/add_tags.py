@@ -62,7 +62,7 @@ class TagsHandlerClass:
         # обновим сообщение
         text = self.text
         if chosen_tags_ids_list:
-            text += f"Вы уже выбрали {get_chosen_tags_names(all_tags_list, chosen_tags_ids_list)}"
+            text += f"Выбранные типы: {get_chosen_tags_names(all_tags_list, chosen_tags_ids_list)}"
         else:
             text += "Вы пока ничего не выбрали."
         await update.callback_query.edit_message_text(
@@ -78,7 +78,7 @@ class TagsHandlerClass:
 
         all_tags_list = await self._get_tags_from_db()
         await update.callback_query.edit_message_text(
-            text=self.text,
+            text=self.text + "Вы пока ничего не выбрали.",
             reply_markup=self._build_tags_keyboard(all_tags_list, chosen_tags_ids_list),
         )
         return self.entry_point
