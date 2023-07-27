@@ -62,7 +62,7 @@ class TagsHandlerClass:
         # обновим сообщение
         text = self.text
         if chosen_tags_ids_list:
-            text += f"Выбранные типы проблемы: {get_chosen_tags_names(all_tags_list, chosen_tags_ids_list)}"
+            text += f"Выбранные типы: {get_chosen_tags_names(all_tags_list, chosen_tags_ids_list)}"
         else:
             text += "Вы пока ничего не выбрали."
         await update.callback_query.edit_message_text(
