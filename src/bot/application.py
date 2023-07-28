@@ -39,6 +39,7 @@ from bot.handlers.loggers import logger
 from core.config import settings
 
 from .handlers.common import end_describing, handle_invalid_button, help_command, stop
+from .handlers.holiday import endless_holiday_now_save, stop_holiday_now_save
 from .handlers.participation import make_donation
 from .handlers.pollution import (
     back_to_select_option_to_report_about_pollution,
@@ -66,6 +67,8 @@ from .handlers.state_constants import (
     BACK,
     CAR_COMMAND,
     DADATA_UNAVAILABLE,
+    ENDLESS_HOLIDAY_START_NOW,
+    HOLIDAY_STOP_NOW,
     NO_TAG,
     PHONE_COMMAND,
     PHONE_INPUT,
@@ -118,6 +121,8 @@ def create_bot() -> Application:
                 CallbackQueryHandler(handle_radius_input, pattern=SPECIFY_ACTIVITY_RADIUS_CMD),
                 CallbackQueryHandler(handle_car_input, pattern=SPECIFY_CAR_AVAILABILITY_CMD),
                 CallbackQueryHandler(save_volunteer, pattern="^" + SAVE + "$"),
+                CallbackQueryHandler(endless_holiday_now_save, pattern=ENDLESS_HOLIDAY_START_NOW),
+                CallbackQueryHandler(stop_holiday_now_save, pattern=HOLIDAY_STOP_NOW),
             ],
             TYPING_ADDRESS: [MessageHandler(filters.TEXT & ~filters.COMMAND, address_confirmation)],
             VALIDATE: [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_phone_input)],
