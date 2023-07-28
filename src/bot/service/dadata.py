@@ -1,5 +1,6 @@
 from dadata import Dadata
 
+from bot.handlers.loggers import logger
 from core.config import settings
 
 dadata = Dadata(settings.DADATA_TOKEN, settings.DADATA_SECRET)
@@ -21,5 +22,6 @@ def get_fields_from_dadata(data):
             latitude=latitude,
             longitude=longitude,
         )
-    except (IndexError, TypeError):
+    except (IndexError, TypeError) as e:
+        logger.error("Не удалось получить данные с Dadata", error=str(e))
         return None
