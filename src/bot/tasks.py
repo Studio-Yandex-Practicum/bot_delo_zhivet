@@ -41,19 +41,19 @@ def task_bulk_remove_assistance_tag_in_tracker(old_tag_name: str, event_ticket_i
     run(assistance_disabled_traker_tag_updater.bulk_remove_tag_from_queue(old_tag_name, event_ticket_ids))
 
 
-@celery.task(name="tracker.tasks.task_bulkupdate_and_remove_pollution_tag_in_tracker")
-def task_bulkupdate_and_remove_pollution_tag_in_tracker(
+@celery.task(name="tracker.tasks.task_bulk_update_and_remove_pollution_tag_in_tracker")
+def task_bulk_update_and_remove_pollution_tag_in_tracker(
     old_tag_name: str, new_tag_name: str, event_ticket_ids: list[str]
 ) -> None:
-    run(pollution_traker_tag_updater.bulkupdate_queue_and_remove_tag(old_tag_name, new_tag_name, event_ticket_ids))
+    run(pollution_traker_tag_updater.bulk_update_queue_and_remove_tag(old_tag_name, new_tag_name, event_ticket_ids))
 
 
-@celery.task(name="tracker.tasks.task_bulkupdate_and_remove_assistance_tag_in_tracker")
-def task_bulkupdate_and_remove_assistance_tag_in_tracker(
+@celery.task(name="tracker.tasks.task_bulk_update_and_remove_assistance_tag_in_tracker")
+def task_bulk_update_and_remove_assistance_tag_in_tracker(
     old_tag_name: str, new_tag_name: str, event_ticket_ids: list[str]
 ) -> None:
     run(
-        assistance_disabled_traker_tag_updater.bulkupdate_queue_and_remove_tag(
+        assistance_disabled_traker_tag_updater.bulk_update_queue_and_remove_tag(
             old_tag_name, new_tag_name, event_ticket_ids
         )
     )
