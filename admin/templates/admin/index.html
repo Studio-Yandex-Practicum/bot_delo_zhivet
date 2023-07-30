@@ -1,47 +1,76 @@
-{% extends 'admin/master.html' %}
+{% extends 'admin/base.html' %}
 
 {% block body %}
-{{ super() }}
+    {{ super() }}
 
-<section class="container">
-    {% if current_user.is_authenticated %}
-        <h1 class="display-3">
-            Админка бота «Дело живёт»
-        </h1>
+	<section class='index-wrapper'>
+        {% if current_user.is_authenticated %}
+            <h1 class="display-3">
+                Админка бота «Дело живёт»
+            </h1>
 
-        <p class="lead">
-            Добро пожаловать, {{ current_user.login }}!
-        </p>
+            <p class="lead">
+                Добро пожаловать,
+                <strong>{{ current_user.login }}</strong>!
+            </p>
 
-        <p>
-            Управление пользователями и волонтёрами в базе данных бота «Дело живёт».
-        </p>
-    {% else %}
-        <form method="POST" action="">
-            {{ form.hidden_tag() if form.hidden_tag }}
+            <p>
+                Управление пользователями и волонтёрами в базе данных бота «Дело живёт».
+            </p>
+        {% endif %}
 
-            {% for f in form if f.type != 'CSRFTokenField' %}
-                <div class="form-group">
-                    {{ f.label }}<br>
-                    {{ f }}
-                    {% if f.errors %}
-                    <ul>
-                        {% for e in f.errors %}
-                        <li>{{ e }}</li>
-                        {% endfor %}
+        {% if not current_user.is_authenticated %}
+            <form method="POST" action="" class='form-auth' novalidate>
+                {{ form.hidden_tag }}
+
+                {% for field in form if field.type != 'CSRFTokenField' %}
+                    <ul class='list'>
+                        <li class='form-group'>
+                            <label class='auth-input-text'>
+                                <p class='auth-input-text__label'>
+                                    {{ field.label.text }}
+                                </p>
+
+                                {% if field.errors %}
+                                    {{ field(class_='auth-input-text__field auth-input-text__field_error_message', placeholder_=field.label.text) }}
+
+                                    {% for error in field.errors %}
+                                        <p class='auth-input-text__message-error'>
+                                            {{ error }}
+                                        </p>
+                                    {% endfor %}
+                                {% endif %}
+
+                                {% if not field.errors %}
+                                    {{ field(class_='auth-input-text__field', placeholder_=field.label.text) }}
+                                {% endif %}
+                            </label>
+                        </li>
                     </ul>
-                    {% endif %}
-                </div>
-            {% endfor %}
+                {% endfor %}
 
-            <button class="btn btn-primary" type="submit">Подтвердить</button>
-        </form>
-    {{ link | safe }}
+                <button type='submit' class='auth-input-text__submit'>
+                    {{ submit_text }}
+                </button>
+            </form>
+        {% endif %}
 
-    {% endif %}
+        {% if not current_user.is_authenticated and sigin_link %}
+            <p class='auth-link'>
+                Вы уже зарегистрированы?
+                <a href="{{ sigin_link }}">
+                    Нажмите здесь, чтобы войти
+                </a>
+            </p>
+        {% endif %}
 
-    {% if not current_user.is_authenticated %}
-    <a class="btn btn-primary" href="/"><i class="icon-arrow-left icon-white"></i> Назад</a>
-    {% endif %}
-</section>
+        {% if not current_user.is_authenticated and registration_link %}
+            <p class='auth-link'>
+                У Вас нет учетной записи?
+                <a href="{{ registration_link }}">
+                    Нажмите здесь, чтобы зарегистрироваться
+                </a>
+            </p>
+        {% endif %}
+    </section>
 {% endblock body %}

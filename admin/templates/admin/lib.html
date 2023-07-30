@@ -72,7 +72,7 @@
     {% endif %}
 </ul>
 {% endif %}
-{%- endmacro %}
+{% endmacro %}
 
 {% macro simple_pager(page, have_next, generator) -%}
 <ul class="pagination">
@@ -95,7 +95,7 @@
   </li>
   {% endif %}
 </ul>
-{%- endmacro %}
+{% endmacro %}
 
 {# ---------------------- Modal Window ------------------- #}
 {% macro add_modal_window(modal_window_id='fa_modal_window', modal_label_id='fa_modal_label') %}
@@ -123,17 +123,17 @@
     <label for="{{ field.id }}" class="control-label" {% if field.widget.input_type == 'checkbox' %}style="display: block"{% endif %}>{{ field.label.text }}
         {% if h.is_required_form_field(field) %}
           <strong style="color: red">&#42;</strong>
-        {%- else -%}
+        {% else %}
           &nbsp;
-        {%- endif %}
+        {% endif %}
     </label>
     {% if prepend or append %}
     <div class="input-group">
-      {%- if prepend -%}
+      {% if prepend %}
       <div class="input-group-prepend">
         {{ prepend }}
       </div>
-      {%- endif -%}
+      {% endif %}
     {% endif %}
       {% if field.widget.input_type == 'checkbox' %}
         {% set _class = kwargs.setdefault('class', 'form-control-lg') %}
@@ -142,13 +142,13 @@
       {% else %}
         {% set _class = kwargs.setdefault('class', 'form-control') %}
       {% endif %}
-      {%- if direct_error %} {% set _ = kwargs.update({'class': kwargs['class'] ~ ' is-invalid'}) %} {% endif -%}
+      {% if direct_error %} {% set _ = kwargs.update({'class': kwargs['class'] ~ ' is-invalid'}) %} {% endif -%}
       {{ field(**kwargs) | safe }}
-      {%- if append -%}
+      {% if append %}
       <div class="input-group-append">
         {{ append }}
       </div>
-      {%- endif -%}
+      {% endif %}
       {% if direct_error %}
         <div class="invalid-feedback">
           <ul class="help-block">

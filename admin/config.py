@@ -40,9 +40,7 @@ class Settings(BaseSettings):
     # Параметры генерации токенов сброса пароля
     PASSWORD_RESET_TOKEN_ALGORITHM: str = "HS256"
     PASSWORD_RESET_TOKEN_TTL: int = 600
-
-    # Дополнительные параметры, не участвующие в ините приложения
-    BOOTSTRAP_VERSION = "bootstrap4"
+   
 
     class Config:
         env_file_encoding = "utf-8"

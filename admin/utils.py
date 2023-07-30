@@ -27,8 +27,8 @@ def get_readonly_dict(fields):
     return readonly_fileds
 
 
-def get_translated_lables(fields):
-    """Функция для перевода полей на русский язык"""
+def get_translated_labels(fields):
+    """ Функция для перевода полей на русский язык. """
     labels = dict()
     for field in fields:
         labels[field] = FIELD_TRANSLATION_RU.get(field, field)

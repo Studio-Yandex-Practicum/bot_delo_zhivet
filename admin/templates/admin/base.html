@@ -1,5 +1,6 @@
-{% import 'admin/layout.html' as layout with context -%}
+{% import 'admin/layout.html' as layout with context %}
 {% import 'admin/static.html' as admin_static with context %}
+
 <!DOCTYPE html>
 <html>
   <head>
@@ -7,6 +8,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="{{ url_for( 'static', filename='index.css', v=1)}}">
     {% block head_css %}
         <link href="{{ admin_static.url(filename='bootstrap/bootstrap4/swatch/{swatch}/bootstrap.min.css'.format(swatch=config.get('FLASK_ADMIN_SWATCH', 'default')), v='4.2.1') }}"
               rel="stylesheet">
@@ -32,7 +34,7 @@
     {% include 'admin/includes/header.html' %}
 </header>
 
-<main>
+<main class='main'>
     {% block page_body %}
         {{ layout.messages() }}
 
@@ -42,6 +44,8 @@
         {% block body %}{% endblock %}
     {% endblock %}
 </main>
+
+<footer></footer>
 
 {% block tail_js %}
     <script src="{{ admin_static.url(filename='vendor/jquery.min.js', v='3.5.1') }}" type="text/javascript"></script>
