@@ -20,7 +20,6 @@ from telegram.ext import (
     PicklePersistence,
     filters,
 )
-from telegram.ext.filters import Regex
 
 from bot.const import (
     BECOME_VOLUNTEER_CMD,
