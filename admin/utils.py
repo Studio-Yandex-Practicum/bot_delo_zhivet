@@ -98,8 +98,7 @@ def verify_reset_password_token(token):
 def check_tag_uniqueness(model, existing_tags):
     """Функция для проверки уникальности тега."""
     for tag in existing_tags:
-        distance_score = distance(tag.name.lower(), model.name.lower())
-        if distance_score < 5:
+        if (distance_score := distance(tag.name.lower(), model.name.lower())) < 5:
             logger.warning(TAG_EXISTS, tag=tag.name, model=model.name, distance_score=distance_score)
             raise ValidationError(TAG_EXISTS)
     logger.debug(TAG_CHECKED, model=model.name, tag=model.name)
