@@ -20,13 +20,11 @@ from telegram.ext import (
     PicklePersistence,
     filters,
 )
-from telegram.ext.filters import Regex
 
 from bot.const import (
     BECOME_VOLUNTEER_CMD,
     DATA_PATH,
     END_CMD,
-    MAKE_DONATION_CMD,
     REPORT_ECO_PROBLEM_CMD,
     SAVE_PERSISTENCE_INTERVAL,
     SPECIFY_ACTIVITY_RADIUS_CMD,
@@ -40,7 +38,6 @@ from core.config import settings
 
 from .handlers.common import end_describing, handle_invalid_button, help_command, stop
 from .handlers.holiday import endless_holiday_now_save, stop_holiday_now_save
-from .handlers.participation import make_donation
 from .handlers.pollution import (
     back_to_select_option_to_report_about_pollution,
     input,
@@ -237,8 +234,6 @@ def create_bot() -> Application:
     )
 
     app.add_handler(conv_handler)
-
-    app.add_handler(MessageHandler(Regex(MAKE_DONATION_CMD), make_donation))
     app.add_handler(CommandHandler("help", help_command))
     app.add_handler(CallbackQueryHandler(handle_invalid_button, InvalidCallbackData))
 
