@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Sequence
 
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -7,19 +7,11 @@ from yandex_tracker_client.exceptions import NotFound
 
 from src.api.tracker import client
 from src.bot.handlers.state_constants import (
-    ADDRESS_INPUT,
-    FIRST_NAME,
-    GEOM,
-    LAST_NAME,
-    LATITUDE,
-    LONGITUDE,
-    SPECIFY_ACTIVITY_RADIUS,
-    SPECIFY_CAR_AVAILABILITY,
-    SPECIFY_PHONE_PERMISSION,
-    TELEGRAM_ID,
-    TELEGRAM_USERNAME,
-    VOLUNTEER,
+    ADDRESS_INPUT, FIRST_NAME, GEOM, HOLIDAY_START, LAST_NAME, LATITUDE,
+    LONGITUDE, SPECIFY_ACTIVITY_RADIUS, SPECIFY_CAR_AVAILABILITY,
+    SPECIFY_PHONE_PERMISSION, TELEGRAM_ID, TELEGRAM_USERNAME, VOLUNTEER,
 )
+from src.bot.service.holiday import check_and_update_holiday_status
 from src.core.db.model import Volunteer
 from src.core.db.repository.volunteer_repository import crud_volunteer
 
@@ -53,24 +45,14 @@ async def update_volunteer(db_obj: Volunteer, data: VolunteerCreate, session: As
     return await crud_volunteer.update(db_obj, data, session)
 
 
-def volunteers_description(volunteers):
+def volunteers_description(volunteers: Sequence[Volunteer]) -> str:
     if not volunteers:
         return "\n---- \n\nВолонтёров поблизости не нашлось"
     description = "\n---- \n\nВолонтёры поблизости\n\n"
-    description_add_hascar = ""
-    description_add_nocar = ""
     for volunteer in volunteers:
-        volunteer_description = (
-            f"https://t.me/{volunteer.telegram_username}, {volunteer.city}\n{volunteer.ticketID}\n\n"
+        description += (
+            f"* https://t.me/{volunteer.telegram_username}, {volunteer.ticketID}\n"
         )
-        if volunteer.has_car:
-            description_add_hascar += volunteer_description
-        else:
-            description_add_nocar += volunteer_description
-    if description_add_hascar:
-        description += "* с авто:\n\n" + description_add_hascar
-    if description_add_nocar:
-        description += "* без авто:\n\n" + description_add_nocar
     return description
 
 
@@ -89,6 +71,8 @@ def volunteer_data_preparation(telegram_id: int, username: str, first_name: str,
     if SPECIFY_PHONE_PERMISSION in data:
         data[SPECIFY_PHONE_PERMISSION] = data[SPECIFY_PHONE_PERMISSION][6:]
     data.pop(ADDRESS_INPUT, None)
+    if HOLIDAY_START in data and data[HOLIDAY_START] is not None:
+        data[HOLIDAY_START] = datetime.fromtimestamp(data[HOLIDAY_START])
     return data
 
 
@@ -124,11 +108,12 @@ def form_description(volunteer: Volunteer):
     return description
 
 
-def form_summary(volunteer: Volunteer):
-    user_name = volunteer.telegram_username
-    if user_name is None:
-        user_name = "Никнейм скрыт"
-    return f"{user_name} - {volunteer.full_address}"
+def form_summary(volunteer: Volunteer) -> str:
+    volunteer_telegram_username = volunteer.telegram_username
+    if not volunteer_telegram_username:
+        volunteer_telegram_username = "Username не указан"
+    has_car = "есть автомобиль" if volunteer.has_car else "нет автомобиля"
+    return f"{volunteer_telegram_username}, {has_car} - {volunteer.full_address}"
 
 
 def create_volunteer_ticket(volunteer: Volunteer):
@@ -142,6 +127,7 @@ def create_volunteer_ticket(volunteer: Volunteer):
 def update_volunteer_ticket(volunteer: Volunteer, ticket_id: str):
     try:
         issue = client.issues[ticket_id]
+        issue = check_and_update_holiday_status(volunteer, issue)
         return issue.update(
             summary=form_summary(volunteer),
             description=form_description(volunteer),

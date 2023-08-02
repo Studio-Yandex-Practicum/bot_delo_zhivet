@@ -100,5 +100,5 @@ async def save_volunteer(
         context.user_data[FEATURES],
         context.user_data[IS_EXISTS],
     )
-    context.user_data[IS_EXISTS] = True
+    context.user_data.pop(IS_EXISTS, None)
     return await end_describing(update, context)

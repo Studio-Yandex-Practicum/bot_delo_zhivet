@@ -4,34 +4,14 @@ from telegram.ext import ContextTypes
 
 from src.bot.handlers.start import start
 from src.bot.handlers.state_constants import (
-    ACTIVITY_RADIUS,
-    ADDING_VOLUNTEER,
-    ADDRESS,
-    ADDRESS_INPUT,
-    ADDRESS_TEMPORARY,
-    BACK,
-    CAR_COMMAND,
-    CHECK_MARK,
-    CURRENT_FEATURE,
-    EDIT_PROFILE_GREETING,
-    END,
-    FEATURES,
-    FEATURES_DESCRIPTION,
-    IS_EXISTS,
-    PHONE_COMMAND,
-    PHONE_INPUT,
-    RADIUS_COMMAND,
-    REGISTER_GREETING,
-    SAVE,
-    SECOND_LEVEL_TEXT,
-    SECOND_LEVEL_UPDATE_TEXT,
-    SELECTING_OVER,
-    SPECIFY_ACTIVITY_RADIUS,
-    SPECIFY_CAR_AVAILABILITY,
-    SPECIFY_PHONE_PERMISSION,
-    START_OVER,
-    TELEGRAM_ID,
-    TELEGRAM_USERNAME,
+    ACTIVITY_RADIUS, ADDING_VOLUNTEER, ADDRESS, ADDRESS_INPUT,
+    ADDRESS_TEMPORARY, BACK, CAR_COMMAND, CHECK_MARK, CURRENT_FEATURE,
+    DB_HOLIDAY_START, EDIT_PROFILE_GREETING, END, ENDLESS_HOLIDAY_START_NOW,
+    FEATURES, FEATURES_DESCRIPTION, HOLIDAY_START, HOLIDAY_STOP_NOW, IS_EXISTS,
+    PHONE_COMMAND, PHONE_INPUT, RADIUS_COMMAND, REGISTER_GREETING, SAVE,
+    SECOND_LEVEL_TEXT, SECOND_LEVEL_UPDATE_TEXT, SELECTING_OVER,
+    SPECIFY_ACTIVITY_RADIUS, SPECIFY_CAR_AVAILABILITY,
+    SPECIFY_PHONE_PERMISSION, START_OVER, TELEGRAM_ID, TELEGRAM_USERNAME,
     VALIDATE,
 )
 from src.bot.service.get_issues_with_statuses import add_new_volunteer_to_issue
@@ -39,11 +19,8 @@ from src.bot.service.phone_number import format_numbers, phone_number_validate
 from src.bot.service.save_new_user import create_new_user
 from src.bot.service.save_tracker_id import save_tracker_id
 from src.bot.service.volunteer import (
-    check_and_update_volunteer,
-    create_volunteer,
-    create_volunteer_ticket,
-    update_volunteer_ticket,
-    volunteer_data_preparation,
+    check_and_update_volunteer, create_volunteer, create_volunteer_ticket,
+    update_volunteer_ticket, volunteer_data_preparation,
 )
 from src.core.db.db import get_async_session
 from src.core.db.repository.user_repository import crud_user
@@ -71,9 +48,13 @@ async def add_volunteer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> s
     if context.user_data.get(IS_EXISTS) is None:
         session_generator = get_async_session()
         session = await session_generator.asend(None)
-        context.user_data[IS_EXISTS] = await crud_volunteer.get_exist_by_attribute(
-            TELEGRAM_ID, update.effective_chat.id, session
-        )
+        user = await crud_volunteer.get_volunteer_by_telegram_id(update.effective_chat.id, session)
+        if user is not None:
+            context.user_data[IS_EXISTS] = True
+            context.user_data[DB_HOLIDAY_START] = user.holiday_start
+        else:
+            context.user_data[IS_EXISTS] = False
+
         context.chat_data["current_session"] = session
     action, save_action, text, second_level_text = get_buttons_params(context.user_data[IS_EXISTS])
 
@@ -108,6 +89,27 @@ async def add_volunteer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> s
             InlineKeyboardButton(text="Назад", callback_data=str(END)),
         ],
     ]
+
+    if context.user_data.get(DB_HOLIDAY_START, False) is None:
+        buttons.insert(
+            -1,
+            [
+                InlineKeyboardButton(
+                    text=f"Уйти в отпуск{CHECK_MARK*check_feature(HOLIDAY_START)}",
+                    callback_data=ENDLESS_HOLIDAY_START_NOW,
+                ),
+            ],
+        )
+    if context.user_data.get(DB_HOLIDAY_START, False):
+        buttons.insert(
+            -1,
+            [
+                InlineKeyboardButton(
+                    text=f"Выйти из отпуска {CHECK_MARK*check_feature(HOLIDAY_START)}",
+                    callback_data=HOLIDAY_STOP_NOW,
+                ),
+            ],
+        )
 
     keyboard = InlineKeyboardMarkup(buttons)
 
