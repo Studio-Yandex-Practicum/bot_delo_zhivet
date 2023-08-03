@@ -44,7 +44,7 @@ from src.bot.handlers.social import (
 from src.bot.handlers.start import start
 from src.bot.handlers.state_constants import (
     ADD_POLLUTION_TAG, ADD_SOCIAL_TAG, ADDING_SOCIAL_TASK, ADDING_VOLUNTEER,
-    ADDRESS_COMMAND, ADDRESS_INPUT, BACK, CAR_COMMAND,
+    ADDRESS_COMMAND, ADDRESS_INPUT, BACK, CAR_COMMAND, DADATA_UNAVAILABLE,
     ENDLESS_HOLIDAY_START_NOW, HOLIDAY_STOP_NOW, NO_TAG, PHONE_COMMAND,
     PHONE_INPUT, POLLUTION_COMMENT, POLLUTION_COORDINATES, POLLUTION_FOTO,
     RADIUS_COMMAND, SAVE, SELECTING_ACTION, SELECTING_FEATURE, SELECTING_OVER,
@@ -56,7 +56,7 @@ from src.bot.handlers.volunteer import (
     handle_car_input, handle_phone_input, handle_radius_input, save_input,
 )
 from src.bot.service.common_functions import (
-    address_confirmation, ask_for_input_address,
+    address_confirmation, ask_for_input_address, retry_address_confirmation,
 )
 from src.bot.tasks import save_pollution, save_social_problem, save_volunteer
 from src.core.config import settings
@@ -93,6 +93,7 @@ def create_bot() -> Application:
                 CallbackQueryHandler(save_input, pattern="^" + ADDRESS_COMMAND),
                 CallbackQueryHandler(save_input, pattern="^" + RADIUS_COMMAND),
                 CallbackQueryHandler(save_input, pattern="^" + CAR_COMMAND),
+                CallbackQueryHandler(retry_address_confirmation, pattern=f"^{DADATA_UNAVAILABLE}$"),
             ],
         },
         fallbacks=[
@@ -159,7 +160,10 @@ def create_bot() -> Application:
             SOCIAL_PROBLEM_TYPING: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, save_social_problem_data),
             ],
-            SELECTING_OVER: [CallbackQueryHandler(save_social_address_input, pattern="^" + ADDRESS_COMMAND)],
+            SELECTING_OVER: [
+                CallbackQueryHandler(save_social_address_input, pattern="^" + ADDRESS_COMMAND),
+                CallbackQueryHandler(retry_address_confirmation, pattern=f"^{DADATA_UNAVAILABLE}$"),
+            ],
             TYPING_ADDRESS: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, address_confirmation),
             ],
