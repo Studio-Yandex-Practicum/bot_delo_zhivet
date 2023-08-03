@@ -25,6 +25,8 @@ from src.core.config import settings
 from src.core.db.db import get_async_session
 from src.core.db.repository.tags_repository import AbstractTag, TagCRUD, crud_tag_assistance, crud_tag_pollution
 
+from .loggers import logger
+
 
 class TagsHandlerClass:
     """Класс для создания хендлера для выбора тегов."""
@@ -46,6 +48,7 @@ class TagsHandlerClass:
     async def enter_tags(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         """Хендлер для обработки как первого входа в выбор тегов, так и всех нажатий кнопок с тегами."""
         if not await self._on_enter_checks(update, context):
+            logger.info("Invalid button", update=update.to_dict(), context=context.to_dict())
             return await handle_invalid_button(update, context)
 
         await update.callback_query.answer()
@@ -59,12 +62,25 @@ class TagsHandlerClass:
             chosen_tags_ids_list = self._update_chosen_tags(
                 chosen_tag.group(TAG_ID), chosen_tags_ids_list, all_tags_ids_list
             )
+
+        logger.info(
+            "Updated chosen tags",
+            chosen_tags_ids_list=chosen_tags_ids_list,
+            all_tags_list=all_tags_list,
+            all_tags_ids_list=all_tags_ids_list,
+        )
+
         # обновим сообщение
         text = self.text
         if chosen_tags_ids_list:
             text += f"Выбранные типы: {get_chosen_tags_names(all_tags_list, chosen_tags_ids_list)}"
         else:
             text += "Вы пока ничего не выбрали."
+
+        logger.info(
+            "Editing message", text=text, reply_markup=self._build_tags_keyboard(all_tags_list, chosen_tags_ids_list)
+        )
+
         await update.callback_query.edit_message_text(
             text=text,
             reply_markup=self._build_tags_keyboard(all_tags_list, chosen_tags_ids_list),
@@ -77,6 +93,9 @@ class TagsHandlerClass:
         chosen_tags_ids_list = []
 
         all_tags_list = await self._get_tags_from_db()
+
+        logger.info("Clearing tags", all_tags_list=all_tags_list)
+
         await update.callback_query.edit_message_text(
             text=self.text + "Вы пока ничего не выбрали.",
             reply_markup=self._build_tags_keyboard(all_tags_list, chosen_tags_ids_list),
@@ -96,6 +115,7 @@ class TagsHandlerClass:
         """Убедится что в context.user_data есть нужные ключи."""
         # если FEATURES нет в user_data, значит что то не так
         if FEATURES not in context.user_data:
+            logger.info("Missing key in user_data", key=FEATURES)
             return False
 
         if update.callback_query.data == self.entry_point:
@@ -107,7 +127,7 @@ class TagsHandlerClass:
         return True
 
     async def _get_tags_from_db(self) -> list:
-        """Получает список тегов их базы в заданом порядке."""
+        """Получает список тегов из базы в заданом порядке."""
         session_generator = get_async_session()
         session = await session_generator.asend(None)
         return await self.crud_tag.get_all_sorted_by_attribute(settings.sort_tags_in_bot, session)
@@ -120,6 +140,7 @@ class TagsHandlerClass:
                 chosen_tags_ids_list.append(chosen_tag)
             else:
                 chosen_tags_ids_list.remove(chosen_tag)
+        logger.info("Updated chosen tags IDs", chosen_tags_ids_list=chosen_tags_ids_list)
         return chosen_tags_ids_list
 
     def _build_tags_keyboard(
