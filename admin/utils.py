@@ -6,11 +6,9 @@ from sqlalchemy.orm.attributes import InstrumentedAttribute
 from structlog import get_logger
 from wtforms.validators import ValidationError
 
-from src.core.db.model import Staff
-
-from .config import settings
-from .locales import FIELD_TRANSLATION_RU
-from .messages import (
+from admin.config import settings
+from admin.locales import FIELD_TRANSLATION_RU
+from admin.messages import (
     GENERATE_RESET_TOKEN,
     GET_DATABASE_FIELDS,
     TAG_CHECKED,
@@ -18,6 +16,7 @@ from .messages import (
     TOKEN_VALIDATION_ERROR,
     USER_NOT_FOUND,
 )
+from src.core.db.model import Staff
 
 logger = get_logger("admin_logger")
 

@@ -7,7 +7,7 @@ from structlog import PrintLogger
 from structlog.contextvars import merge_contextvars
 from structlog.processors import JSONRenderer, TimeStamper, UnicodeDecoder, add_log_level
 
-from .config import settings
+from admin.config import settings
 
 DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S.%f"
 
