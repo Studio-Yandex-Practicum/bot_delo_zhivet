@@ -7,13 +7,23 @@ from yandex_tracker_client.exceptions import NotFound
 
 from src.api.tracker import client
 from src.bot.handlers.state_constants import (
-    ADDRESS_INPUT, FIRST_NAME, GEOM, HOLIDAY_START, LAST_NAME, LATITUDE,
-    LONGITUDE, SPECIFY_ACTIVITY_RADIUS, SPECIFY_CAR_AVAILABILITY,
-    SPECIFY_PHONE_PERMISSION, TELEGRAM_ID, TELEGRAM_USERNAME, VOLUNTEER,
+    ADDRESS_INPUT,
+    FIRST_NAME,
+    GEOM,
+    LAST_NAME,
+    LATITUDE,
+    LONGITUDE,
+    SPECIFY_ACTIVITY_RADIUS,
+    SPECIFY_CAR_AVAILABILITY,
+    SPECIFY_PHONE_PERMISSION,
+    TELEGRAM_ID,
+    TELEGRAM_USERNAME,
+    VOLUNTEER,
 )
-from src.bot.service.holiday import check_and_update_holiday_status
+from src.bot.service.get_issues_with_statuses import processing_volunteer
 from src.core.db.model import Volunteer
 from src.core.db.repository.volunteer_repository import crud_volunteer
+
 
 VOLUNTEER_UPDATE = "https://t.me/{tlg_username}, \n{ticketID}\n\n"
 
@@ -75,8 +85,6 @@ def volunteer_data_preparation(telegram_id: int, username: str, first_name: str,
     if SPECIFY_PHONE_PERMISSION in data:
         data[SPECIFY_PHONE_PERMISSION] = data[SPECIFY_PHONE_PERMISSION][6:]
     data.pop(ADDRESS_INPUT, None)
-    if HOLIDAY_START in data and data[HOLIDAY_START] is not None:
-        data[HOLIDAY_START] = datetime.fromtimestamp(data[HOLIDAY_START])
     return data
 
 
@@ -84,15 +92,23 @@ async def check_and_update_volunteer(
     volunteer_data: dict, session: AsyncSession
 ) -> tuple[Optional[Volunteer], Optional[str]]:
     """Проверяет не забанен ли волонтер, есть ли данные для обновления"""
-    volunteer = await crud_volunteer.get_volunteer_by_telegram_id(volunteer_data[TELEGRAM_ID], session)
-    old_ticket_id = volunteer.ticketID
+    volunteer = old_volunteer = await crud_volunteer.get_volunteer_by_telegram_id(
+        volunteer_data[TELEGRAM_ID], session
+    )
     for attr in set(volunteer_data.keys()):
         if getattr(volunteer, attr) == volunteer_data[attr]:
             del volunteer_data[attr]
     if not volunteer_data:
-        return None, old_ticket_id
+        return None, old_volunteer.ticketID
     volunteer = await update_volunteer(volunteer, volunteer_data, session)
-    return volunteer, old_ticket_id
+    if SPECIFY_CAR_AVAILABILITY in volunteer_data:
+        # когда утвердят строчку в summary для машины
+        pass
+    if volunteer.is_banned:
+        return volunteer, volunteer.ticketID
+    if SPECIFY_ACTIVITY_RADIUS in volunteer_data or GEOM in volunteer_data:
+        await processing_volunteer(volunteer, session, old_volunteer)
+    return volunteer, volunteer.ticketID
 
 
 def form_description(volunteer: Volunteer):
@@ -130,7 +146,6 @@ def create_volunteer_ticket(volunteer: Volunteer):
 def update_volunteer_ticket(volunteer: Volunteer, ticket_id: str):
     try:
         issue = client.issues[ticket_id]
-        issue = check_and_update_holiday_status(volunteer, issue)
         return issue.update(
             summary=form_summary(volunteer),
             description=form_description(volunteer),
