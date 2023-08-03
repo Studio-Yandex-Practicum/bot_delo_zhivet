@@ -5,9 +5,7 @@ from os import getpid
 import structlog
 from structlog import PrintLogger
 from structlog.contextvars import merge_contextvars
-from structlog.processors import (
-    JSONRenderer, TimeStamper, UnicodeDecoder, add_log_level,
-)
+from structlog.processors import JSONRenderer, TimeStamper, UnicodeDecoder, add_log_level
 
 from .config import settings
 
