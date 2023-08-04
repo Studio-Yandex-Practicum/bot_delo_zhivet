@@ -1,5 +1,7 @@
 version: '3.8'
 
+name: bot_delo_zhivet
+
 services:
   db:
     image: postgis/postgis:14-3.3-alpine
