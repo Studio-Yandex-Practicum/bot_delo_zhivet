@@ -42,7 +42,6 @@ services:
       - ../.env_files/.env.s3
       - ../.env_files/.env.flask
       - ../.env_files/.env.mail
-      - ../.env_files/.env.sentry
       - ../.env_files/.env.db
       - ../.env_files/.env.nginx
       - ../.env_files/.env.redis
@@ -74,7 +73,6 @@ services:
       - ../.env_files/.env.s3
       - ../.env_files/.env.flask
       - ../.env_files/.env.mail
-      - ../.env_files/.env.sentry
       - ../.env_files/.env.db
       - ../.env_files/.env.nginx
       - ../.env_files/.env.redis
@@ -113,7 +111,6 @@ services:
       - ../.env_files/.env.s3
       - ../.env_files/.env.flask
       - ../.env_files/.env.mail
-      - ../.env_files/.env.sentry
       - ../.env_files/.env.db
       - ../.env_files/.env.nginx
       - ../.env_files/.env.redis
@@ -151,7 +148,6 @@ services:
       - ../.env_files/.env.s3
       - ../.env_files/.env.flask
       - ../.env_files/.env.mail
-      - ../.env_files/.env.sentry
       - ../.env_files/.env.db
       - ../.env_files/.env.nginx
       - ../.env_files/.env.redis

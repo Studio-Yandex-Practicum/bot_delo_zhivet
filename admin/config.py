@@ -23,8 +23,6 @@ class Settings(BaseSettings):
     SUPER_USER_LOGIN: str
     SUPER_USER_PASSWORD: str
 
-    SENTRY_DSN_ADMIN: str = None
-
     # Logging
     LOG_NAME: str = "admin"
     LOG_DEFAULT_LVL: int | None = INFO
@@ -50,7 +48,6 @@ class Settings(BaseSettings):
             ".env.flask",
             ".env.s3",
             ".env.mail",
-            ".env.sentry",
             ".env.db.local",
         )
         env_file = ("./infrastructure/.env_files/" + file_name for file_name in env_files_names)

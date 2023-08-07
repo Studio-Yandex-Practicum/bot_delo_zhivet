@@ -25,8 +25,6 @@ class Settings(BaseSettings):
     AWS_SERVICE_NAME: str
     AWS_ENDPOINT_URL: str
     AWS_BUCKET_NAME: str
-    # sentry
-    SENTRY_DSN_BOT: str = None
 
     # Dadata
     DADATA_TOKEN: str
@@ -55,7 +53,6 @@ class Settings(BaseSettings):
         env_files_names = (
             ".env.telegram",
             ".env.s3",
-            ".env.sentry",
             ".env.dadata",
             ".env.yatracker",
             ".env.db.local",

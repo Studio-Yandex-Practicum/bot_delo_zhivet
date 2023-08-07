@@ -39,7 +39,6 @@ services:
       - ./infrastructure/.env.telegram
       - ./infrastructure/.env.db
       - ./infrastructure/.env.s3
-      - ./infrastructure/.env.sentry
     volumes:
       - persistence_data:/app/persistence_data/
       - media_data:/app/media/
@@ -68,7 +67,6 @@ services:
       - ./infrastructure/.env.mail
       - ./infrastructure/.env.nginx
       - ./infrastructure/.env.redis
-      - ./infrastructure/.env.sentry
       - ./infrastructure/.env.yatracker
     volumes:
       - static_value:/app/admin/static/
