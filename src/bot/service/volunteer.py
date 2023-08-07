@@ -20,12 +20,9 @@ from src.bot.handlers.state_constants import (
     TELEGRAM_USERNAME,
     VOLUNTEER,
 )
-from src.bot.service.get_issues_with_statuses import processing_volunteer
+from src.bot.service.get_issues_with_statuses import processing_volunteer, VOLUNTEER_UPDATE
 from src.core.db.model import Volunteer
 from src.core.db.repository.volunteer_repository import crud_volunteer
-
-
-VOLUNTEER_UPDATE = "https://t.me/{tlg_username}, \n{ticketID}\n\n"
 
 
 class VolunteerCreate(BaseModel):

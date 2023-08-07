@@ -7,7 +7,8 @@ from src.api.tracker import client
 from src.bot.handlers.state_constants import POLLUTION, SOCIAL
 from src.core.db.model import Volunteer
 from src.core.db.repository.volunteer_repository import crud_volunteer
-from src.bot.service.volunteer import VOLUNTEER_UPDATE
+
+VOLUNTEER_UPDATE = "https://t.me/{tlg_username}, \n{ticketID}\n\n"
 
 
 def get_issues_with_statuses(
@@ -49,10 +50,8 @@ async def processing_volunteer(
             if issue.key
             in (set(new_issues_keys) - set(old_issues_keys)) & set(issues_keys)
         ]
-        to_add = add_new_volunteer(new_volunteer, to_add)
-        issues_updater(to_add)
-        to_delete = delete_volunteer_from_issues(old_volunteer, to_delete)
-        issues_updater(to_delete)
+        add_new_volunteer(new_volunteer, to_add)
+        delete_volunteer_from_issues(old_volunteer, to_delete)
     else:
         new_issues_keys = await crud_volunteer.get_issues_in_radius(
             new_volunteer, session
@@ -61,8 +60,7 @@ async def processing_volunteer(
             issue for issue in issues
             if issue.key in (set(new_issues_keys) & set(issues_keys))
         ]
-        issues = add_new_volunteer(new_volunteer, issues)
-        issues_updater(issues)
+        add_new_volunteer(new_volunteer, issues)
 
 
 def issues_updater(issues: list) -> None:
@@ -82,7 +80,7 @@ def issues_updater(issues: list) -> None:
 def add_new_volunteer(
     volunteer: Volunteer,
     issues: list
-) -> list:
+) -> None:
     '''Функция добавляет волонтера в описание задачи'''
     for issue in issues:
         issue.description = issue.description.replace(
@@ -92,13 +90,13 @@ def add_new_volunteer(
             tlg_username=volunteer.telegram_username,
             ticketID=volunteer.ticketID
         )
-    return issues
+    issues_updater(issues)
 
 
 def delete_volunteer_from_issues(
     volunteer: Volunteer,
     issues: list
-) -> list:
+) -> None:
     '''Функция удаляет запись волонтера из описания задачи'''
     for issue in issues:
         issue.description = issue.description.replace(
@@ -109,4 +107,4 @@ def delete_volunteer_from_issues(
         )
         if 'https://t.me/' not in issue.description:
             issue.description += "\n\nВолонтёров поблизости не нашлось."
-    return issues
+    issues_updater(issues)
