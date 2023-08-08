@@ -3,6 +3,6 @@ apiVersion: 1
 datasources:
   - name: Loki
     type: loki
-    url: http://loki:3100
+    url: http://${LOKI_HOST}:${LOKI_PORT}
     isDefault: true
     editable: false

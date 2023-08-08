@@ -20,8 +20,6 @@ services:
       timeout: 10s
       interval: 1s
       retries: 10
-    # ports:
-    #   - "5432:5432"
 
   redis:
     image: redis:alpine
@@ -41,19 +39,23 @@ services:
 
   promtail:
     image: grafana/promtail:2.8.3
+    env_file:
+      - ../.env_files/.env.grafana
     volumes:
       - ../grafana/promtail-config.yaml:/etc/promtail/config.yaml
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - /var/run/docker.sock:/var/run/docker.sock
-    command: -config.file=/etc/promtail/config.yaml
+    command: -config.file=/etc/promtail/config.yaml -config.expand-env=true
     depends_on:
       - loki
 
   grafana:
-    image: grafana/grafana:8.2.6
+    image: grafana/grafana:10.0.3-ubuntu
     restart: unless-stopped
     ports:
       - "3000:3000"
+    env_file:
+      - ../.env_files/.env.grafana
     volumes:
       - grafana_data:/var/lib/grafana
       - ../grafana/grafana-datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml
@@ -170,6 +172,8 @@ services:
 
 volumes:
   postgres_data:
+  loki_data:
+  grafana_data:
   persistence_data:
   static_value:
   redis_data:
