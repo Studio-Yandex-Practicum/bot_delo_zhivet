@@ -11,93 +11,55 @@ from starlette.routing import Route
 from structlog import contextvars
 from telegram import Update
 from telegram.ext import (
-    Application,
-    CallbackQueryHandler,
-    CommandHandler,
-    ConversationHandler,
-    InvalidCallbackData,
-    MessageHandler,
-    PicklePersistence,
-    filters,
+    Application, CallbackQueryHandler, CommandHandler, ConversationHandler,
+    InvalidCallbackData, MessageHandler, PicklePersistence, filters,
 )
 from telegram.ext.filters import Regex
 
-from bot.const import (
-    BECOME_VOLUNTEER_CMD,
-    DATA_PATH,
-    END_CMD,
-    MAKE_DONATION_CMD,
-    REPORT_ECO_PROBLEM_CMD,
-    SAVE_PERSISTENCE_INTERVAL,
-    SPECIFY_ACTIVITY_RADIUS_CMD,
-    SPECIFY_ADDRESS_CMD,
-    SPECIFY_CAR_AVAILABILITY_CMD,
-    SPECIFY_PHONE_PERMISSION_CMD,
+from src.bot.const import (
+    BECOME_VOLUNTEER_CMD, DATA_PATH, END_CMD, MAKE_DONATION_CMD,
+    REPORT_ECO_PROBLEM_CMD, SAVE_PERSISTENCE_INTERVAL,
+    SPECIFY_ACTIVITY_RADIUS_CMD, SPECIFY_ADDRESS_CMD,
+    SPECIFY_CAR_AVAILABILITY_CMD, SPECIFY_PHONE_PERMISSION_CMD,
 )
-from bot.handlers.add_tags import pollution_tags_handler, social_tags_handler
-from bot.handlers.loggers import logger
-from core.config import settings
-
-from .handlers.common import end_describing, handle_invalid_button, help_command, stop
-from .handlers.holiday import endless_holiday_now_save, stop_holiday_now_save
-from .handlers.participation import make_donation
-from .handlers.pollution import (
-    back_to_select_option_to_report_about_pollution,
-    input,
-    save_comment,
-    save_foto,
-    save_location,
-    select_option_to_report_about_pollution,
+from src.bot.handlers.add_tags import (
+    pollution_tags_handler, social_tags_handler,
 )
-from .handlers.social import (
-    back_to_add_social,
-    input_social_data,
-    report_about_social_problem,
-    save_social_address_input,
-    save_social_problem_data,
+from src.bot.handlers.common import (
+    end_describing, handle_invalid_button, help_command, stop,
 )
-from .handlers.start import start
-from .handlers.state_constants import (
-    ADD_POLLUTION_TAG,
-    ADD_SOCIAL_TAG,
-    ADDING_SOCIAL_TASK,
-    ADDING_VOLUNTEER,
-    ADDRESS_COMMAND,
-    ADDRESS_INPUT,
-    BACK,
-    CAR_COMMAND,
-    DADATA_UNAVAILABLE,
-    ENDLESS_HOLIDAY_START_NOW,
-    HOLIDAY_STOP_NOW,
-    NO_TAG,
-    PHONE_COMMAND,
-    PHONE_INPUT,
-    POLLUTION_COMMENT,
-    POLLUTION_COORDINATES,
-    POLLUTION_FOTO,
-    RADIUS_COMMAND,
-    SAVE,
-    SELECTING_ACTION,
-    SELECTING_FEATURE,
-    SELECTING_OVER,
-    SOCIAL_COMMENT,
-    SOCIAL_PROBLEM_TYPING,
-    TAG_ID_PATTERN,
-    TYPING,
-    TYPING_ADDRESS,
-    VALIDATE,
+from src.bot.handlers.holiday import (
+    endless_holiday_now_save, stop_holiday_now_save,
 )
-from .handlers.volunteer import (
-    add_volunteer,
-    ask_user_phone_number,
-    back_to_add_volunteer,
-    handle_car_input,
-    handle_phone_input,
-    handle_radius_input,
-    save_input,
+from src.bot.handlers.loggers import logger
+from src.bot.handlers.participation import make_donation
+from src.bot.handlers.pollution import (
+    back_to_select_option_to_report_about_pollution, input, save_comment,
+    save_foto, save_location, select_option_to_report_about_pollution,
 )
-from .service.common_functions import address_confirmation, ask_for_input_address, retry_address_confirmation
-from .tasks import save_pollution, save_social_problem, save_volunteer
+from src.bot.handlers.social import (
+    back_to_add_social, input_social_data, report_about_social_problem,
+    save_social_address_input, save_social_problem_data,
+)
+from src.bot.handlers.start import start
+from src.bot.handlers.state_constants import (
+    ADD_POLLUTION_TAG, ADD_SOCIAL_TAG, ADDING_SOCIAL_TASK, ADDING_VOLUNTEER,
+    ADDRESS_COMMAND, ADDRESS_INPUT, BACK, CAR_COMMAND, DADATA_UNAVAILABLE,
+    ENDLESS_HOLIDAY_START_NOW, HOLIDAY_STOP_NOW, NO_TAG, PHONE_COMMAND,
+    PHONE_INPUT, POLLUTION_COMMENT, POLLUTION_COORDINATES, POLLUTION_FOTO,
+    RADIUS_COMMAND, SAVE, SELECTING_ACTION, SELECTING_FEATURE, SELECTING_OVER,
+    SOCIAL_COMMENT, SOCIAL_PROBLEM_TYPING, TAG_ID_PATTERN, TYPING,
+    TYPING_ADDRESS, VALIDATE,
+)
+from src.bot.handlers.volunteer import (
+    add_volunteer, ask_user_phone_number, back_to_add_volunteer,
+    handle_car_input, handle_phone_input, handle_radius_input, save_input,
+)
+from src.bot.service.common_functions import (
+    address_confirmation, ask_for_input_address, retry_address_confirmation,
+)
+from src.bot.tasks import save_pollution, save_social_problem, save_volunteer
+from src.core.config import settings
 
 
 def create_bot() -> Application:

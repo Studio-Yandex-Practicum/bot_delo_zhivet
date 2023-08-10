@@ -6,11 +6,17 @@ from sqlalchemy.orm.attributes import InstrumentedAttribute
 from structlog import get_logger
 from wtforms.validators import ValidationError
 
+from admin.config import settings
+from admin.locales import FIELD_TRANSLATION_RU
+from admin.messages import (
+    GENERATE_RESET_TOKEN,
+    GET_DATABASE_FIELDS,
+    TAG_CHECKED,
+    TAG_EXISTS,
+    TOKEN_VALIDATION_ERROR,
+    USER_NOT_FOUND,
+)
 from src.core.db.model import Staff
-
-from .config import settings
-from .locales import FIELD_TRANSLATION_RU
-from .messages import TOKEN_VALIDATION_ERROR
 
 logger = get_logger("admin_logger")
 
@@ -44,6 +50,7 @@ def get_table_fields_from_model(model):
     for field, value in dict(model.__dict__).items():
         if isinstance(value, InstrumentedAttribute):
             fields.append(field)
+    logger.debug(GET_DATABASE_FIELDS, model=model.__name__, fields=fields)
     return fields
 
 
@@ -63,6 +70,7 @@ def get_sortable_fields_list(all_columns: list, name_relation: dict[str:str]) ->
 
 
 def get_reset_password_token(user, expires_in=int(settings.PASSWORD_RESET_TOKEN_TTL)):
+    logger.debug(GENERATE_RESET_TOKEN, user=user.login, expires_in=expires_in)
     return jwt.encode(
         {"reset_password": user.login, "exp": time() + expires_in},
         settings.SECRET_KEY,
@@ -80,10 +88,16 @@ def verify_reset_password_token(token):
     except Exception as e:
         logger.warning(TOKEN_VALIDATION_ERROR, token=token, details=str(e))
         return
-    return Staff.query.filter_by(login=login).first()
+    user = Staff.query.filter_by(login=login).first()
+    if not user:
+        logger.warning(USER_NOT_FOUND, token=token, login=login)
+    return user
 
 
 def check_tag_uniqueness(model, existing_tags):
     """Функция для проверки уникальности тега."""
-    if any(distance(tag.name.lower(), model.name.lower()) < 5 for tag in existing_tags):
-        raise ValidationError("В базе уже существует похожий тег!")
+    for tag in existing_tags:
+        if (distance_score := distance(tag.name.lower(), model.name.lower())) < 5:
+            logger.warning(TAG_EXISTS, tag=tag.name, model=model.name, distance_score=distance_score)
+            raise ValidationError(TAG_EXISTS)
+    logger.debug(TAG_CHECKED, model=model.name, tag=model.name)
