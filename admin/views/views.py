@@ -211,35 +211,35 @@ admin.add_view(
 admin.add_view(
     VolunteerModelView(
         Volunteer,
-            db.session,
-            MODALS_NAMES['volunteers']
+        db.session,
+        MODALS_NAMES['volunteers']
     )
 )
 admin.add_view(
     AssistanceDisabledModelView(
         Assistance_disabled,
-            db.session,
-            MODALS_NAMES['social_help']
+        db.session,
+        MODALS_NAMES['social_help']
     )
 )
 admin.add_view(
     PollutionModelView(
         Pollution,
-            db.session,
-            name=MODALS_NAMES['pollution']
+        db.session,
+        name=MODALS_NAMES['pollution']
     )
 )
 admin.add_view(
     TagPollutionModelView(
         Tag_Pollution,
-            db.session,
-            name=MODALS_NAMES['tag_pollution']
+        db.session,
+        name=MODALS_NAMES['tag_pollution']
     )
 )
 admin.add_view(
     TagAssistanceModelView(
         Tag_Assistance,
-            db.session,
-            name=MODALS_NAMES['tag_assistance']
+        db.session,
+        name=MODALS_NAMES['tag_assistance']
     )
 )
