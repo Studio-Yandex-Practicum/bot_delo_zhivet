@@ -42,7 +42,7 @@ class RegistrationForm(LoginField, PasswordField, PasswordRepeatField, EmailFiel
 
         if user is not None and not field.errors:
             raise validators.ValidationError(ERROR_MESSAGE['login_busy'])
-        
+
     def validate_email(self, field):
         user = self.get_user_by_email()
 

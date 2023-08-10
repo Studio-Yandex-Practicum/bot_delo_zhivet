@@ -40,7 +40,6 @@ class Settings(BaseSettings):
     # Параметры генерации токенов сброса пароля
     PASSWORD_RESET_TOKEN_ALGORITHM: str = "HS256"
     PASSWORD_RESET_TOKEN_TTL: int = 600
-   
 
     class Config:
         env_file_encoding = "utf-8"

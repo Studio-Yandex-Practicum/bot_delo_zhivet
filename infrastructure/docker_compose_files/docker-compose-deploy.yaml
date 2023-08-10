@@ -72,6 +72,7 @@ services:
       - ./infrastructure/.env.yatracker
     volumes:
       - static_value:/app/admin/static/
+      - custom_static:/app/admin/static/custom_static/
       - ./flask_admin/logs/:/app/admin/logs/
 
   celery:
@@ -132,6 +133,7 @@ services:
       - ./nginx/delo.temp:/etc/nginx/conf.d/delo.temp
       - ./nginx/letsencrypt/:/etc/letsencrypt/:rw
       - static_value:/var/html/static/
+      - custom_static:/var/html/custom_static/
     env_file:
       - ./.env
     command: /bin/sh -c "envsubst '$${HOST_NAME} $${WEBHOOK_PATH}' < /etc/nginx/conf.d/delo.temp > /etc/nginx/servers/delo.conf && crond -b && nginx -g 'daemon off;'"
@@ -140,5 +142,6 @@ volumes:
   postgres_data:
   persistence_data:
   static_value:
+  custom_static:
   redis_data:
   media_data:

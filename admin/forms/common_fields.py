@@ -22,9 +22,9 @@ class LoginField(form.Form):
             Regexp(r"^[a-zA-Z\d]+$", message='Только латинские буквы алфавита и цифры'),
             InputRequired(ERROR_MESSAGE['required_field']),
             Length(min=MIN_LENGTH_LOGIN,
-                max=MAX_LENGTH_LOGIN,
-                message=ERROR_MESSAGE['min_length_login'])])
-    
+                   max=MAX_LENGTH_LOGIN,
+                   message=ERROR_MESSAGE['min_length_login'])])
+
     def get_user_by_login(self):
         """ Получить пользователя по полю login. """
         return db.session.query(Staff).filter_by(login=self.login.data).first()
@@ -36,7 +36,7 @@ class EmailField(form.Form):
         validators=[
             DataRequired(ERROR_MESSAGE['required_field']),
             Email(ERROR_MESSAGE['incorrect_email'])])
-    
+
     def get_user_by_email(self):
         """ Получить пользователя по полю email. """
         return db.session.query(Staff).filter_by(email=self.email.data).first()
@@ -49,8 +49,8 @@ class PasswordField(form.Form):
             Regexp(r"^[a-zA-Z\d]+[!@#$%^&*]*$", message='Только латинские буквы алфавита, цифры и символы !@#$%^&*'),
             DataRequired(ERROR_MESSAGE['required_field']),
             Length(min=MIN_LENGTH_PASSWORD,
-                max=MAX_LENGTH_PASSWORD,
-                message=ERROR_MESSAGE['min_length_password'])])
+                   max=MAX_LENGTH_PASSWORD,
+                   message=ERROR_MESSAGE['min_length_password'])])
 
 
 class PasswordRepeatField(form.Form):

@@ -206,8 +206,8 @@ admin.add_view(AssistanceDisabledModelView(Assistance_disabled,
                                            db.session,
                                            MODALS_NAMES['social_help']))
 admin.add_view(PollutionModelView(Pollution,
-                                 db.session,
-                                 name=MODALS_NAMES['pollution']))
+                                  db.session,
+                                  name=MODALS_NAMES['pollution']))
 admin.add_view(TagPollutionModelView(Tag_Pollution,
                                      db.session,
                                      name=MODALS_NAMES['tag_pollution']))

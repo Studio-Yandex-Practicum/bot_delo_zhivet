@@ -33,6 +33,7 @@ mail = Mail(app)
 
 logger = get_logger("admin_logger")
 
+
 def send_async_email(app, msg):
     with app.app_context():
         try:
@@ -41,11 +42,13 @@ def send_async_email(app, msg):
         except Exception as e:
             logger.error(MAIL_SEND_ERROR, subject=msg.subject, recipients=msg.recipients, details=str(e))
 
+
 def send_email(subject, sender, recipients, text_body, html_body):
     msg = Message(subject, sender=sender, recipients=recipients)
     msg.body = text_body
     msg.html = html_body
     Thread(target=send_async_email, args=(app, msg)).start()
+
 
 def send_password_reset_email(user):
     token = get_reset_password_token(user)
@@ -106,13 +109,13 @@ class MyAdminIndexView(AdminIndexView):
             db.session.commit()
 
             login.login_user(user)
-    
+
             return redirect(url_for('.index'))
 
         self._template_args['form'] = form
         self._template_args['sigin_link'] = url_for('.login_view')
         self._template_args['submit_text'] = self.BUTTONS_TEXT['register_submit']
-    
+
         return super(MyAdminIndexView, self).index()
 
     @expose("/logout/")
