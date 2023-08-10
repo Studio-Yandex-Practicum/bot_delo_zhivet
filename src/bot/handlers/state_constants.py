@@ -24,6 +24,7 @@ TYPING = "TYPING"
 SOCIAL_PROBLEM_TYPING = "social_problem_typing"
 SOCIAL_PROBLEM_ADDRESS = "social_problem_address"
 SELECTING_OVER = "selecting_address"
+DADATA_UNAVAILABLE = "dadata_unavailable"
 
 # Состояния диалога Получение Телефонного номера
 SPECIFY_PHONE_PERMISSION = "phone"
@@ -38,6 +39,11 @@ SHOWING = "showing"
 END = ConversationHandler.END
 
 # Различные константы для проекта
+HOLIDAY_START = "holiday_start"
+DB_HOLIDAY_START = "DB_HOLIDAY_START"
+ENDLESS_HOLIDAY_START_NOW = "ENDLESS_HOLIDAY_START_NOW"
+HOLIDAY_STOP_NOW = "HOLIDAY_STOP_NOW"
+
 NO_COMMENT_PHASE = "Комментариев не оставили"
 ADD_POLLUTION_TAG = "ADD_POLLUTION_TAG"
 ADD_SOCIAL_TAG = "ADD_SOCIAL_TAG"
@@ -60,6 +66,7 @@ CURRENT_FEATURE = "current_feature"
 CURRENT_LEVEL = "current_level"
 ADDRESS_COMMAND = "CITY="
 ADDRESS_TEMPORARY = "address_temporary"
+UNRESTRICTED_ADDRESS = "unrestricted_address"
 RADIUS_COMMAND = "RADIUS="
 CAR_COMMAND = "CAR="
 POLLUTION_FOTO = "photo"
