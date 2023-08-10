@@ -152,6 +152,7 @@ class TagPollutionModelView(BaseModelView):
         if is_created:
             existing_tags = Tag_Pollution.query.all()
             check_tag_uniqueness(model, existing_tags)
+
         super().on_model_change(form, model, is_created)
 
 
@@ -169,6 +170,7 @@ class TagAssistanceModelView(BaseModelView):
         if is_created:
             existing_tags = Tag_Assistance.query.all()
             check_tag_uniqueness(model, existing_tags)
+
         super().on_model_change(form, model, is_created)
 
 
@@ -192,25 +194,52 @@ MODALS_NAMES = {
     'tag_pollution': 'Теги загрязнения',
     'tag_assistance': 'Теги социальной помощи'
 }
-admin.add_view(StaffModelView(Staff,
-                              db.session,
-                              name=MODALS_NAMES['staff']))
-admin.add_view(UserModelView(User,
-                             db.session,
-                             name=MODALS_NAMES['users']))
-
-admin.add_view(VolunteerModelView(Volunteer,
-                                  db.session,
-                                  MODALS_NAMES['volunteers']))
-admin.add_view(AssistanceDisabledModelView(Assistance_disabled,
-                                           db.session,
-                                           MODALS_NAMES['social_help']))
-admin.add_view(PollutionModelView(Pollution,
-                                  db.session,
-                                  name=MODALS_NAMES['pollution']))
-admin.add_view(TagPollutionModelView(Tag_Pollution,
-                                     db.session,
-                                     name=MODALS_NAMES['tag_pollution']))
-admin.add_view(TagAssistanceModelView(Tag_Assistance,
-                                      db.session,
-                                      name=MODALS_NAMES['tag_assistance']))
+admin.add_view(
+    StaffModelView(
+        Staff,
+        db.session,
+        name=MODALS_NAMES['staff']
+    )
+)
+admin.add_view(
+    UserModelView(
+        User,
+        db.session,
+        name=MODALS_NAMES['users']
+    )
+)
+admin.add_view(
+    VolunteerModelView(
+        Volunteer,
+            db.session,
+            MODALS_NAMES['volunteers']
+    )
+)
+admin.add_view(
+    AssistanceDisabledModelView(
+        Assistance_disabled,
+            db.session,
+            MODALS_NAMES['social_help']
+    )
+)
+admin.add_view(
+    PollutionModelView(
+        Pollution,
+            db.session,
+            name=MODALS_NAMES['pollution']
+    )
+)
+admin.add_view(
+    TagPollutionModelView(
+        Tag_Pollution,
+            db.session,
+            name=MODALS_NAMES['tag_pollution']
+    )
+)
+admin.add_view(
+    TagAssistanceModelView(
+        Tag_Assistance,
+            db.session,
+            name=MODALS_NAMES['tag_assistance']
+    )
+)
