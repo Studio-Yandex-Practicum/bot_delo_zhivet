@@ -1,0 +1,37 @@
+auth_enabled: false
+
+server:
+  http_listen_port: 3100
+
+common:
+  path_prefix: /loki
+  storage:
+    filesystem:
+      chunks_directory: /loki/chunks
+      rules_directory: /loki/rules
+
+  replication_factor: 1
+
+  ring:
+    kvstore:
+      store: inmemory
+
+compactor:
+  shared_store: filesystem
+  compaction_interval: 10m
+  retention_enabled: true
+  retention_delete_delay: 2h
+  retention_delete_worker_count: 150
+
+schema_config:
+  configs:
+    - from: 2020-09-07
+      store: boltdb-shipper
+      object_store: filesystem
+      schema: v12
+      index:
+        prefix: index_
+        period: 24h
+
+limits_config:
+  retention_period: '${RETENTION_PERIOD}'
