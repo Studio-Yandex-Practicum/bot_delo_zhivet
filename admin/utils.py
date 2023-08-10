@@ -1,10 +1,10 @@
 from time import time
 
 import jwt
-from Levenshtein import distance
+from Levenshtein import ratio
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 from structlog import get_logger
-from wtforms.validators import ValidationError
+from flask import flash
 
 from admin.config import settings
 from admin.locales import FIELD_TRANSLATION_RU
@@ -12,7 +12,6 @@ from admin.messages import (
     GENERATE_RESET_TOKEN,
     GET_DATABASE_FIELDS,
     TAG_CHECKED,
-    TAG_EXISTS,
     TOKEN_VALIDATION_ERROR,
     USER_NOT_FOUND,
 )
@@ -95,9 +94,12 @@ def verify_reset_password_token(token):
 
 
 def check_tag_uniqueness(model, existing_tags):
-    """Функция для проверки уникальности тега."""
-    for tag in existing_tags:
-        if (distance_score := distance(tag.name.lower(), model.name.lower())) < 5:
-            logger.warning(TAG_EXISTS, tag=tag.name, model=model.name, distance_score=distance_score)
-            raise ValidationError(TAG_EXISTS)
-    logger.debug(TAG_CHECKED, model=model.name, tag=model.name)
+    """ Функция для проверки уникальности тега. """
+    if any(ratio(tag.name, model.name, score_cutoff=0.8, processor=lambda string: string.lower()) for tag in existing_tags):
+
+        logger.debug(TAG_CHECKED, model=model.name, tag=model.name)
+        message = (
+            "Внимание! Похожий тег уже существует!"
+        )
+
+        return flash(message, "error")
