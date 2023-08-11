@@ -115,58 +115,48 @@
 {% endmacro %}
 
 {# ---------------------- Forms -------------------------- #}
+
+<!-- Рендеринг полей формы. -->
 {% macro render_field(form, field, kwargs={}, caller=None) %}
-  {% set direct_error = h.is_field_error(field.errors) %}
-  {% set prepend = kwargs.pop('prepend', None) %}
-  {% set append = kwargs.pop('append', None) %}
-  <div class="form-group {{ kwargs.get('column_class', '') }}">
-    <label for="{{ field.id }}" class="control-label" {% if field.widget.input_type == 'checkbox' %}style="display: block"{% endif %}>{{ field.label.text }}
+  <div class='form-group'>
+
+    <!-- Формируем Label. Связываем input с помощью for. Для чекбокса добавляем стили. -->
+    <label
+      for="{{ field.id }}"
+      class="control-label"
+      {% if field.widget.input_type == 'checkbox' %}
+        style="display: block"
+      {% endif %}
+    >
+        {{ field.label.text }}
+
+        <!-- Если поле обязательно, помечаем это. -->
         {% if h.is_required_form_field(field) %}
           <strong style="color: red">&#42;</strong>
-        {% else %}
-          &nbsp;
         {% endif %}
     </label>
-    {% if prepend or append %}
-    <div class="input-group">
-      {% if prepend %}
-      <div class="input-group-prepend">
-        {{ prepend }}
-      </div>
-      {% endif %}
-    {% endif %}
+
+    <!-- Сами поля. -->
+    <div class="mb-3">
       {% if field.widget.input_type == 'checkbox' %}
-        {% set _class = kwargs.setdefault('class', 'form-control-lg') %}
+        {{ field(class_='form-control-lg') | safe }}
       {% elif field.widget.input_type == 'file' %}
-        {% set _class = kwargs.setdefault('class', 'form-control-file') %}
+        {{ field(class_='form-control-file') | safe }}
       {% else %}
-        {% set _class = kwargs.setdefault('class', 'form-control') %}
+        {% if field.errors %}
+          {{ field(class_='form-control is-invalid', placeholder_=field.label.text) }}
+        {% else %}
+          {{ field(class_='form-control', placeholder_=field.label.text) }}
+        {% endif %}
       {% endif %}
-      {% if direct_error %} {% set _ = kwargs.update({'class': kwargs['class'] ~ ' is-invalid'}) %} {% endif -%}
-      {{ field(**kwargs) | safe }}
-      {% if append %}
-      <div class="input-group-append">
-        {{ append }}
-      </div>
-      {% endif %}
-      {% if direct_error %}
-        <div class="invalid-feedback">
-          <ul class="help-block">
-          {% for e in field.errors if e is string %}
-            <li>{{ e }}</li>
-          {% endfor %}
-          </ul>
+
+      {% for error in field.errors %}
+        <div class="invalid-feedback col-md-6">
+          {{ error }}
         </div>
-      {% elif field.description %}
-        <div class="help-block">{{ field.description|safe }}</div>
-      {% endif %}
-    {% if prepend or append %}
+      {% endfor %}
     </div>
-    {% endif %}
-    {% if caller %}
-      {{ caller(form, field, direct_error, kwargs) }}
-    {% endif %}
-  </div>
+
 {% endmacro %}
 
 {% macro render_header(form, text) %}
