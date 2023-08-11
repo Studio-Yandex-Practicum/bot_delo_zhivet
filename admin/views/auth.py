@@ -62,7 +62,7 @@ def send_password_reset_email(user):
 
 
 class MyAdminIndexView(AdminIndexView):
-    """ Расширение AdminIndexView для аутентификации. """
+    """ View главной страницы. """
 
     BUTTONS_TEXT = {
         'login_submit': 'Войти',

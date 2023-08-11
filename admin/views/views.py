@@ -21,6 +21,9 @@ from ..utils import (
     check_tag_uniqueness,
     get_readonly_dict,
     get_sortable_fields_list,
+)
+
+from .utils import (
     get_table_fields_from_model,
     get_translated_labels,
 )
@@ -55,38 +58,45 @@ class BaseModelView(sqla.ModelView):
         )
 
 
-class UserModelView(BaseModelView):
-    """ Вью-класс пользователей. """
-
-    all_columns = get_table_fields_from_model(User)
-
-    column_exclude_list = ("password",)
-    form_excluded_columns = ("password",)
-    column_labels = get_translated_labels(all_columns)
-    form_columns = (
-        "telegram_username",
-        "is_banned",
-    )
-    form_widget_args = {"telegram_username": {"readonly": True}}
-    column_searchable_list = ("telegram_username",)
-
-
 class StaffModelView(BaseModelView):
-    """ Вью-класс администраторов. """
+    """ View администраторов. """
 
     all_columns = get_table_fields_from_model(Staff)
-    column_exclude_list = ("password",)
-    form_excluded_columns = ("password",)
+
+    column_exclude_list = ('password',)
+    form_excluded_columns = ('password',)
+
     column_labels = get_translated_labels(all_columns)
+
     form_columns = (
-        "login",
-        "roles",
-        "active",
+        'first_name',
+        'last_name',
+        'roles',
+        'active'
     )
-    form_widget_args = {"login": {"readonly": True}}
 
     def is_accessible(self):
         return current_user.is_active and current_user.is_authenticated and current_user.has_role("superuser")
+
+
+class UserModelView(BaseModelView):
+    """ View пользователей. """
+
+    all_columns = get_table_fields_from_model(User)
+
+    column_exclude_list = ('password',)
+    form_excluded_columns = ('password',)
+
+    column_labels = get_translated_labels(all_columns)
+
+    form_columns = (
+        'telegram_username',
+        'is_banned'
+    )
+
+    form_widget_args = {'telegram_username': {'readonly': True}}
+
+    column_searchable_list = ('telegram_username',)
 
 
 class VolunteerModelView(BaseModelView):
@@ -149,12 +159,11 @@ class TagPollutionModelView(BaseModelView):
     can_delete = True
 
     def on_model_change(self, form, model, is_created):
+
         if is_created:
             existing_tags = Tag_Pollution.query.all()
             check_tag_uniqueness(model, existing_tags)
-
         super().on_model_change(form, model, is_created)
-
 
 class TagAssistanceModelView(BaseModelView):
     """ Вью-класс тегов соц. помощи. """
@@ -179,11 +188,12 @@ ADMIN_NAME = "Бот «Дело живёт»"
 BASE_TEMPLATE = "admin/index.html"
 admin = Admin(
     app,
-    template_mode=BOOTSTRAP_VERSION,
     name=ADMIN_NAME,
+    template_mode=BOOTSTRAP_VERSION,
     index_view=MyAdminIndexView(name="Главная"),
     base_template=BASE_TEMPLATE,
 )
+
 
 MODALS_NAMES = {
     'staff': 'Персонал',
