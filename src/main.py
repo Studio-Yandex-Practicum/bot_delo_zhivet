@@ -1,45 +1,41 @@
-import logging
+from functools import partial
+from json import dumps
+from os import getpid
 
-import sentry_sdk
 import structlog
-from sentry_sdk.integrations.logging import LoggingIntegration
+from structlog.contextvars import merge_contextvars
+from structlog.processors import JSONRenderer, TimeStamper, UnicodeDecoder, add_log_level
 
 from bot.application import start_bot
 from core.config import settings
 
-# Logging бота активируется при инициализации logger в main.py
-logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.DEBUG)
-logger = logging.getLogger(__name__)
+DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S.%f"
 
-structlog.configure(
-    processors=[
-        structlog.stdlib.add_log_level,
-        structlog.stdlib.add_logger_name,
-        structlog.processors.TimeStamper(fmt="%Y-%m-%d %H:%M:%S"),
-        structlog.processors.JSONRenderer(),
-    ],
-    context_class=structlog.threadlocal.wrap_dict(dict),
-    logger_factory=structlog.stdlib.LoggerFactory(),
-)
 
-if settings.SENTRY_DSN_BOT:
-    sentry_logging = LoggingIntegration(
-        level=logging.INFO,
-        event_level=logging.ERROR,
-    )
-    sentry_sdk.init(
-        dsn=settings.SENTRY_DSN_BOT,
-        integrations=[
-            sentry_logging,
+def add_pid(logger, log_method, event_dict):
+    event_dict["pid"] = getpid()
+    return event_dict
+
+
+add_timestamp = TimeStamper(fmt=DATETIME_FORMAT, utc=False)
+
+
+def configure_logging():
+    structlog.configure(
+        processors=[
+            merge_contextvars,
+            add_pid,
+            add_log_level,
+            add_timestamp,
+            UnicodeDecoder(),
+            JSONRenderer(serializer=partial(dumps, ensure_ascii=False)),
         ],
-        traces_sample_rate=1.0,
-        environment="bot",
+        wrapper_class=structlog.make_filtering_bound_logger(settings.log_level),
     )
 
-    logger = structlog.get_logger("bot", processors=[structlog.stdlib.add_log_level, sentry_logging])
-else:
-    logger = structlog.get_logger("bot")
 
 if __name__ == "__main__":
+    configure_logging()
+    logger = structlog.getLogger(settings.logger_name)
     logger.info("Starting bot")
     start_bot(logger)

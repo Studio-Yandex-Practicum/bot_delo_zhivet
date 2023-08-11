@@ -16,8 +16,7 @@
     1. [Настройка env-файлов](#1-настройка-env-файлов)
     2. [Запуск сервисов бота в Docker](#2-запуск-сервисов-бота-в-docker)
     3. [Отдельный запуск базы и применение миграций на локальной машине](#3-отдельный-запуск-базы-и-применение-миграций-на-локальной-машине)
-4. [Подключение системы мониторинга Sentry](#подключение-системы-мониторинга-sentry)
-5. [Deprecated](#deprecated)
+4. [Deprecated](#deprecated)
 ---
 
 ## Установка Poetry и запуск виртуального окружения
@@ -177,7 +176,7 @@ docker compose -f infrastructure/docker_compose_files/postgres-local.yaml stop
 ```
 
 3. Запуск сервисов бота (database, bot, flask admin, redis, celery, flower):
-   
+
 
 ```bash
 docker compose -f infrastructure/docker_compose_files/docker-compose-local.yaml up -d --build
@@ -252,23 +251,6 @@ alembic upgrade head
 [:arrow_up: Оглавление](#оглавление)
 ___
 
-## Подключение системы мониторинга Sentry
-1. Зарегистрируйтесь на платформе: https://sentry.io/signup/
-2. Подключите Sentry к админке, для этого:
-    - Создайте новый проект, выбрав при этом платформу FLASK:
-      `https://<your-organization>-ac.sentry.io/projects/new/`
-    - В настройках проекта перейдите в раздел **Client Keys**, скопируйте ключ **DSN (Data Source Name)**:
-      `https://<your-organization>-ac.sentry.io/settings/projects/<your-project>/keys/`
-    - Присвойте переменной `SENTRY_DSN_ADMIN` в файле `.env.sentry` полученное значение.
-3. Подключите Sentry к боту, выполнив для этого аналогичные шаги:
-    - Создайте еще один проект, выбрав при этом платформу PYTHON.
-    - В настройках проекта перейдите в раздел **Client Keys**, скопируйте ключ **DSN**.
-    - Присвойте переменной `SENTRY_DSN_BOT` в файле `.env.sentry` полученное значение.
-
-[:arrow_up: Оглавление](#оглавление)
-
----
-
 ### Локальный Запуск Flask-admin с базой в докере
 Если виртуальное окружение активно и запущен `postgres-local.yaml`:
 
@@ -280,4 +262,3 @@ flask run
 ```
 2. Перейти по ссылке из терминала, ввести логин и пароль.
 ___
-
