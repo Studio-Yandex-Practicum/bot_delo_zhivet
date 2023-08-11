@@ -165,6 +165,7 @@ class TagPollutionModelView(BaseModelView):
             check_tag_uniqueness(model, existing_tags)
         super().on_model_change(form, model, is_created)
 
+
 class TagAssistanceModelView(BaseModelView):
     """ Вью-класс тегов соц. помощи. """
 

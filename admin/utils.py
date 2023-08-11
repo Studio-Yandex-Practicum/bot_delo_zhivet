@@ -17,6 +17,7 @@ from src.core.db.model import Staff
 
 logger = get_logger("admin_logger")
 
+
 def get_readonly_dict(fields):
     """
     Возвращает словарь для установки полей, перечисленных
