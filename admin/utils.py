@@ -12,6 +12,7 @@ from admin.messages import (
     GENERATE_RESET_TOKEN,
     GET_DATABASE_FIELDS,
     TAG_CHECKED,
+    TAG_EXISTS,
     TOKEN_VALIDATION_ERROR,
     USER_NOT_FOUND,
 )
@@ -95,11 +96,13 @@ def verify_reset_password_token(token):
 
 def check_tag_uniqueness(model, existing_tags):
     """ Функция для проверки уникальности тега. """
-    if any(ratio(tag.name, model.name, score_cutoff=0.8, processor=lambda string: string.lower()) for tag in existing_tags):
+    for tag in existing_tags:
+        if (distance_score := ratio(tag.name, model.name, score_cutoff=0.8, processor=lambda string: string.lower())):
+            logger.warning(TAG_EXISTS, tag=tag.name, model=model.name, distance_score=distance_score)
 
-        logger.debug(TAG_CHECKED, model=model.name, tag=model.name)
-        message = (
-            "Внимание! Похожий тег уже существует!"
-        )
+            message = (
+                "Внимание! Похожий тег уже существует!"
+            )
+            return flash(message, "error")
 
-        return flash(message, "error")
+    logger.debug(TAG_CHECKED, model=model.name, tag=model.name)
