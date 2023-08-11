@@ -1,4 +1,4 @@
-{% import 'admin/static.html' as admin_static with context%}
+{% comment %} {% import 'admin/static.html' as admin_static with context%}
 {% import 'admin/lib.html' as lib with context %}
 
 {# store the jinja2 context for form_rules rendering logic #}
@@ -28,4 +28,4 @@
 
 {% block tail %}
   <script src="{{ admin_static.url(filename='admin/js/bs4_modal.js', v='1.0.0') }}"></script>
-{% endblock %}
+{% endblock %} {% endcomment %}

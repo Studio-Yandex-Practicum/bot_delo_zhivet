@@ -2,26 +2,19 @@
 {% import 'admin/lib.html' as lib with context %}
 {% from 'admin/lib.html' import extra with context %} {# backward compatible #}
 
-{% block head %}
-  {{ super() }}
-  {{ lib.form_css() }}
-{% endblock %}
-
 {% block body %}
-  {% block navlinks %}
-  <ul class="nav nav-tabs">
-    <li class="nav-item">
-        <a href="{{ return_url }}" class="nav-link">{{ _gettext('List') }}</a>
-    </li>
-    <li class="nav-item">
-        <a href="javascript:void(0)" class="nav-link active">{{ _gettext('Create') }}</a>
-    </li>
-  </ul>
-  {% endblock %}
+<ul class="nav nav-tabs">
+  <li class="nav-item">
+      <a href="{{ return_url }}" class="nav-link">Список</a>
+  </li>
+  <li class="nav-item">
+      <a href="{{ get_url('.create_view', url=return_url) }}" class="nav-link active">Создать</a>
+  </li>
+</ul>
 
-  {% block create_form %}
-    {{ lib.render_form(form, return_url, extra(), form_opts) }}
-  {% endblock %}
+<!-- create_form -->
+  {{ lib.render_form(form, return_url, extra(), form_opts) }}
+<!-- create_form -->
 {% endblock %}
 
 {% block tail %}

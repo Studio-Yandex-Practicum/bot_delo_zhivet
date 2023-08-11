@@ -1,0 +1,21 @@
+<nav class="container-md navbar navbar-expand-xl navbar-dark bg-dark mb-2" role="navigation">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#admin-navbar-collapse"
+            aria-controls="admin-navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <!-- navbar content -->
+    <div class="collapse navbar-collapse" id="admin-navbar-collapse">
+        <a class="navbar-brand" href="{{ admin_view.admin.url }}">{{ admin_view.admin.name }}</a>
+
+        <!-- навигация -->
+        <ul class="navbar-nav mr-auto">
+            {{ layout.menu() }}
+        </ul>
+
+        {% if current_user.is_authenticated %}
+            {% include 'admin/includes/dropdown.html' %}
+        {% endif %}
+    </div>
+</nav>

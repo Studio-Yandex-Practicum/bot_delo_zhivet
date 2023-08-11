@@ -128,6 +128,7 @@ services:
 
     volumes:
       - static_value:/app/admin/static/
+      - custom_static:/app/admin/static/custom_static/
       - ../../admin/logs/:/app/admin/logs/
 
   celery:
@@ -220,6 +221,7 @@ services:
       - ../nginx/delo-local.conf:/etc/nginx/servers/delo.conf:rw
       - ../nginx/letsencrypt/:/etc/letsencrypt/:rw
       - static_value:/var/html/static/
+      - custom_static:/var/html/custom_static/
     depends_on:
       - web
     env_file:
@@ -231,5 +233,6 @@ volumes:
   loki_data:
   grafana_data:
   static_value:
+  custom_static:
   media_data:
   redis_data:

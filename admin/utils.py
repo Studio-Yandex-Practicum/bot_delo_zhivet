@@ -2,15 +2,12 @@ from time import time
 
 import jwt
 from Levenshtein import ratio
-from sqlalchemy.orm.attributes import InstrumentedAttribute
 from structlog import get_logger
 from flask import flash
 
 from admin.config import settings
-from admin.locales import FIELD_TRANSLATION_RU
 from admin.messages import (
     GENERATE_RESET_TOKEN,
-    GET_DATABASE_FIELDS,
     TAG_CHECKED,
     TAG_EXISTS,
     TOKEN_VALIDATION_ERROR,
@@ -31,27 +28,6 @@ def get_readonly_dict(fields):
     for field in fields:
         readonly_fileds[field] = {"readonly": True}
     return readonly_fileds
-
-
-def get_translated_lables(fields):
-    """Функция для перевода полей на русский язык"""
-    labels = dict()
-    for field in fields:
-        labels[field] = FIELD_TRANSLATION_RU.get(field, field)
-    return labels
-
-
-def get_table_fields_from_model(model):
-    """
-    Функция для извлечения списка полей, отображаемых в админке,
-    из модели
-    """
-    fields = []
-    for field, value in dict(model.__dict__).items():
-        if isinstance(value, InstrumentedAttribute):
-            fields.append(field)
-    logger.debug(GET_DATABASE_FIELDS, model=model.__name__, fields=fields)
-    return fields
 
 
 def get_sortable_fields_list(all_columns: list, name_relation: dict[str:str]) -> list:

@@ -23,7 +23,7 @@ from src.core.db.db import Base
 
 
 class User(Base):
-    """Модель пользователя"""
+    """ Модель пользователя. """
 
     telegram_username = Column(String(100), nullable=True)
     telegram_id = Column(BigInteger, unique=True, nullable=False)
@@ -31,7 +31,7 @@ class User(Base):
 
 
 class Volunteer(Base):
-    """Модель волонтера"""
+    """ Модель волонтера. """
 
     telegram_id = Column(BigInteger, ForeignKey("user.telegram_id"))
     city = Column(String(100), nullable=False)
@@ -55,7 +55,7 @@ class Volunteer(Base):
 
 
 class AbstractTag(Base):
-    """Абстрактная модель тега."""
+    """ Абстрактная модель тега. """
 
     __abstract__ = True
     name = Column(String(35), nullable=False, unique=True)
@@ -66,13 +66,13 @@ class AbstractTag(Base):
 
 
 class Tag_Pollution(AbstractTag):
-    """Модель тега для сообщения о загрязнении."""
+    """ Модель тега для сообщения о загрязнении. """
 
     pass
 
 
 class Tag_Assistance(AbstractTag):
-    """Модель тега для сообщения о социальной помощи."""
+    """ Модель тега для сообщения о социальной помощи. """
 
     pass
 
@@ -92,7 +92,7 @@ assistance_tag_connection = Table(
 
 
 class Pollution(Base):
-    """Модель сообщения о загрязнении"""
+    """ Модель сообщения о загрязнении. """
 
     photo = Column(String(), nullable=False)
     latitude = Column(Float, nullable=False)
@@ -108,7 +108,7 @@ class Pollution(Base):
 
 
 class Assistance_disabled(Base):
-    """Модель сообщения о социальной помощи"""
+    """ Модель сообщения о социальной помощи. """
 
     city = Column(Text, nullable=False)
     full_address = Column(Text, nullable=False)
@@ -133,7 +133,7 @@ roles_users = Table(
 
 
 class Role(RoleMixin, Base):
-    """Модель роли для персонала"""
+    """ Модель роли для персонала. """
 
     name = Column(String, unique=True)
     description = Column(String(255))
@@ -143,7 +143,7 @@ class Role(RoleMixin, Base):
 
 
 class Staff(UserMixin, Base):
-    """Модель персонала"""
+    """ Модель персонала. """
 
     first_name = Column(String(255))
     last_name = Column(String(255))

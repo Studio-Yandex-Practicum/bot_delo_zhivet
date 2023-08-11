@@ -171,6 +171,7 @@ cython_debug/
 # Media and Static Django
 /media/*.jpg
 /staticfiles
+!css
 
 # Logs Django
 /logs

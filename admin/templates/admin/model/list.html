@@ -14,17 +14,32 @@
     {% block model_menu_bar %}
     <ul class="nav nav-tabs">
         <li class="nav-item">
-            <a href="javascript:void(0)" class="nav-link active">{{ _gettext('List') }}{% if count %} ({{ count }}){% endif %}</a>
+            <a href="#" class="nav-link active">
+                Список
+                {% if count %}
+                    ({{ count }})
+                {% endif %}
+            </a>
         </li>
 
         {% if admin_view.can_create %}
-        <li class="nav-item">
-          {%- if admin_view.create_modal -%}
-            {{ lib.add_modal_button(url=get_url('.create_view', url=return_url, modal=True), btn_class='nav-link', title=_gettext('Create New Record'), content=_gettext('Create')) }}
-          {% else %}
-            <a href="{{ get_url('.create_view', url=return_url) }}" title="{{ _gettext('Create New Record') }}" class="nav-link">{{ _gettext('Create') }}</a>
-          {%- endif -%}
-        </li>
+            <li class="nav-item">
+                {% if admin_view.create_modal %}
+                    {{ lib.add_modal_button(
+                        url=get_url('.create_view', url=return_url, modal=True),
+                        btn_class='nav-link',
+                        title='Создать новую запись',
+                        content='Создать')
+                    }}
+                {% else %}
+                    <a href="{{ get_url('.create_view', url=return_url) }}"
+                        title="Создать новую запись"
+                        class="nav-link"
+                    >
+                        Создать
+                    </a>
+                {% endif %}
+            </li>
         {% endif %}
 
         {% if admin_view.can_export %}

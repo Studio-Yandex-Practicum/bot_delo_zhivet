@@ -73,7 +73,7 @@ def index():
     return redirect(url_for("admin.index"))
 
 
-from admin import views  # noqa
+from .views import views  # noqa
 
 
 @app.errorhandler(404)
