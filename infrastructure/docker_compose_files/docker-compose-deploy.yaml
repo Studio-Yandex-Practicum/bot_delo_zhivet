@@ -5,11 +5,10 @@ name: bot_delo_zhivet
 services:
   db:
     image: postgis/postgis:14-3.3-alpine
-    platform: linux/amd64
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     env_file:
-      - ./infrastructure/.env.db
+      - ../.env_files/.env.db
     healthcheck:
       test:
         [
@@ -24,7 +23,7 @@ services:
   redis:
     image: redis:alpine
     env_file:
-      - ./infrastructure/.env.redis
+      - ../.env_files/.env.redis
     volumes:
       - redis_data:/data
 
@@ -70,10 +69,10 @@ services:
       db:
         condition: service_healthy
     env_file:
-      - ./infrastructure/.env.telegram
-      - ./infrastructure/.env.db
-      - ./infrastructure/.env.s3
-      - ./infrastructure/.env.sentry
+      - ../.env_files/.env.telegram
+      - ../.env_files/.env.db
+      - ../.env_files/.env.s3
+      - ../.env_files/.env.sentry
     volumes:
       - persistence_data:/app/persistence_data/
       - media_data:/app/media/
@@ -96,14 +95,14 @@ services:
         condition: service_healthy
 
     env_file:
-      - ./infrastructure/.env.s3
-      - ./infrastructure/.env.dadata
-      - ./infrastructure/.env.flask
-      - ./infrastructure/.env.mail
-      - ./infrastructure/.env.nginx
-      - ./infrastructure/.env.redis
-      - ./infrastructure/.env.sentry
-      - ./infrastructure/.env.yatracker
+      - ../.env_files/.env.s3
+      - ../.env_files/.env.dadata
+      - ../.env_files/.env.flask
+      - ../.env_files/.env.mail
+      - ../.env_files/.env.nginx
+      - ../.env_files/.env.redis
+      - ../.env_files/.env.sentry
+      - ../.env_files/.env.yatracker
     volumes:
       - static_value:/app/admin/static/
       - ./flask_admin/logs/:/app/admin/logs/
@@ -128,29 +127,6 @@ services:
       bot:
         condition: service_started
       redis:
-        condition: service_started
-
-  flower:
-    image: delozhivet/delo_zhivet_bot_and_admin:latest
-    command:
-      [
-        "poetry",
-        "run",
-        "celery",
-        "-A",
-        "src.bot.tasks",
-        "flower"
-      ]
-    ports:
-      - "5555:5555"
-    depends_on:
-      db:
-        condition: service_healthy
-      bot:
-        condition: service_started
-      redis:
-        condition: service_started
-      celery:
         condition: service_started
 
   nginx:
