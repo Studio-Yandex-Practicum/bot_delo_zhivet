@@ -143,7 +143,7 @@ services:
       - ./nginx/letsencrypt/:/etc/letsencrypt/:rw
       - static_value:/var/html/static/
     env_file:
-      - ./.env
+      - ../.env_files/.env.nginx
     command: /bin/sh -c "envsubst '$${HOST_NAME} $${WEBHOOK_PATH}' < /etc/nginx/conf.d/delo.temp > /etc/nginx/servers/delo.conf && crond -b && nginx -g 'daemon off;'"
 
 volumes:
