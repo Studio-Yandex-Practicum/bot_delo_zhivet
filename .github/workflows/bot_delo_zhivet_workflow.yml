@@ -12,7 +12,7 @@ env:
     NGINX_CONFIG_FILES_PATH: ~/${{ vars.PROJECT_FOLDER_NAME }}/nginx
     ENV_FILES_DIR_NAME: .env_files
     INFRASTRUCTURE: infrastructure
-    DOCKER_COMPOSE_FILE: docker-compose-dev-deploy.yaml
+    DOCKER_COMPOSE_FILE: docker-compose-deploy.yaml
 
 jobs:
   tests:
