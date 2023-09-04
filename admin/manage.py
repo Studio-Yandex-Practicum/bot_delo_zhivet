@@ -1,57 +1,21 @@
 import argparse
-import logging
 import os
 import shutil
 import sys
 
 import flask_admin
-from config import Config
-from messages import (
-    APP_TEMPLATE_FOLDER_COPY_SUCCESS,
-    APP_TEMPLATE_FOLDER_NOT_FOUND,
-    COLLECT_STATIC_CLEAR_DIR_INFO,
-    COLLECT_STATIC_DIR_ALREADY_EXIST,
-    COLLECT_STATIC_ERROR,
-    COLLECT_STATIC_INFO,
-    COLLECT_TEMPLATES_ERROR,
-    COLLECT_TEMPLATES_SUCCESS,
-    COMMON_ERROR,
-    START_LOGGING,
-    STOP_LOGGING,
+from structlog import get_logger
+
+from admin.config import settings
+from admin.messages import (
+    APP_TEMPLATE_FOLDER_COPY_SUCCESS, APP_TEMPLATE_FOLDER_NOT_FOUND,
+    COLLECT_STATIC_CLEAR_DIR_INFO, COLLECT_STATIC_DIR_ALREADY_EXIST,
+    COLLECT_STATIC_ERROR, COLLECT_STATIC_INFO, COLLECT_TEMPLATES_ERROR,
+    COLLECT_TEMPLATES_SUCCESS, COMMON_ERROR, START_LOGGING, STOP_LOGGING,
     UNKNOWN_COMMAND,
 )
 
-logging.root.setLevel(logging.NOTSET)
-
-# Переопределение логгера для manage.py
-# При попытке импорта по цепочке manage.py не импортирует модули через '.'
-# из-за ошибки attempted relative import with no known parent package
-# Изящнее решения не нашел
-
-
-def get_logger(file, display=False):
-
-    """Создание и настройка логгера."""
-
-    log_path = os.path.join(os.path.dirname(file), Config.LOG_REL_PATH)
-    if not os.path.exists(log_path):
-        os.mkdir(log_path)
-    log_file = os.path.join(log_path, os.path.basename(file) + Config.LOG_EXTENSION)
-    logger = logging.getLogger(os.path.basename(file))
-    formatter = logging.Formatter(Config.LOG_FORMAT)
-    file_handler = logging.FileHandler(log_file)
-    file_handler.setLevel(Config.LOG_DEFAULT_LVL)
-    file_handler.setFormatter(formatter)
-    logger.addHandler(file_handler)
-    if display:
-        console_handler = logging.StreamHandler(stream=sys.stdout)
-        console_handler.setLevel(Config.LOG_DEFAULT_LVL)
-        console_handler.setFormatter(formatter)
-        logger.addHandler(console_handler)
-    return logger
-
-
-logger = get_logger(__file__, display=True)
+logger = get_logger("admin_logger")
 logger.info(START_LOGGING)
 
 
@@ -65,11 +29,10 @@ def flush_folder(folder):
             os.rmdir(os.path.join(folder, items))
         else:
             os.remove(os.path.join(folder, items))
-            logger.debug(f"Item removed: {folder}")
+            logger.debug("Item removed", folder=folder)
 
 
 def recursive_copy_not_existing_items(src, dst):
-
     """Рекурсивное копирование несуществующих файлов и папок"""
     logger.debug("start recurse copying")
     for item in os.listdir(src):
@@ -84,7 +47,7 @@ def recursive_copy_not_existing_items(src, dst):
             dst_file = os.path.join(dst, item)
             if not os.path.exists(dst_file):
                 shutil.copy(src_file, dst_file)
-                logger.debug(f"Copied from {src_file} to {dst_file}")
+                logger.debug("Copied files", src_file=src_file, dst_file=dst_file)
 
 
 class Manage(object):
@@ -105,7 +68,7 @@ class Manage(object):
         args = parser.parse_args(sys.argv[1:2])
         if not hasattr(self, args.command):
             print(UNKNOWN_COMMAND.format(command=args.command))
-            logger.warning(UNKNOWN_COMMAND.format(command=args.command))
+            logger.warning(UNKNOWN_COMMAND, command=args.command)
             parser.print_help()
             exit(1)
         getattr(self, args.command)()
@@ -155,21 +118,21 @@ class Manage(object):
         try:
             if os.path.exists(dst) and overwrite:
                 print(COLLECT_STATIC_CLEAR_DIR_INFO.format(dst=dst))
-                logger.info(COLLECT_STATIC_CLEAR_DIR_INFO.format(dst=dst))
+                logger.info(COLLECT_STATIC_CLEAR_DIR_INFO, dst=dst)
                 flush_folder(dst)
             elif not os.path.exists(dst):
                 os.mkdir(dst)
             else:
                 print(COLLECT_STATIC_DIR_ALREADY_EXIST.format(dst=dst, overwrite=overwrite))
-                logger.info(COLLECT_STATIC_DIR_ALREADY_EXIST.format(dst=dst, overwrite=overwrite))
+                logger.info(COLLECT_STATIC_DIR_ALREADY_EXIST, dst=dst, overwrite=overwrite)
                 return True
             print(COLLECT_STATIC_INFO.format(dst=dst))
-            logger.info(COLLECT_STATIC_INFO.format(dst=dst))
+            logger.info(COLLECT_STATIC_INFO, dst=dst)
             recursive_copy_not_existing_items(src, dst)
             return True
         except Exception as error:
             print(COLLECT_STATIC_ERROR.format(details=str(error)))
-            logger.error(COLLECT_STATIC_ERROR.format(details=str(error)))
+            logger.error(COLLECT_STATIC_ERROR, details=str(error))
             return False
 
     def collecttemplates(self):
@@ -218,7 +181,7 @@ class Manage(object):
         merge = args.merge
         dst = os.path.join(os.path.dirname(os.path.abspath(__file__)), templates_folder)
         src_common = os.path.join(os.path.dirname(flask_admin.__file__), "templates")
-        src = os.path.join(src_common, Config.BOOTSTRAP_VERSION)
+        src = os.path.join(src_common, settings.BOOTSTRAP_VERSION)
         try:
             if not os.path.exists(dst):
                 os.mkdir(dst)
@@ -237,7 +200,7 @@ class Manage(object):
             return True
         except Exception as error:
             print(COLLECT_TEMPLATES_ERROR.format(details=str(error)))
-            logger.warning(COLLECT_TEMPLATES_ERROR.format(details=str(error)))
+            logger.warning(COLLECT_TEMPLATES_ERROR, details=str(error))
             return False
 
 
@@ -247,5 +210,5 @@ if __name__ == "__main__":
         logger.info(STOP_LOGGING)
         sys.exit(0)
     except Exception as error:
-        logger.error(COMMON_ERROR.format(details=str(error)))
+        logger.error(COMMON_ERROR, details=str(error))
         sys.exit(1)

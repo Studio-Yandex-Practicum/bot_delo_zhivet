@@ -4,29 +4,15 @@ from flask import Markup, url_for
 from werkzeug.security import check_password_hash
 from wtforms import fields, form, validators
 
-from src.core.db.model import Staff
-
-from .database import db
-from .messages import (
-    ACCOUNT_BUSY,
-    ACCOUNT_LABEL,
-    DISSALOWED_CHARS_IN_ACCOUNT,
-    DISSALOWED_CHARS_IN_PASWORD,
-    EMAIL_BUSY,
-    EMAIL_LABEL,
-    EMAIL_NOT_FOUND,
-    EQUAL_PASSWORDS,
-    INPUT_EMAIL,
-    INVALID_EMAIL,
-    LOGIN_LENGTH,
-    PASSWORD_CONTAINS_ACCOUNT,
-    PASSWORD_LABEL,
-    PASSWORD_LENGTH,
-    PASSWORD_TOO_LONG,
-    REPEAT_PASSWORD,
-    REQUIRED_FIELD,
-    WRONG_USER,
+from admin.database import db
+from admin.messages import (
+    ACCOUNT_BUSY, ACCOUNT_LABEL, DISSALOWED_CHARS_IN_ACCOUNT,
+    DISSALOWED_CHARS_IN_PASWORD, EMAIL_BUSY, EMAIL_LABEL, EMAIL_NOT_FOUND,
+    EQUAL_PASSWORDS, INPUT_EMAIL, INVALID_EMAIL, LOGIN_LENGTH,
+    PASSWORD_CONTAINS_ACCOUNT, PASSWORD_LABEL, PASSWORD_LENGTH,
+    PASSWORD_TOO_LONG, REPEAT_PASSWORD, REQUIRED_FIELD, WRONG_USER,
 )
+from src.core.db.model import Staff
 
 
 class BaseForm(form.Form):

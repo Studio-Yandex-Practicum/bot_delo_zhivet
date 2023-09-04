@@ -1,39 +1,81 @@
-import logging
 import os
+from logging import INFO
 
-from dotenv import load_dotenv
-
-load_dotenv()
+from pydantic import BaseSettings
 
 
-class Config(object):
-    SECRET_KEY = os.getenv("ADMIN_SECRET_KEY", default="SECRET_KEY")
+class Settings(BaseSettings):
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = (
-        f"postgresql://{os.getenv('POSTGRES_USER')}:"
-        f"{os.getenv('POSTGRES_PASSWORD')}@"
-        f"{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('POSTGRES_DB')}"
-    )
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
-    FLASK_ENV = "development"
+    FLASK_ENV: str
+    SECRET_KEY: str = "SECRET_KEY"
 
-    SENTRY_DSN_ADMIN = os.getenv("SENTRY_DSN_ADMIN", default=None)
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    # database
+    POSTGRES_USER: str
+    POSTGRES_PASSWORD: str
+    DB_HOST: str
+    DB_PORT: str
+    POSTGRES_DB: str
+    SQLALCHEMY_DATABASE_URI: str = None
+
+    # First SuperUser
+    SUPER_USER_EMAIL: str
+    SUPER_USER_LOGIN: str
+    SUPER_USER_PASSWORD: str
+
+    SENTRY_DSN_ADMIN: str = None
+
+    # Logging
+    LOG_NAME: str = "admin"
+    LOG_DEFAULT_LVL: int | None = INFO
+
+    # Параметры почтового клиента
+    MAIL_DEBUG: int = 1
+    MAIL_PORT: int = 465
+    MAIL_SERVER: str = "smtp.yandex.ru"
+    MAIL_USE_SSL: bool = True
+    MAIL_USERNAME: str = "test.delo.zhivet@yandex.ru"
+    MAIL_PASSWORD: str = "bctlgfnckbtxhgzt"
+
+    # Параметры генерации токенов сброса пароля
+    PASSWORD_RESET_TOKEN_ALGORITHM: str = "HS256"
+    PASSWORD_RESET_TOKEN_TTL: int = 600
 
     # Дополнительные параметры, не участвующие в ините приложения
     BOOTSTRAP_VERSION = "bootstrap4"
-    LOG_DEFAULT_LVL = logging.DEBUG
-    LOG_EXTENSION = ".log"
-    LOG_FORMAT = "%(asctime)s [%(levelname)s]  %(message)s"
-    LOG_REL_PATH = "logs"
 
-    # Параметры почтового клиента
-    MAIL_SERVER = os.getenv("MAIL_SERVER", default="smtp.yandex.ru")
-    MAIL_PORT = os.getenv("MAIL_PORT", default=465)
-    MAIL_USE_SSL = os.getenv("MAIL_USE_SSL", default=True)
-    MAIL_USERNAME = os.getenv("MAIL_USERNAME", default="test.delo.zhivet@yandex.ru")
-    MAIL_PASSWORD = os.getenv("MAIL_PASSWORD", default="bctlgfnckbtxhgzt")
-    MAIL_DEBUG = os.getenv("MAIL_DEBUG", default=1)
+    class Config:
+        env_file_encoding = "utf-8"
+        env_files_names = (
+            ".env.flask",
+            ".env.s3",
+            ".env.mail",
+            ".env.sentry",
+            ".env.db.local",
+        )
+        env_file = ("./infrastructure/.env_files/" + file_name for file_name in env_files_names)
 
-    # Параметры генерации токенов сброса пароля
-    PASSWORD_RESET_TOKEN_TTL = os.getenv("PASSWORD_RESET_TOKEN_TTL", default=600)
-    PASSWORD_RESET_TOKEN_ALGORITHM = os.getenv("PASSWORD_RESET_TOKEN_ALGORITHM", default="HS256")
+
+class DevSettings(Settings):
+    pass
+
+
+class LocalSettings(Settings):
+    pass
+
+
+def get_settings():
+    PG_DOCKER_ENV = os.getenv("PG_DOCKER_ENV", "local")
+    if PG_DOCKER_ENV == "dev":
+        return DevSettings()
+    else:
+        return LocalSettings()
+
+
+settings = get_settings()
+settings.SQLALCHEMY_DATABASE_URI = (
+    f"postgresql://{settings.POSTGRES_USER}:"
+    f"{settings.POSTGRES_PASSWORD}@"
+    f"{settings.DB_HOST}:{settings.DB_PORT}/"
+    f"{settings.POSTGRES_DB}"
+)

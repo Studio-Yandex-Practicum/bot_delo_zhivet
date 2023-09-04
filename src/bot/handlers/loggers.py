@@ -1,36 +1,34 @@
-import logging
-import sys
-from logging.handlers import RotatingFileHandler
+from functools import partial
+from json import dumps
+from os import getpid
 
-STR_FORMAT = "[%(asctime)s] %(filename)s:%(lineno)d " "[%(levelname)s] %(message)s"
-DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
+import structlog
+from structlog import PrintLogger
+from structlog.contextvars import merge_contextvars
+from structlog.processors import JSONRenderer, TimeStamper, UnicodeDecoder, add_log_level
 
-Errors_log_file = "ERRORS_file.log"
+from core.config import settings
 
-
-def backoff_loger():
-    logger = logging.getLogger("backoff")
-    file_handler = RotatingFileHandler(Errors_log_file, maxBytes=10**4, backupCount=5)
-    file_handler.setLevel(logging.ERROR)
-    error_formatter = logging.Formatter("%(asctime)s - %(name)s " "- %(levelname)s %(message)s")
-    file_handler.setFormatter(error_formatter)
-    logger.addHandler(file_handler)
-    return logger
+DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S.%f"
 
 
-def get_logger(logger_name=__file__):
-    """Создание и настройка логгера."""
-    # Create a custom logger
-    logger = logging.getLogger(logger_name)
-    # Create handlers
-    console_handler = logging.StreamHandler(stream=sys.stdout)
-    # Create levels
-    console_handler.setLevel(logging.DEBUG)
-    # Create formatters
-    formatter = logging.Formatter(fmt=STR_FORMAT, datefmt=DATE_FORMAT)
-    # Add formatters to handlers
-    console_handler.setFormatter(formatter)
-    # Add handlers to  the logger
-    logger.addHandler(console_handler)
+def add_pid(logger, log_method, event_dict):
+    event_dict["pid"] = getpid()
+    return event_dict
 
-    return logger
+
+add_timestamp = TimeStamper(fmt=DATETIME_FORMAT, utc=False)
+
+structlog.configure(
+    processors=[
+        merge_contextvars,
+        add_pid,
+        add_log_level,
+        add_timestamp,
+        UnicodeDecoder(),
+        JSONRenderer(serializer=partial(dumps, ensure_ascii=False)),
+    ],
+    wrapper_class=structlog.make_filtering_bound_logger(settings.log_level),
+)
+
+logger: PrintLogger = structlog.getLogger(settings.logger_name)

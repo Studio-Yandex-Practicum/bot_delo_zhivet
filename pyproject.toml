@@ -57,6 +57,12 @@ uvicorn = "^0.20.0"
 greenlet = "^2.0.2"
 flask-mail = "^0.9.1"
 pyjwt = "^2.6.0"
+celery = "^5.2.7"
+redis = "^4.5.4"
+flower = "^1.2.0"
+structlog = "^23.1.0"
+pillow = "^9.5.0"
+levenshtein = "^0.21.1"
 
 [tool.poetry.group.prod]
 optional = true
@@ -78,6 +84,7 @@ optional = true
 [tool.poetry.group.dev.dependencies]
 psycopg2-binary = "^2.9.5"
 flake8 = "^6.0.0"
+gevent = "^22.10.2"
 
 [build-system]
 requires = ["poetry-core"]

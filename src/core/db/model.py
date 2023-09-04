@@ -1,11 +1,23 @@
 from flask_login import UserMixin
 from flask_security import RoleMixin
 from geoalchemy2.types import Geography
-from sqlalchemy import BigInteger, Boolean, Column, Date, DateTime, Float, ForeignKey, Integer, String, Table, Text
+from sqlalchemy import (
+    TIMESTAMP,
+    BigInteger,
+    Boolean,
+    Column,
+    Date,
+    DateTime,
+    Float,
+    ForeignKey,
+    Integer,
+    String,
+    Table,
+    Text,
+)
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import backref, relationship
+from sqlalchemy.orm import Mapped, backref, relationship
 from werkzeug.security import check_password_hash, generate_password_hash
-
 
 from src.core.db.db import Base
 
@@ -37,18 +49,62 @@ class Volunteer(Base):
     deleted_at = Column(DateTime(timezone=True))
     is_banned = Column(Boolean, default=False)
     ticketID = Column(Text, nullable=True)
+    holiday_start = Column(TIMESTAMP, nullable=True)
+    holiday_end = Column(TIMESTAMP, nullable=True)
+    is_active = Column(Boolean, default=False)
+
+
+class AbstractTag(Base):
+    """Абстрактная модель тега."""
+
+    __abstract__ = True
+    name = Column(String(35), nullable=False, unique=True)
+    priority = Column(Integer, nullable=True, default=999)
+
+    def __str__(self):
+        return self.name
+
+
+class Tag_Pollution(AbstractTag):
+    """Модель тега для сообщения о загрязнении."""
+
+    pass
+
+
+class Tag_Assistance(AbstractTag):
+    """Модель тега для сообщения о социальной помощи."""
+
+    pass
+
+
+pollution_tag_connection = Table(
+    "pollution_tag_connection",
+    Base.metadata,
+    Column("pollution_id", ForeignKey("pollution.id", ondelete="CASCADE")),
+    Column("tag", ForeignKey("tag_pollution.id", ondelete="CASCADE")),
+)
+assistance_tag_connection = Table(
+    "assistance_tag_connection",
+    Base.metadata,
+    Column("Assistance_id", ForeignKey("assistance_disabled.id", ondelete="CASCADE")),
+    Column("tag", ForeignKey("tag_assistance.id", ondelete="CASCADE")),
+)
 
 
 class Pollution(Base):
     """Модель сообщения о загрязнении"""
 
-    photo = Column(String(100), nullable=False)
+    photo = Column(String(), nullable=False)
     latitude = Column(Float, nullable=False)
     longitude = Column(Float, nullable=False)
     geometry = Column(Geography(geometry_type="POINT", srid=4326, dimension=2))
     comment = Column(Text, nullable=True)
     telegram_id = Column(BigInteger, ForeignKey("user.telegram_id"))
     ticketID = Column(Text, nullable=True)
+    tags: Mapped[list[Tag_Pollution]] = relationship(
+        argument=Tag_Pollution, secondary=pollution_tag_connection, lazy="subquery"
+    )
+    sender = relationship(User, lazy="subquery")
 
 
 class Assistance_disabled(Base):
@@ -62,6 +118,10 @@ class Assistance_disabled(Base):
     latitude = Column(Float, nullable=False)
     longitude = Column(Float, nullable=False)
     geometry = Column(Geography(geometry_type="POINT", srid=4326, dimension=2))
+    tags: Mapped[list[Tag_Assistance]] = relationship(
+        argument=Tag_Assistance, secondary=assistance_tag_connection, lazy="subquery"
+    )
+    sender = relationship(User, lazy="subquery")
 
 
 roles_users = Table(
@@ -72,7 +132,7 @@ roles_users = Table(
 )
 
 
-class Role(Base, RoleMixin):
+class Role(RoleMixin, Base):
     """Модель роли для персонала"""
 
     name = Column(String, unique=True)
@@ -82,7 +142,7 @@ class Role(Base, RoleMixin):
         return self.name
 
 
-class Staff(Base, UserMixin):
+class Staff(UserMixin, Base):
     """Модель персонала"""
 
     first_name = Column(String(255))

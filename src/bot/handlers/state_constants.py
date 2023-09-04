@@ -1,4 +1,6 @@
 # Обозначим состояния главного менюSELECTING_ACTION
+import re
+
 from telegram.ext import ConversationHandler
 
 # Константы для API трекера
@@ -14,16 +16,15 @@ ADDING_SOCIAL_TASK = "adding_social_task"
 SELECTING_FEATURE = "selecting_feature"
 
 # Обозначим состояния второго диалога второго уровня
-SPECIFY_CITY = "specify_city"
 SPECIFY_ACTIVITY_RADIUS = "radius"
 SPECIFY_CAR_AVAILABILITY = "has_car"
-TYPING_CITY = "typing_city"
-TYPING_SOCIAL_CITY = "typing_social_city"
+TYPING_ADDRESS = "typing_address"
 TYPING_RADIUS = "typing_radius"
 TYPING = "TYPING"
 SOCIAL_PROBLEM_TYPING = "social_problem_typing"
 SOCIAL_PROBLEM_ADDRESS = "social_problem_address"
-SELECTING_OVER = "selecting_city"
+SELECTING_OVER = "selecting_address"
+DADATA_UNAVAILABLE = "dadata_unavailable"
 
 # Состояния диалога Получение Телефонного номера
 SPECIFY_PHONE_PERMISSION = "phone"
@@ -38,24 +39,41 @@ SHOWING = "showing"
 END = ConversationHandler.END
 
 # Различные константы для проекта
+HOLIDAY_START = "holiday_start"
+DB_HOLIDAY_START = "DB_HOLIDAY_START"
+ENDLESS_HOLIDAY_START_NOW = "ENDLESS_HOLIDAY_START_NOW"
+HOLIDAY_STOP_NOW = "HOLIDAY_STOP_NOW"
+
+NO_COMMENT_PHASE = "Комментариев не оставили"
+ADD_POLLUTION_TAG = "ADD_POLLUTION_TAG"
+ADD_SOCIAL_TAG = "ADD_SOCIAL_TAG"
+TAG_ID = "tag_id"
+TAG_BUTTON_CALLBACK_PREFIX = f"{TAG_ID}="
+TAG_ID_PATTERN_RAW = f"{TAG_ID}=(?P<{TAG_ID}>.*)"
+TAG_ID_PATTERN = re.compile(TAG_ID_PATTERN_RAW)
+NO_TAG = "NO_TAG"
+TAGS = "tags"
+POLLUTION_TAGS = "POLLUTION_TAGS"
+SOCIAL_TAGS = "SOCIAL_TAGS"
 LONGITUDE = "longitude"
 LATITUDE = "latitude"
 GEOM = "geometry"
 FILE_PATH = "file_path"
 START_OVER = "start_over"
+IS_EXISTS = "is_exists"
 FEATURES = "features"
 CURRENT_FEATURE = "current_feature"
 CURRENT_LEVEL = "current_level"
-CITY_COMMAND = "CITY="
-CITY_SOCIAL = "SOCIAL_CITY="
+ADDRESS_COMMAND = "CITY="
 ADDRESS_TEMPORARY = "address_temporary"
+UNRESTRICTED_ADDRESS = "unrestricted_address"
 RADIUS_COMMAND = "RADIUS="
 CAR_COMMAND = "CAR="
 POLLUTION_FOTO = "photo"
 POLLUTION_COORDINATES = "pollution_coordinates"
 POLLUTION_COMMENT = "comment"
-SOCIAL_ADDRESS = "social_address"
 SOCIAL_COMMENT = "comment"
+COMMENT = "comment"
 SAVE = "save"
 ACTIVITY_RADIUS = [
     list(range(5, 30, 5)),
@@ -66,9 +84,9 @@ TELEGRAM_ID = "telegram_id"
 TELEGRAM_USERNAME = "telegram_username"
 FIRST_NAME = "first_name"
 LAST_NAME = "last_name"
-CITY_INPUT = "city_input"
+ADDRESS_INPUT = "address_input"
 BACK = "back"
-CITY = "city"
+ADDRESS = "full_address"
 VALIDATE = "validate"
 PHONE_INPUT = "phone_input"
 PHONE_COMMAND = "phone="
@@ -81,12 +99,22 @@ GREETING_MESSAGE = (
     " Выбери, что хочешь сделать:"
 )
 
+FEATURES_DESCRIPTION = (
+    "- Свой адрес, можно без квартиры, для удобства расчетов расстояния;\n"
+    "- Расстояние, на которое ты готов выезжать;\n"
+    "- Наличие автомобиля, и готовность задействовать его;\n"
+    "- [Опционально] Номер телефона для связи."
+)
+
+REGISTER_GREETING = "Для регистрации волонтером вам надо указать:\n"
+EDIT_PROFILE_GREETING = "Выберите данные для изменения:\n"
+
 TOP_LEVEL_MENU_TEXT = "Можно выбрать новое действие или закончить разговор, набрав команду /stop"
 
-SECOND_LEVEL_TEXT = (
-    "Понял-принял! Укажите информацию для остальных пунктов или нажмите на кнопку "
-    "<b>Отправить заявку</b> (она появится, когда всё будет заполнено):"
-)
+SECOND_LEVEL_TEXT_BASE = "Понял-принял! Укажите информацию для остальных пунктов или нажмите на кнопку " "<b>{}</b>{}:"
+SECOND_LEVEL_TEXT = SECOND_LEVEL_TEXT_BASE.format("Отправить заявку", " (она появится, когда всё будет заполнено)")
+SECOND_LEVEL_UPDATE_TEXT = SECOND_LEVEL_TEXT_BASE.format("Сохранить", "")
+
 
 CHECK_MARK = "\U00002705"  # Эмодзи галочки
 

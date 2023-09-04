@@ -1,43 +1,49 @@
 import os
 from datetime import datetime
+from pathlib import Path
+from uuid import uuid4
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.constants import ParseMode
 from telegram.ext import ContextTypes
 
 from src.api.tracker import client
-from src.bot.handlers.common import end_describing
-from src.bot.service.pollution import create_new_pollution, download_to_object_storage
-from src.bot.service.save_new_user import check_user_in_db, create_new_user
-from src.bot.service.save_tracker_id import save_tracker_id
-from src.bot.service.volunteer import volunteers_description
-from src.core.config import settings
-from src.core.db.db import get_async_session
-from src.core.db.repository.pollution_repository import crud_pollution
-from src.core.db.repository.volunteer_repository import crud_volunteer
-
-from .start import start
-from .state_constants import (
+from src.bot.const import KB_IN_MB, MAXIMUM_SIZE_OF_IMAGE_KB
+from src.bot.handlers.start import start
+from src.bot.handlers.state_constants import (
+    ADD_POLLUTION_TAG,
     BACK,
     CHECK_MARK,
     CURRENT_FEATURE,
     END,
     FEATURES,
-    GEOM,
     LATITUDE,
     LONGITUDE,
-    POLLUTION,
     POLLUTION_COMMENT,
     POLLUTION_COORDINATES,
     POLLUTION_FOTO,
+    POLLUTION_TAGS,
     SAVE,
     SECOND_LEVEL_TEXT,
     SELECTING_FEATURE,
     START_OVER,
-    TELEGRAM_ID,
-    TELEGRAM_USERNAME,
     TYPING,
 )
+from src.bot.service.pollution import (
+    create_new_pollution,
+    create_new_pollution_dict_from_data,
+    create_new_pollution_message_for_tracker,
+    download_to_object_storage,
+    resize_downloaded_image,
+)
+from src.bot.service.save_new_user import get_or_create_user
+from src.bot.service.save_tracker_id import other_save_tracker_id
+from src.bot.service.tags import check_pollution_tags_are_in_db
+from src.bot.service.volunteer import volunteers_description
+from src.core.db.db import get_async_session
+from src.core.db.model import Pollution, User, Volunteer
+from src.core.db.repository.pollution_repository import crud_pollution
+from src.core.db.repository.volunteer_repository import crud_volunteer
 
 
 async def select_option_to_report_about_pollution(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
@@ -66,6 +72,20 @@ async def select_option_to_report_about_pollution(update: Update, context: Conte
             InlineKeyboardButton(text="Назад", callback_data=str(END)),
         ],
     ]
+
+    session_generator = get_async_session()
+    session = await session_generator.asend(None)
+    tag = await check_pollution_tags_are_in_db(session)
+    if tag:
+        buttons.insert(
+            3,
+            [
+                InlineKeyboardButton(
+                    text=f"Указать тип проблемы {CHECK_MARK*check_feature(POLLUTION_TAGS)}",
+                    callback_data=ADD_POLLUTION_TAG,
+                ),
+            ],
+        )
 
     keyboard = InlineKeyboardMarkup(buttons)
 
@@ -154,28 +174,37 @@ async def save_foto(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     """Сохранение фотографии"""
     user_data = context.user_data
     if context.user_data[CURRENT_FEATURE] == POLLUTION_FOTO:
-        photo_file = await update.message.photo[-1].get_file()
+        if update.message.photo:
+            photo_file = await update.message.effective_attachment[-1].get_file()
+        elif update.message.document.mime_type == "image/jpeg":
+            photo_file = await update.message.effective_attachment.get_file()
+        elif update.message.document.mime_type == "image/png":
+            photo_file = await update.message.effective_attachment.get_file()
+        else:
+            chat_text = "Вы ввели некорректные данные, возможно вы хотели добавить фотографию?"
+            buttons = [
+                [
+                    InlineKeyboardButton(text="Перейти к добавлению фотографии", callback_data=POLLUTION_FOTO),
+                ],
+                [
+                    InlineKeyboardButton(text="Назад", callback_data=BACK),
+                ],
+            ]
+            keyboard = InlineKeyboardMarkup(buttons)
+            await update.message.reply_text(text=chat_text, reply_markup=keyboard)
+
         date = datetime.now().strftime("%d_%m_%Y_%H_%M_%S")
-        file_path = f"media\\{date}.jpg"
+        unique_uuid_name = str(uuid4())
+        file_path = Path.cwd() / "media" / f"{date}_{unique_uuid_name}.jpg"
         await photo_file.download_to_drive(custom_path=file_path)
         user_data[FEATURES][POLLUTION_FOTO] = str(file_path)
         user_data[START_OVER] = True
 
+        size_of_photo_in_kbytes = int(os.stat(file_path).st_size // KB_IN_MB)
+        if size_of_photo_in_kbytes > MAXIMUM_SIZE_OF_IMAGE_KB:
+            await resize_downloaded_image(file_path)
+
         return await select_option_to_report_about_pollution(update, context)
-    else:
-        chat_text = "Вы ввели некорректные данные, возможно вы хотели добавить фотографию?"
-        buttons = [
-            [
-                InlineKeyboardButton(text="Перейти к добавлению фотографии", callback_data=POLLUTION_FOTO),
-            ],
-            [
-                InlineKeyboardButton(text="Назад", callback_data=BACK),
-            ],
-        ]
-
-        keyboard = InlineKeyboardMarkup(buttons)
-
-        await update.message.reply_text(text=chat_text, reply_markup=keyboard)
 
 
 async def save_location(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
@@ -203,48 +232,32 @@ async def save_location(update: Update, context: ContextTypes.DEFAULT_TYPE) -> s
         await update.message.reply_text(text=chat_text, reply_markup=keyboard)
 
 
-async def save_and_exit_pollution(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
-    """Сохранение данных в базу"""
-    context.user_data[START_OVER] = True
-    user_data = context.user_data[FEATURES]
-    user_data[TELEGRAM_ID] = update.effective_user.id
-    user_data[GEOM] = f"POINT({user_data[LONGITUDE]} {user_data[LATITUDE]})"
-    file_path = user_data[POLLUTION_FOTO]
-    latitude = user_data[LATITUDE]
-    longitude = user_data[LONGITUDE]
-    if POLLUTION_COMMENT in user_data:
-        comment = user_data[POLLUTION_COMMENT]
-    else:
-        comment = "Комментариев не оставили"
-    user = {}
-    user[TELEGRAM_ID] = user_data[TELEGRAM_ID]
-    user[TELEGRAM_USERNAME] = update.effective_user.username
-    await download_to_object_storage(file_path)
+async def save_and_exit_pollution(
+    user_id: int,
+    username: str,
+    user_data,
+) -> None:
+    """Сохранение данных в базу и отправка в трекер"""
+
     session_generator = get_async_session()
     session = await session_generator.asend(None)
-    old_user = await check_user_in_db(user_data[TELEGRAM_ID], session)
-    if not old_user:
-        await create_new_user(user, session)
-    if old_user and old_user.is_banned:
-        return await end_describing(update, context)
-    await create_new_pollution(user_data, session)
-    volunteers = await crud_volunteer.get_volunteers_by_point(longitude, latitude, session)
-    summary = f"{user[TELEGRAM_USERNAME]} - {latitude}, {longitude}"
-    description = f"""
-    Ник в телеграмме оставившего заявку: {user[TELEGRAM_USERNAME]}
-    Координаты загрязнения: {latitude}, {longitude}
-    Комментарий к заявке: {comment}
-    {settings.AWS_ENDPOINT_URL}/{settings.AWS_BUCKET_NAME}/{file_path[6:]}
-    """
-    description += volunteers_description(volunteers)
-    tracker = client.issues.create(
-        queue=POLLUTION,
-        summary=summary,
-        description=description,
+
+    user_db: User = await get_or_create_user(user_id, username, session)
+    if user_db.is_banned:
+        return
+
+    file_path: str = user_data[POLLUTION_FOTO]
+    await download_to_object_storage(file_path)
+
+    new_pollution_data: dict = await create_new_pollution_dict_from_data(user_db.telegram_id, user_data, session)
+    new_pollution_db: Pollution = await create_new_pollution(new_pollution_data, session)
+    volunteers: list[Volunteer] = await crud_volunteer.get_volunteers_by_point(
+        new_pollution_db.longitude, new_pollution_db.latitude, session
     )
+    message: dict = create_new_pollution_message_for_tracker(new_pollution_db, volunteers_description(volunteers))
+    tracker = client.issues.create(**message)
+    await other_save_tracker_id(crud_pollution, tracker.key, new_pollution_db, session)
     os.remove(file_path)
-    await save_tracker_id(crud_pollution, tracker.key, user_data[TELEGRAM_ID], session)
-    return await end_describing(update, context)
 
 
 async def back_to_select_option_to_report_about_pollution(update: Update, context: ContextTypes.DEFAULT_TYPE):

@@ -133,6 +133,9 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+.env*
+!.env.examples/
+!.env.*.example
 
 # Spyder project settings
 .spyderproject
@@ -181,5 +184,8 @@ cython_debug/
 
 .vscode/
 *.code-workspace
+
+# editorconfig
+.editorconfig
 
 bot_persistence_data

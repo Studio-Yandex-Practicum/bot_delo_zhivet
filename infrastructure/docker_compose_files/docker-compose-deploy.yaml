@@ -1,0 +1,156 @@
+version: '3.8'
+
+name: bot_delo_zhivet
+
+services:
+  db:
+    image: postgis/postgis:14-3.3-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - ../.env_files/.env.db
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U $${POSTGRES_USER:?err} -d $${POSTGRES_DB:?err}"
+        ]
+      start_period: 30s
+      timeout: 10s
+      interval: 1s
+      retries: 10
+
+  redis:
+    image: redis:alpine
+    env_file:
+      - ../.env_files/.env.redis
+    volumes:
+      - redis_data:/data
+
+  loki:
+    image: grafana/loki:2.8.3
+    volumes:
+      - loki_data:/loki
+      - ../grafana/loki-config.yaml:/etc/loki/local-config.yaml
+    env_file:
+      - ../.env_files/.env.grafana
+    command: -config.file=/etc/loki/local-config.yaml -config.expand-env=true
+
+  promtail:
+    image: grafana/promtail:2.8.3
+    env_file:
+      - ../.env_files/.env.grafana
+    volumes:
+      - ../grafana/promtail-config.yaml:/etc/promtail/config.yaml
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: -config.file=/etc/promtail/config.yaml -config.expand-env=true
+    depends_on:
+      - loki
+
+  grafana:
+    image: grafana/grafana:10.0.3-ubuntu
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    env_file:
+      - ../.env_files/.env.grafana
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ../grafana/grafana-datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml
+    depends_on:
+      - loki
+
+  bot:
+    image: delozhivet/delo_zhivet_bot_and_admin:latest
+    command: [ "poetry", "run", "runbot" ]
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - ../.env_files/.env.telegram
+      - ../.env_files/.env.db
+      - ../.env_files/.env.s3
+      - ../.env_files/.env.sentry
+    volumes:
+      - persistence_data:/app/persistence_data/
+      - media_data:/app/media/
+
+  web:
+    image: delozhivet/delo_zhivet_bot_and_admin:latest
+    command:
+      [
+        "poetry",
+        "run",
+        "gunicorn",
+        "--bind",
+        "0.0.0.0:5000",
+        "--access-logfile=-",
+        "manage:app"
+      ]
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+
+    env_file:
+      - ../.env_files/.env.s3
+      - ../.env_files/.env.dadata
+      - ../.env_files/.env.flask
+      - ../.env_files/.env.mail
+      - ../.env_files/.env.nginx
+      - ../.env_files/.env.redis
+      - ../.env_files/.env.sentry
+      - ../.env_files/.env.yatracker
+    volumes:
+      - static_value:/app/admin/static/
+      - ./flask_admin/logs/:/app/admin/logs/
+
+  celery:
+    image: delozhivet/delo_zhivet_bot_and_admin:latest
+    volumes:
+      - media_data:/app/media/
+    command:
+      [
+        "poetry",
+        "run",
+        "celery",
+        "-A",
+        "src.bot.tasks",
+        "worker"
+      ]
+
+    depends_on:
+      db:
+        condition: service_healthy
+      bot:
+        condition: service_started
+      redis:
+        condition: service_started
+
+  nginx:
+    image: delozhivet/delo_zhivet_nginx:latest
+    restart: unless-stopped
+    depends_on:
+      - web
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/delo.conf:/etc/nginx/servers/delo.conf:rw
+      - ./nginx/delo.temp:/etc/nginx/conf.d/delo.temp
+      - ./nginx/letsencrypt/:/etc/letsencrypt/:rw
+      - static_value:/var/html/static/
+    env_file:
+      - ../.env_files/.env.nginx
+    command: /bin/sh -c "envsubst '$${HOST_NAME} $${WEBHOOK_PATH}' < /etc/nginx/conf.d/delo.temp > /etc/nginx/servers/delo.conf && crond -b && nginx -g 'daemon off;'"
+
+volumes:
+  postgres_data:
+  loki_data:
+  grafana_data:
+  persistence_data:
+  static_value:
+  redis_data:
+  media_data:
