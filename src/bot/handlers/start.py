@@ -31,7 +31,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
         ],
         [
             InlineKeyboardButton(
-                text="Сделать пожертвование", url="https://delozhivet.ru/campaign/pomoch-delo-zhivet/"
+                text="Сделать пожертвование", url="https://donate.delozhivet.ru/campaign/pomoch-delo-zhivet/"
             ),
         ],
     ]
