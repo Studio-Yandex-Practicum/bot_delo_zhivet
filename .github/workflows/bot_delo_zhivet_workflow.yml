@@ -8,6 +8,11 @@ on:
 env:
     BRANCH: 'refs/heads/master'
     PROJECT_FOLDER_PATH: ~/${{ vars.PROJECT_FOLDER_NAME }}
+    DOCKER_COMPOSE_FILES_PATH: ~/${{ vars.PROJECT_FOLDER_NAME }}/docker_compose_files
+    NGINX_CONFIG_FILES_PATH: ~/${{ vars.PROJECT_FOLDER_NAME }}/nginx
+    ENV_FILES_DIR_NAME: .env_files
+    INFRASTRUCTURE: infrastructure
+    DOCKER_COMPOSE_FILE: docker-compose-dev-deploy.yaml
 
 jobs:
   tests:
