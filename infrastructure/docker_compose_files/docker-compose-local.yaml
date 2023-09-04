@@ -210,7 +210,7 @@ services:
   nginx:
     build:
       context: ../nginx
-      dockerfile: Dockerfile_nginx
+      dockerfile: ../nginx/Dockerfile
     restart: unless-stopped
     ports:
       - "80:80"
