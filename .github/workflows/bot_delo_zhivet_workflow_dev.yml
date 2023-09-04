@@ -93,7 +93,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          file: Dockerfile_bot_admin
+          file: Dockerfile
           no-cache: true
           push: ${{ github.event_name == 'push' }}
           tags: ${{ steps.meta_bot_and_admin.outputs.tags }}

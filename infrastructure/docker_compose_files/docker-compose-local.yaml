@@ -69,7 +69,7 @@ services:
   bot:
     build:
       context: ../../
-      dockerfile: Dockerfile_bot_admin
+      dockerfile: ../../Dockerfile
     volumes:
       - media_data:/app/media/
     command: [ "poetry", "run", "runbot" ]
@@ -94,7 +94,7 @@ services:
   web:
     build:
       context: ../../
-      dockerfile: Dockerfile_bot_admin
+      dockerfile: ../../Dockerfile
     command:
       [
         "poetry",
@@ -133,7 +133,7 @@ services:
   celery:
     build:
       context: ../../
-      dockerfile: Dockerfile_bot_admin
+      dockerfile: ../../Dockerfile
 
     volumes:
       - media_data:/app/media/
@@ -170,7 +170,7 @@ services:
   flower:
     build:
       context: ../../
-      dockerfile: Dockerfile_bot_admin
+      dockerfile: ../../Dockerfile
 
     command:
       [
