@@ -145,64 +145,94 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           passphrase: ${{ secrets.SERVER_PASSPHRASE }}
           script: |
-            cd ${{ env.PROJECT_FOLDER_PATH }}
-            docker compose -f docker-compose.yaml stop
-            docker compose -f docker-compose.yaml rm -fs web
-            docker compose -f docker-compose.yaml rm -fs bot
-            docker compose -f docker-compose.yaml rm -fs nginx
-            docker image rm -f ${{ secrets.DOCKERHUB_USERNAME }}/delo_zhivet_bot_and_admin:${{ vars.DOCKER_TAG }}
-            docker image rm -f ${{ secrets.DOCKERHUB_USERNAME }}/delo_zhivet_nginx:${{ vars.DOCKER_TAG }}
-            docker image pull -q ${{ secrets.DOCKERHUB_USERNAME }}/delo_zhivet_bot_and_admin:${{ vars.DOCKER_TAG }}
-            docker image pull -q ${{ secrets.DOCKERHUB_USERNAME }}/delo_zhivet_nginx:${{ vars.DOCKER_TAG }}
-            rm .env
-            touch .env
-            echo TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }} >> .env
-            echo HOST=${{ secrets.HOST }} >> .env
-            echo WEBHOOK_PATH=${{ secrets.WEBHOOK_PATH }} >> .env
-            echo WEBHOOK_DOMAIN=${{ secrets.WEBHOOK_DOMAIN }} >> .env
-            echo WEBHOOK_PORT=${{ secrets.WEBHOOK_PORT }} >> .env
-            echo GEOCODER_APIKEY=${{ secrets.GEOCODER_APIKEY }} >> .env
-            echo GEOCODER_BASE_URL=${{ secrets.GEOCODER_BASE_URL }} >> .env
-            echo MAXIMUM_OBJECTS_FROM_GEOCODER=${{ secrets.MAXIMUM_OBJECTS_FROM_GEOCODER }} >> .env
-            echo POSTGRES_DB=${{ secrets.POSTGRES_DB }} >> .env
-            echo POSTGRES_USER=${{ secrets.POSTGRES_USER }} >> .env
-            echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env
-            echo DB_HOST=${{ secrets.DB_HOST }} >> .env
-            echo DB_PORT=${{ secrets.DB_PORT }} >> .env
-            echo OAUTH_TOKEN=${{ secrets.OAUTH_TOKEN }} >> .env
-            echo ORG_ID=${{ secrets.ORG_ID }} >> .env
-            echo DADATA_TOKEN=${{ secrets.DADATA_TOKEN }} >> .env
-            echo DADATA_SECRET=${{ secrets.DADATA_SECRET }} >> .env
-            echo FLASK_APP=${{ secrets.FLASK_APP }} >> .env
-            echo FLASK_DEBUG=${{ secrets.FLASK_DEBUG }} >> .env
-            echo SUPER_USER_LOGIN=${{ secrets.SUPER_USER_LOGIN }} >> .env
-            echo SUPER_USER_EMAIL=${{ secrets.SUPER_USER_EMAIL }} >> .env
-            echo SUPER_USER_PASSWORD=${{ secrets.SUPER_USER_PASSWORD }} >> .env
-            echo ADMIN_SECRET_KEY=${{ secrets.ADMIN_SECRET_KEY }} >> .env
-            echo AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }} >> .env
-            echo AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }} >> .env
-            echo AWS_SERVICE_NAME=${{ secrets.AWS_SERVICE_NAME }} >> .env
-            echo AWS_ENDPOINT_URL=${{ secrets.AWS_ENDPOINT_URL }} >> .env
-            echo AWS_BUCKET_NAME=${{ secrets.AWS_BUCKET_NAME }} >> .env
-            echo SENTRY_DSN_ADMIN=${{ secrets.SENTRY_DSN_ADMIN }} >> .env
-            echo SENTRY_DSN_BOT=${{ secrets.SENTRY_DSN_BOT }} >> .env
-            echo PASSWORD_RESET_TOKEN_TTL=${{ secrets.PASSWORD_RESET_TOKEN_TTL }} >> .env
-            echo PASSWORD_RESET_TOKEN_ALGORITHM=${{ secrets.PASSWORD_RESET_TOKEN_ALGORITHM }} >> .env
-            echo MAIL_SERVER=${{ secrets.MAIL_SERVER }} >> .env
-            echo MAIL_PORT=${{ secrets.MAIL_PORT }} >> .env
-            echo MAIL_USE_SSL=${{ secrets.MAIL_USE_SSL }} >> .env
-            echo MAIL_USERNAME=${{ secrets.MAIL_USERNAME }} >> .env
-            echo MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }} >> .env
-            echo MAIL_DEBUG=${{ secrets.MAIL_DEBUG }} >> .env
-            echo HOST_NAME=${{ secrets.HOST_NAME }} >> .env
-            echo CERTBOT_EMAIL=${{ secrets.CERTBOT_EMAIL }} >> .env
-            echo PROJECT_FOLDER_PATH=${{ env.PROJECT_FOLDER_PATH }} >> .env
-            echo RELOAD_NGINX_CONFIG=${{ vars.RELOAD_NGINX_CONFIG }} >> .env
+            
+            cd ${{env.PROJECT_FOLDER_PATH}}
+            mkdir ${{env.ENV_FILES_DIR_NAME}}
+            cd ${{env.PROJECT_FOLDER_PATH}}/${{env.ENV_FILES_DIR_NAME}}
+
+            rm .env.db
+            touch .env.db
+            echo POSTGRES_DB=${{ secrets.POSTGRES_DB }} >> .env.db
+            echo POSTGRES_USER=${{ secrets.POSTGRES_USER }} >> .env.db
+            echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env.db
+            echo DB_HOST=${{ secrets.DB_HOST }} >> .env.db
+            echo DB_PORT=${{ secrets.DB_PORT }} >> .env.db
+
+            rm .env.flask
+            touch .env.flask
+            echo FLASK_APP=${{ secrets.FLASK_APP }} >> .env.flask
+            echo FLASK_DEBUG=${{ secrets.FLASK_DEBUG }} >> .env.flask
+            echo FLASK_ENV=${{ vars.FLASK_ENV }} >> .env.flask
+            echo SUPER_USER_LOGIN=${{ secrets.SUPER_USER_LOGIN }} >> .env.flask
+            echo SUPER_USER_EMAIL=${{ secrets.SUPER_USER_EMAIL }} >> .env.flask
+            echo SUPER_USER_PASSWORD=${{ secrets.SUPER_USER_PASSWORD }} >> .env.flask
+            echo ADMIN_SECRET_KEY=${{ secrets.ADMIN_SECRET_KEY }} >> .env.flask
+
+            rm .env.mail
+            touch .env.mail
+            echo PASSWORD_RESET_TOKEN_TTL=${{ secrets.PASSWORD_RESET_TOKEN_TTL }} >> .env.mail
+            echo PASSWORD_RESET_TOKEN_ALGORITHM=${{ secrets.PASSWORD_RESET_TOKEN_ALGORITHM }} >> .env.mail
+            echo MAIL_SERVER=${{ secrets.MAIL_SERVER }} >> .env.mail
+            echo MAIL_PORT=${{ secrets.MAIL_PORT }} >> .env.mail
+            echo MAIL_USE_SSL=${{ secrets.MAIL_USE_SSL }} >> .env.mail
+            echo MAIL_USERNAME=${{ secrets.MAIL_USERNAME }} >> .env.mail
+            echo MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }} >> .env.mail
+            echo MAIL_DEBUG=${{ secrets.MAIL_DEBUG }} >> .env.mail
+
+            rm .env.sentry
+            touch .env.sentry
+            echo SENTRY_DSN_ADMIN=${{ secrets.SENTRY_DSN_ADMIN }} >> .env.sentry
+            echo SENTRY_DSN_BOT=${{ secrets.SENTRY_DSN_BOT }} >> .env.sentry
+
+            rm .env.telegram
+            touch .env.telegram
+            echo TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }} >> .env.telegram
+            echo HOST=${{ secrets.HOST }} >> .env.telegram
+            echo WEBHOOK_PATH=${{ secrets.WEBHOOK_PATH }} >> .env.telegram
+            echo WEBHOOK_DOMAIN=${{ secrets.WEBHOOK_DOMAIN }} >> .env.telegram
+            echo WEBHOOK_PORT=${{ secrets.WEBHOOK_PORT }} >> .env.telegram
+
+            rm .env.s3
+            touch .env.s3
+            echo AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }} >> .env.s3
+            echo AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }} >> .env.s3
+            echo AWS_SERVICE_NAME=${{ secrets.AWS_SERVICE_NAME }} >> .env.s3
+            echo AWS_ENDPOINT_URL=${{ secrets.AWS_ENDPOINT_URL }} >> .env.s3
+            echo AWS_BUCKET_NAME=${{ secrets.AWS_BUCKET_NAME }} >> .env.s3
+
+            rm .env.yatracker
+            touch .env.yatracker
+            echo OAUTH_TOKEN=${{ secrets.OAUTH_TOKEN }} >> .env.yatracker
+            echo ORG_ID=${{ secrets.ORG_ID }} >> .env.yatracker
+
+            rm .env.dadata
+            touch .env.dadata
+            echo DADATA_TOKEN=${{ secrets.DADATA_TOKEN }} >> .env.dadata
+            echo DADATA_SECRET=${{ secrets.DADATA_SECRET }} >> .env.dadata
+
+            rm .env.redis
+            touch .env.redis
+            echo REDIS_HOST=redis >> .env.redis
+            echo REDIS_PORT=6379 >> .env.redis
+
+            rm .env.nginx
+            touch .env.nginx
+            echo HOST_NAME=${{ secrets.HOST_NAME }} >> .env.nginx
+            echo CERTBOT_EMAIL=${{ secrets.CERTBOT_EMAIL }} >> .env.nginx
+            echo RELOAD_NGINX_CONFIG=${{vars.RELOAD_NGINX_CONFIG}}>> .env.nginx
+            echo PROJECT_FOLDER_PATH=${{env.PROJECT_FOLDER_PATH}} >> .env.nginx
             echo DOCKER_TAG=${{ vars.DOCKER_TAG }} >> .env
-            chmod +x update_nginx_conf.sh
-            . ./update_nginx_conf.sh
-            docker compose -f docker-compose.yaml up -d
-            chmod +x update_certificate.sh
-            . ./update_certificate.sh
-            docker compose -f docker-compose.yaml exec bot alembic upgrade head
-            docker compose -f docker-compose.yaml exec web python admin/manage.py collectstatic --static_folder static --overwrite
+
+            
+            # вызов скрипта по обновлению конфига нгинкса сейчас не вызывается и не факт что работает
+            cd ${{env.PROJECT_FOLDER_PATH}}
+            # chmod +x update_nginx_conf.sh
+            # . ./update_nginx_conf.sh
+
+            # chmod +x update_certificate.sh
+            # . ./update_certificate.sh
+
+            cd ${{env.DOCKER_COMPOSE_FILES_PATH}}
+            docker compose -f ${{env.DOCKER_COMPOSE_FILE}} up -d
+            docker compose -f ${{env.DOCKER_COMPOSE_FILE}} exec bot poetry run alembic upgrade head
+            docker compose -f ${{env.DOCKER_COMPOSE_FILE}} exec web poetry run python admin/manage.py collectstatic --static_folder static --overwrite
