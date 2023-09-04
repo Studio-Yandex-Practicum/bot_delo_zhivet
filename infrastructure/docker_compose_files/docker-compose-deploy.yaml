@@ -21,6 +21,7 @@ services:
       retries: 10
 
   redis:
+    restart: always
     image: redis:alpine
     env_file:
       - ../.env_files/.env.redis
@@ -28,6 +29,7 @@ services:
       - redis_data:/data
 
   loki:
+    restart: always
     image: grafana/loki:2.8.3
     volumes:
       - loki_data:/loki
@@ -37,6 +39,7 @@ services:
     command: -config.file=/etc/loki/local-config.yaml -config.expand-env=true
 
   promtail:
+    restart: always
     image: grafana/promtail:2.8.3
     env_file:
       - ../.env_files/.env.grafana
@@ -108,6 +111,7 @@ services:
       - ./flask_admin/logs/:/app/admin/logs/
 
   celery:
+    restart: always
     image: delozhivet/delo_zhivet_bot_and_admin:latest
     volumes:
       - media_data:/app/media/
