@@ -1,6 +1,6 @@
 version: '3.8'
 
-name: bot_delo_zhivet
+name: delozhivet
 
 services:
   db:
