@@ -92,7 +92,7 @@ jobs:
           file: Dockerfile
           no-cache: true
           push: ${{ github.event_name == 'push' }}
-          tags: ${{ steps.meta_bot_and_admin.outputs.tags }}
+          tags: 2.0
           labels: ${{ steps.meta_bot_and_admin.outputs.labels }}
 
       - name: Build and push a nginx image to Docker Hub
@@ -105,7 +105,7 @@ jobs:
           build-args: |
             NGINX_CONFIG=default.conf
           push: ${{ github.event_name == 'push' }}
-          tags: ${{ steps.meta_nginx.outputs.tags }}
+          tags: 2.0
           labels: ${{ steps.meta_nginx.outputs.labels }}
 
   deploy:
