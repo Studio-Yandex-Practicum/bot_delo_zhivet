@@ -15,7 +15,7 @@ FROM python:3.11.4-slim
 COPY --from=build /app /app
 
 RUN pip install poetry==1.3.2 \
-    && poetry config virtualenvs.in_project true \
+    && poetry config virtualenvs.in_project true
 
 WORKDIR /app
 
