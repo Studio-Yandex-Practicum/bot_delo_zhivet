@@ -65,7 +65,7 @@ services:
       - loki
 
   bot:
-    image: delozhivet/delo_zhivet_bot_and_admin:latest
+    image: delozhivet/delo_zhivet_bot_and_admin:master
     command: [ "poetry", "run", "runbot" ]
     restart: always
     depends_on:
@@ -81,7 +81,7 @@ services:
       - media_data:/app/media/
 
   web:
-    image: delozhivet/delo_zhivet_bot_and_admin:latest
+    image: delozhivet/delo_zhivet_bot_and_admin:master
     command:
       [
         "poetry",
@@ -112,7 +112,7 @@ services:
 
   celery:
     restart: always
-    image: delozhivet/delo_zhivet_bot_and_admin:latest
+    image: delozhivet/delo_zhivet_bot_and_admin:master
     volumes:
       - media_data:/app/media/
     command:
@@ -134,7 +134,7 @@ services:
         condition: service_started
 
   nginx:
-    image: delozhivet/delo_zhivet_nginx:latest
+    image: delozhivet/delo_zhivet_nginx:master
     restart: unless-stopped
     depends_on:
       - web

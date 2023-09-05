@@ -124,8 +124,6 @@ services:
       - ../.env_files/.env.dadata
       - ../.env_files/.env.telegram
 
-
-
   nginx:
     image: delozhivet/delo_zhivet_nginx:develop
     restart: unless-stopped
