@@ -227,6 +227,12 @@ jobs:
             echo RELOAD_NGINX_CONFIG=${{vars.RELOAD_NGINX_CONFIG}}>> .env.nginx
             echo PROJECT_FOLDER_PATH=${{env.PROJECT_FOLDER_PATH}} >> .env.nginx
             echo DOCKER_TAG=${{ vars.DOCKER_TAG }} >> .env
+            
+            rm .env.grafana
+            touch .env.grafana
+            echo RETENTION_PERIOD=${{ secrets.RETENTION_PERIOD }} >> .env.grafana
+            echo LOKI_HOST=${{ secrets.LOKI_HOST }} >> .env.grafana
+            echo LOKI_PORT=${{ secrets.LOKI_PORT }} >> .env.grafana
 
             
             # вызов скрипта по обновлению конфига нгинкса сейчас не вызывается и не факт что работает
