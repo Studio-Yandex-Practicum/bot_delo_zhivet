@@ -229,3 +229,4 @@ jobs:
             docker compose -f ${{env.DOCKER_COMPOSE_FILE}} up -d
             docker compose -f ${{env.DOCKER_COMPOSE_FILE}} exec bot poetry run alembic upgrade head
             docker compose -f ${{env.DOCKER_COMPOSE_FILE}} exec web poetry run python admin/manage.py collectstatic --static_folder static --overwrite
+            docker compose -f ${{env.DOCKER_COMPOSE_FILE}} run --rm  certbot certonly --webroot --webroot-path /var/www/certbot/ -d ${{ secrets.HOST_NAME }}
