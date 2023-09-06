@@ -160,9 +160,9 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./nginx/delo.conf:/etc/nginx/servers/delo.conf:rw
-      - ./nginx/delo.temp:/etc/nginx/conf.d/delo.temp
-      - ./nginx/letsencrypt/:/etc/letsencrypt/:rw
+      - ../nginx/delo.conf:/etc/nginx/servers/delo.conf:rw
+      - ../nginx/delo.temp:/etc/nginx/conf.d/delo.temp
+      - ../nginx/letsencrypt/:/etc/letsencrypt/:rw
       - static_value:/var/html/static/
     env_file:
       - ../.env_files/.env.nginx
