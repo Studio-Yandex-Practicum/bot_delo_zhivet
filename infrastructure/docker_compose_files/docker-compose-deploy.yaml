@@ -161,9 +161,16 @@ services:
       - "443:443"
     volumes:
       - ../nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ../nginx/certbot/www:/var/www/certbot/:ro
       - static_value:/var/html/static/
     env_file:
       - ../.env_files/.env.nginx
+
+  certbot:
+    image: certbot/certbot:latest
+    volumes:
+      - ../nginx/certbot/www:/var/www/certbot/:rw
+      - ../nginx/certbot/conf/:/etc/letsencrypt/:rw
 
 volumes:
   postgres_data:
