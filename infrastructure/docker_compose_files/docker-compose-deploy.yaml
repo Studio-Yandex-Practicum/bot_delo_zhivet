@@ -72,10 +72,16 @@ services:
       db:
         condition: service_healthy
     env_file:
-      - ../.env_files/.env.telegram
-      - ../.env_files/.env.db
       - ../.env_files/.env.s3
+      - ../.env_files/.env.flask
+      - ../.env_files/.env.mail
       - ../.env_files/.env.sentry
+      - ../.env_files/.env.db
+      - ../.env_files/.env.nginx
+      - ../.env_files/.env.redis
+      - ../.env_files/.env.yatracker
+      - ../.env_files/.env.dadata
+      - ../.env_files/.env.telegram
     volumes:
       - persistence_data:/app/persistence_data/
       - media_data:/app/media/
@@ -98,6 +104,7 @@ services:
         condition: service_healthy
 
     env_file:
+      - ../.env_files/.env.db
       - ../.env_files/.env.s3
       - ../.env_files/.env.dadata
       - ../.env_files/.env.flask
@@ -124,6 +131,17 @@ services:
         "src.bot.tasks",
         "worker"
       ]
+    env_file:
+      - ../.env_files/.env.s3
+      - ../.env_files/.env.flask
+      - ../.env_files/.env.mail
+      - ../.env_files/.env.sentry
+      - ../.env_files/.env.db
+      - ../.env_files/.env.nginx
+      - ../.env_files/.env.redis
+      - ../.env_files/.env.yatracker
+      - ../.env_files/.env.dadata
+      - ../.env_files/.env.telegram
 
     depends_on:
       db:
@@ -142,9 +160,9 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./nginx/delo.conf:/etc/nginx/servers/delo.conf:rw
-      - ./nginx/delo.temp:/etc/nginx/conf.d/delo.temp
-      - ./nginx/letsencrypt/:/etc/letsencrypt/:rw
+      - ../nginx/delo.conf:/etc/nginx/servers/delo.conf:rw
+      - ../nginx/delo.temp:/etc/nginx/conf.d/delo.temp
+      - ../nginx/letsencrypt/:/etc/letsencrypt/:rw
       - static_value:/var/html/static/
     env_file:
       - ../.env_files/.env.nginx
