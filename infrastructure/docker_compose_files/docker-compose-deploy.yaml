@@ -152,7 +152,7 @@ services:
         condition: service_started
 
   nginx:
-    image: delozhivet/delo_zhivet_nginx:2.0
+    image: nginx:alpine
     restart: unless-stopped
     depends_on:
       - web
@@ -160,13 +160,10 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ../nginx/delo.conf:/etc/nginx/servers/delo.conf:rw
-      - ../nginx/delo.temp:/etc/nginx/conf.d/delo.temp
-      - ../nginx/letsencrypt/:/etc/letsencrypt/:rw
+      - ../nginx/default.conf:/etc/nginx/conf.d/default.conf
       - static_value:/var/html/static/
     env_file:
       - ../.env_files/.env.nginx
-    command: /bin/sh -c "envsubst '$${HOST_NAME} $${WEBHOOK_PATH}' < /etc/nginx/conf.d/delo.temp > /etc/nginx/servers/delo.conf && crond -b && nginx -g 'daemon off;'"
 
 volumes:
   postgres_data:
