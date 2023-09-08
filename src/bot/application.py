@@ -1,5 +1,4 @@
 from json import JSONDecodeError
-from urllib.parse import urljoin
 from uuid import uuid4
 
 import httpx
