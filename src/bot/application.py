@@ -218,7 +218,7 @@ async def init_webhook() -> Application:
     """Инициализация вебхука"""
     bot_app = create_bot()
     bot_app.updater = None
-    url = urljoin(settings.WEBHOOK_DOMAIN, settings.WEBHOOK_PATH)
+    url = settings.WEBHOOK_DOMAIN + settings.WEBHOOK_PATH
     await bot_app.bot.set_webhook(url=url, secret_token=settings.TELEGRAM_BOT_TOKEN.replace(":", ""))
     await bot_app.initialize()
     await bot_app.start()
